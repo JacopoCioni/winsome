@@ -1,5 +1,6 @@
 package it.unipi.jcioni.model;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class User {
@@ -7,9 +8,8 @@ public class User {
     private String lastname;
     private String email;
     private String password;
-    private List<User> follows;
-    private List<Tag> tags;
-
+    private List<User> follows = new ArrayList<>();
+    private List<Tag> tags = new ArrayList<>();
     private Blog blog;
 
     public User(String firstname, String lastname, String email, String password, List<User> follows, List<Tag> tags) {
@@ -59,9 +59,15 @@ public class User {
 
     public void setFollows(List<User> follows) {
         this.follows = follows;
+        if (this.follows == null) this.follows = new ArrayList<>();
     }
 
     public List<Tag> getTags() {
         return tags;
+    }
+
+    public void setTags(List<Tag> tags) {
+        this.tags = tags;
+        if (this.tags == null) this.tags = new ArrayList<>();
     }
 }

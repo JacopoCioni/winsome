@@ -1,8 +1,12 @@
 package it.unipi.jcioni.model;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class Post extends Content {
     private Post rewin;
     private String text;
+    private List<Comment> comments = new ArrayList<>();
 
 //    public Post(User creator) {
 //        super(creator);
@@ -27,6 +31,15 @@ public class Post extends Content {
 
     public String getText() {
         return text;
+    }
+
+    public List<Comment> getComments() {
+        return comments;
+    }
+
+    public void setComments(List<Comment> comments) {
+        this.comments = comments;
+        if (this.comments == null) this.comments = new ArrayList<>();
     }
 
     public Post retrieveOriginal() {
