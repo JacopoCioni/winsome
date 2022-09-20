@@ -1,6 +1,6 @@
 package it.unipi.jcioni.model;
 
-public class Content {
+public abstract class Content {
     private final User creator;
 
     public Content(User creator) {
