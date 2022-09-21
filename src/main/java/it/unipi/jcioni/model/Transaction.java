@@ -1,18 +1,18 @@
 package it.unipi.jcioni.model;
 
+import java.util.Date;
+
 /*
     This class represents the single winsome transaction
  */
 public class Transaction {
-
-        private final double value;
-        private final String msg;
-        private final long date;
+    private final double value;
+    private final String msg;
+    private final Date timestamp = new Date(System.currentTimeMillis());
 
     public Transaction(double value, String msg) {
         this.value = value;
         this.msg = msg;
-        date = System.currentTimeMillis();
     }
 
     public double getValue() {
@@ -23,7 +23,7 @@ public class Transaction {
         return msg;
     }
 
-    public long getDate() {
-        return date;
+    public Date getTimestamp() {
+        return timestamp;
     }
 }
