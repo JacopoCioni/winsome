@@ -1,4 +1,4 @@
-package it.unipi.jcioni.model;
+package it.unipi.jcioni.winsome.core.model;
 
 public abstract class Content {
     private final User creator;

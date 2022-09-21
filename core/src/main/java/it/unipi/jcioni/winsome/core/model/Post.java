@@ -1,4 +1,4 @@
-package it.unipi.jcioni.model;
+package it.unipi.jcioni.winsome.core.model;
 
 import java.util.ArrayList;
 import java.util.HashMap;

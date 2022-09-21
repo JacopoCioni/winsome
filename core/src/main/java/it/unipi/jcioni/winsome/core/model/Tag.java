@@ -1,4 +1,4 @@
-package it.unipi.jcioni.model;
+package it.unipi.jcioni.winsome.core.model;
 
 public class Tag {
     private final String value;
