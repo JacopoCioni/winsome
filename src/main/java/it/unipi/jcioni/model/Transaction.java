@@ -9,10 +9,10 @@ public class Transaction {
         private final String msg;
         private final long date;
 
-    public Transaction(double value, String msg, long date) {
+    public Transaction(double value, String msg) {
         this.value = value;
         this.msg = msg;
-        this.date = System.currentTimeMillis();
+        date = System.currentTimeMillis();
     }
 
     public double getValue() {
