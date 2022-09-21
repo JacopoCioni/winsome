@@ -4,25 +4,24 @@ import java.util.concurrent.ConcurrentLinkedDeque;
 
 public class Wallet {
 
-    private final User userWallet;
+    private final User owner;
 
     // ThreadSafe queue, you might have multiple threads wanting to access this collection
-    private ConcurrentLinkedDeque<Transaction> transactions;
+    private ConcurrentLinkedDeque<Transaction> transactions = new ConcurrentLinkedDeque<>();
 
-    public Wallet(User userWallet) {
-        this.userWallet = userWallet;
-        transactions = new ConcurrentLinkedDeque<>();
+    public Wallet(User owner) {
+        this.owner = owner;
     }
 
-    public User getUserWallet() {
-        return userWallet;
+    public User getOwner() {
+        return owner;
     }
 
     public ConcurrentLinkedDeque<Transaction> getTransactions() {
         return transactions;
     }
 
-    public double getBalance() {
+    public double balance() {
         double balance = 0;
         for (Transaction t : transactions) {
             balance = balance + t.getValue();
@@ -38,6 +37,6 @@ public class Wallet {
      */
     public double addTransaction(double value, String msg) {
         transactions.add(new Transaction(value, msg));
-        return getBalance();
+        return balance();
     }
 }
