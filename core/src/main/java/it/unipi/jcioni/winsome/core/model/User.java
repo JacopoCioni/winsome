@@ -7,15 +7,17 @@ public class User {
     private String firstname;
     private String lastname;
     private String email;
+    private String username;
     private String password;
     private List<User> follows = new ArrayList<>();
     private List<Tag> tags = new ArrayList<>();
     private Blog blog;
 
-    public User(String firstname, String lastname, String email, String password, List<User> follows, List<Tag> tags) {
+    public User(String firstname, String lastname, String email, String username, String password, List<User> follows, List<Tag> tags) {
         this.firstname = firstname;
         this.lastname = lastname;
         this.email = email;
+        this.username = username;
         this.password = password;
         this.follows = follows;
         this.tags = tags;
@@ -45,6 +47,14 @@ public class User {
         this.email = email;
     }
 
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
     public String getPassword() {
         return password;
     }
@@ -69,5 +79,9 @@ public class User {
     public void setTags(List<Tag> tags) {
         this.tags = tags;
         if (this.tags == null) this.tags = new ArrayList<>();
+    }
+
+    public Blog getBlog() {
+        return blog;
     }
 }

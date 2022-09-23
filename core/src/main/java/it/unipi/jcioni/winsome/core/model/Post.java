@@ -7,6 +7,9 @@ import java.util.Map;
 
 public class Post extends Content {
     private Post rewin;
+    public static final int MAX_TITLE_LENGHT = 20;
+    public static final int MAX_TEXT_LENGHT = 500;
+    private String title;
     private String text;
     private List<Comment> comments = new ArrayList<>();
     private Map<User, Vote> votes = new HashMap<>();
@@ -16,15 +19,17 @@ public class Post extends Content {
 //    }
 
     // Post rewin
-    public Post(User creator, Post rewin, String text) {
+    public Post(User creator, Post rewin, String title, String text) {
         super(creator);
         this.rewin = rewin;
+        this.title = title;
         this.text = text;
     }
 
     // Post originale
-    public Post(User creator, String text) {
+    public Post(User creator, String title, String text) {
         super(creator);
+        this.title = title;
         this.text = text;
     }
 
