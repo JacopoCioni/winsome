@@ -10,7 +10,6 @@ import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
 public class WinsomeServiceImpl implements WinsomeService {
@@ -64,6 +63,37 @@ public class WinsomeServiceImpl implements WinsomeService {
         }
         System.out.println("User login " + username + " END");
         return true;
+    }
+
+    @Override
+    public boolean logout(String username) {
+        System.out.println("User logout " + username + " START");
+        User user = users.stream()
+                .filter(u ->
+                        u.getUsername().equals(username))
+                .findFirst().orElse(null);
+        try {
+            user.logout();
+        } catch (NullPointerException ex) {
+            System.out.println("Error, user not found");
+            return false;
+        }
+        System.out.println("User logout " + username + " END");
+        return true;
+    }
+
+    @Override
+    public List<User> listUsers(User user) {
+        return users.stream().filter(u -> {
+            for (int i = 0; i < user.getTags().size(); i++) {
+                for (int j = 0; j < u.getTags().size(); j++) {
+                    if (user.getTags().get(i).equals(u.getTags().get(j))) {
+                        return !user.getUsername().equals(u.getUsername());
+                    }
+                }
+            }
+            return false;
+        }).collect(Collectors.toList());
     }
 
     @Override
