@@ -8,8 +8,6 @@ import it.unipi.jcioni.winsome.core.service.WinsomeService;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
 
 public class WinsomeServiceImpl implements WinsomeService {
     private List<User> users = new ArrayList<>();
@@ -45,8 +43,9 @@ public class WinsomeServiceImpl implements WinsomeService {
     @Override
     public boolean login(String username, String password) {
         return users.stream()
-                .filter(user -> user.getUsername().equals(username) && user.getPassword().equals(password))
-                .collect(Collectors.toList()).size() == 1;
+                .filter(user ->
+                        user.getUsername().equals(username) && user.getPassword().equals(password))
+                .toList().size() == 1;
     }
 
     @Override
