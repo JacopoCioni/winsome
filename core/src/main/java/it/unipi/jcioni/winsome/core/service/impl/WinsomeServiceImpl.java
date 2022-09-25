@@ -16,21 +16,29 @@ public class WinsomeServiceImpl implements WinsomeService {
 
     @Override
     public boolean register(String username, String password, ArrayList<Tag> tags) {
-        System.out.println("User registration: " + username + " " + tags + "...");
-        if(tags.size() > 5) {
+        System.out.println("User registration " + username + " START");
+        if (username == null) {
+            System.out.println("Error, there is no username.");
+            return false;
+        } else if (password == null) {
+            System.out.println("Error, there is no password.");
+            return false;
+        } else if (tags == null) {
+            System.out.println("Error, there are no tags.");
+            return false;
+        } else if (tags.size() > 5) {
             System.out.println("Error, there are to many tags.");
             return false;
         }
-        for(User u: users) {
-            if(u.getUsername().equals(username)) {
+        for (User u: users) {
+            if (u.getUsername().equals(username)) {
                 System.out.println("Error, username already exists.");
                 return false;
             }
         }
-        if(password == null) return false;
-        User newUser = new User(null, null, null, username, password, new ArrayList<User>(), tags);
+        User newUser = new User(username, password, tags);
         users.add(newUser);
-        System.out.println("Success");
+        System.out.println("User registration " + username + " END");
         return true;
     }
 

@@ -13,13 +13,9 @@ public class User {
     private List<Tag> tags = new ArrayList<>();
     private Blog blog;
 
-    public User(String firstname, String lastname, String email, String username, String password, List<User> follows, List<Tag> tags) {
-        this.firstname = firstname;
-        this.lastname = lastname;
-        this.email = email;
+    public User(String username, String password, List<Tag> tags) {
         this.username = username;
         this.password = password;
-        this.follows = follows;
         this.tags = tags;
     }
 
