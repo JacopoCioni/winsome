@@ -13,7 +13,7 @@ public class User {
     private String password;
     private boolean logged = false;
     private List<User> follows = new ArrayList<>();
-    private List<Tag> tags = new ArrayList<>();
+    private List<Tag> tags;
     private Blog blog;
 
     public User(String username, String password, List<Tag> tags) {
@@ -25,6 +25,10 @@ public class User {
     public void login() throws LoginException {
         if (logged) throw new LoginException();
         logged = true;
+    }
+
+    public void logout() {
+        logged = false;
     }
 
     public String getFirstname() {
