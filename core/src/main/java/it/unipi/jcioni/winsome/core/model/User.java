@@ -1,5 +1,7 @@
 package it.unipi.jcioni.winsome.core.model;
 
+import it.unipi.jcioni.winsome.core.exception.LoginException;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -9,6 +11,7 @@ public class User {
     private String email;
     private String username;
     private String password;
+    private boolean logged = false;
     private List<User> follows = new ArrayList<>();
     private List<Tag> tags = new ArrayList<>();
     private Blog blog;
@@ -17,6 +20,11 @@ public class User {
         this.username = username;
         this.password = password;
         this.tags = tags;
+    }
+
+    public void login() throws LoginException {
+        if (logged) throw new LoginException();
+        logged = true;
     }
 
     public String getFirstname() {
