@@ -1,5 +1,6 @@
 package it.unipi.jcioni.winsome.core.service.impl;
 
+import it.unipi.jcioni.winsome.core.exception.LoginException;
 import it.unipi.jcioni.winsome.core.model.Post;
 import it.unipi.jcioni.winsome.core.model.Tag;
 import it.unipi.jcioni.winsome.core.model.User;
@@ -9,6 +10,7 @@ import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
 public class WinsomeServiceImpl implements WinsomeService {
@@ -46,10 +48,22 @@ public class WinsomeServiceImpl implements WinsomeService {
 
     @Override
     public boolean login(String username, String password) {
-        return users.stream()
-                .filter(user ->
-                        user.getUsername().equals(username) && user.getPassword().equals(password))
-                .toList().size() == 1;
+        System.out.println("User login " + username + " START");
+        User user = users.stream()
+                    .filter(u ->
+                            u.getUsername().equals(username) && u.getPassword().equals(password))
+                .findFirst().orElse(null);
+        try {
+            user.login();
+        } catch (NullPointerException ex) {
+            System.out.println("Error, wrong username or password");
+            return false;
+        } catch (LoginException ex) {
+            System.out.println("Error, user already logged");
+            return false;
+        }
+        System.out.println("User login " + username + " END");
+        return true;
     }
 
     @Override
