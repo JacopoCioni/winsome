@@ -7,24 +7,27 @@ import it.unipi.jcioni.winsome.core.service.WinsomeService;
 
 import java.rmi.RemoteException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class WinsomeServiceImpl implements WinsomeService {
     private List<User> users = new ArrayList<>();
 
     @Override
-    public boolean register(String username, String password, ArrayList<Tag> tags) {
+    public boolean register(String username, String password, String tags) {
         System.out.println("User registration " + username + " START");
+        String[] array = tags.split("\\s+");
         if (username == null) {
             System.out.println("Error, there is no username.");
             return false;
         } else if (password == null) {
             System.out.println("Error, there is no password.");
             return false;
-        } else if (tags == null) {
+        } else if (array.length == 0) {
             System.out.println("Error, there are no tags.");
             return false;
-        } else if (tags.size() > 5) {
+        } else if (array.length > 5) {
             System.out.println("Error, there are to many tags.");
             return false;
         }
@@ -34,7 +37,8 @@ public class WinsomeServiceImpl implements WinsomeService {
                 return false;
             }
         }
-        User newUser = new User(username, password, tags);
+        User newUser = new User(username, password,
+                Arrays.stream(array).map(Tag::new).collect(Collectors.toList()));
         users.add(newUser);
         System.out.println("User registration " + username + " END");
         return true;

@@ -8,7 +8,7 @@ import java.rmi.RemoteException;
 import java.util.ArrayList;
 
 public interface WinsomeService extends Remote {
-    boolean register(String username, String password, ArrayList<Tag> tags);
+    boolean register(String username, String password, String tags);
     boolean login(String username, String password);
     void createPost(String title, String text, User u) throws RemoteException;
     void followUser(String username, String following);
