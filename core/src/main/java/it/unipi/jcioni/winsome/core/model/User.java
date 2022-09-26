@@ -80,6 +80,10 @@ public class User {
         if (this.follows == null) this.follows = new ArrayList<>();
     }
 
+    public void addFollows(User following) {
+        follows.add(following);
+    }
+
     public List<Tag> getTags() {
         return tags;
     }
