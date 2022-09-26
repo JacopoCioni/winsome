@@ -116,12 +116,82 @@ public class WinsomeServiceImpl implements WinsomeService {
             for (int i = 0; i < user.getTags().size(); i++) {
                 for (int j = 0; j < u.getTags().size(); j++) {
                     if (user.getTags().get(i).equals(u.getTags().get(j))) {
-                        return !user.getUsername().equals(u.getUsername());
+                        return !user.equals(u); //user.getUsername().equals(u.getUsername());
                     }
                 }
             }
             return false;
         }).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<User> listFollowers(User user) throws RemoteException {
+        return user.getFollows();
+    }
+
+    @Override
+    public List<User> listFollowing(User following) throws RemoteException {
+        return users.stream().filter(
+                user -> user.getFollows().contains(following))
+                .collect(Collectors.toList());
+    }
+
+    /*
+    @param username, username dello user a cui voglio far followare
+    @param following, username dello user che deve essere followato
+    @throws RemoteException
+    @throws SameUserException se entrambi gli input sono lo stesso username
+    @throws UserNotFound se following non è presente nella lista users
+    @throws InvalidOperationException se following è già followato da username
+    @effects consente a username di followare following
+     */
+    @Override
+    public void followUser(String username, String following)
+            throws RemoteException, SameUserException, UserNotFoundException, InvalidOperationException {
+        if (username.equals(following)) {
+            System.out.println("Error, same user");
+            throw new SameUserException();
+        }
+        if (!existUser(following)) {
+            System.out.println("Error, user does not exist");
+            throw new UserNotFoundException();
+        }
+        User follow = users.stream()
+                .filter(f ->
+                        f.getUsername().equals(following))
+                .findFirst().orElse(null);
+        User user = users.stream()
+                .filter(u ->
+                        u.getUsername().equals(username))
+                .findFirst().orElse(null);
+        user.addFollows(follow);
+    }
+
+    @Override
+    public void unfollowUser(String username, String followed)
+            throws RemoteException, SameUserException, UserNotFoundException, InvalidOperationException {
+        if (username.equals(followed)) {
+            System.out.println("Error, same user");
+            throw new SameUserException();
+        }
+        if (!existUser(followed)) {
+            System.out.println("Error, user does not exist");
+            throw new UserNotFoundException();
+        }
+        User follow = users.stream()
+                .filter(f ->
+                        f.getUsername().equals(followed))
+                .findFirst().orElse(null);
+        User user = users.stream()
+                .filter(u ->
+                        u.getUsername().equals(username))
+                .findFirst().orElse(null);
+        user.removeFollows(follow);
+    }
+
+    @Override
+    public List<Post> viewBlog(User user) throws RemoteException{
+        return user.getBlog().getPosts();
     }
 
     /*
@@ -139,39 +209,23 @@ public class WinsomeServiceImpl implements WinsomeService {
         u.getBlog().getPosts().add(new Post(u, title, text));
     }
 
-    /*
-    @param username, username dello user a cui voglio far followare
-    @param following, username dello user che deve essere followato
-    @throws RemoteException
-    @throws SameUserException se entrambi gli input sono lo stesso username
-    @throws UserNotFound se following non è presente nella lista users
-    @throws InvalidOperationException se following è già followato da username
-    @effects consente a username di followare following
-     */
     @Override
-    public void followUser(String username, String following)
-            throws RemoteException, SameUserException, UserNotFoundException, InvalidOperationException {
-        if(username.equals(following)) {
-            System.out.println("Error, same user");
-            throw new SameUserException();
-        }
-        if(!searchUser(following)) {
-            System.out.println("Error, user does not exist");
-            throw new UserNotFoundException();
-        }
-        User follow = users.stream()
-                .filter(f ->
-                        f.getUsername().equals(following))
-                .findFirst().orElse(null);
-        if(!emptyFollower(follow) && searchFollower(username, follow)) {
-            System.out.println("Error, invalid operation");
-            throw new InvalidOperationException();
-        }
-        User user = users.stream()
-                .filter(u ->
-                        u.getUsername().equals(username))
-                .findFirst().orElse(null);
-        user.addFollows(follow);
+    public List<Post> showFeed(User user) throws RemoteException{
+        List<Post> feed = new ArrayList<>();
+        user.getFollows().stream().forEach(user1 -> feed.addAll(user1.getBlog().getPosts()));
+        return feed.stream().sorted((o1, o2) ->
+                (int) (o2.getTimestamp().getTime() - o1.getTimestamp().getTime()))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public void rewinPost(User user, String idPost) throws RemoteException{
+        List<Post> feed = this.showFeed(user);
+        Post p = new Post(user,
+                feed.stream().filter(post -> post.getIdPost().equals(idPost)).findFirst().orElse(null),
+                "Rewin",
+                "Rewin post");
+        user.getBlog().getPosts().add(p);
     }
 
     /*
@@ -179,10 +233,10 @@ public class WinsomeServiceImpl implements WinsomeService {
     @return true/false
     @effects restituisce true se lo username fa parte di un utente
      */
-    private boolean searchUser(String user) {
+    private boolean existUser(String user) {
         boolean result = false;
-        for(User u: users) {
-            if(u.getUsername().equals(user)) {
+        for (User u: users) {
+            if (u.getUsername().equals(user)) {
                 result = true;
                 break;
             }
@@ -196,8 +250,7 @@ public class WinsomeServiceImpl implements WinsomeService {
     @effects restituisce true se la lista dei follow è vuota
      */
     private boolean emptyFollower(User follow) {
-        if(follow.getFollows() == null) return true;
-        return false;
+        return follow.getFollows() == null;
     }
 
     /*
@@ -209,7 +262,7 @@ public class WinsomeServiceImpl implements WinsomeService {
      */
     private boolean searchFollower(String user, User follow) {
         for(User f: follow.getFollows()) {
-            if(f.getUsername().equals(user)) return true;
+            if (f.getUsername().equals(user)) return true;
         }
         return false;
     }
