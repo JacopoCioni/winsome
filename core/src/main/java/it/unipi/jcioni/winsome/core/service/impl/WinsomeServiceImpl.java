@@ -86,7 +86,7 @@ public class WinsomeServiceImpl implements WinsomeService {
     @param username, user username
     @return true/false
     @throws NullPointerException se l'utente non viene trovato
-    @effect permette la logout di un utente dalla piattaforma winsome
+    @effects permette la logout di un utente dalla piattaforma winsome
      */
     @Override
     public boolean logout(String username) throws RemoteException {
@@ -139,6 +139,15 @@ public class WinsomeServiceImpl implements WinsomeService {
         u.getBlog().getPosts().add(new Post(u, title, text));
     }
 
+    /*
+    @param username, username dello user a cui voglio far followare
+    @param following, username dello user che deve essere followato
+    @throws RemoteException
+    @throws SameUserException se entrambi gli input sono lo stesso username
+    @throws UserNotFound se following non è presente nella lista users
+    @throws InvalidOperationException se following è già followato da username
+    @effects consente a username di followare following
+     */
     @Override
     public void followUser(String username, String following)
             throws RemoteException, SameUserException, UserNotFoundException, InvalidOperationException {
@@ -165,6 +174,11 @@ public class WinsomeServiceImpl implements WinsomeService {
         user.addFollows(follow);
     }
 
+    /*
+    @param user, username dell'utente che voglio cercare nella lista di users
+    @return true/false
+    @effects restituisce true se lo username fa parte di un utente
+     */
     private boolean searchUser(String user) {
         boolean result = false;
         for(User u: users) {
@@ -176,11 +190,23 @@ public class WinsomeServiceImpl implements WinsomeService {
         return result;
     }
 
+    /*
+    @param follow, utente che voglio followare
+    @return true/false
+    @effects restituisce true se la lista dei follow è vuota
+     */
     private boolean emptyFollower(User follow) {
         if(follow.getFollows() == null) return true;
         return false;
     }
-    //Questo metodo cerca se tra la lista dei follower dell'utente che u vuole followare è presente u
+
+    /*
+    Questo metodo cerca se tra la lista dei follower dell'utente che u vuole followare è presente u
+    @param user
+    @param follow
+    @return true/false
+    @effects restituisce true se la lista dei follow contiene user.
+     */
     private boolean searchFollower(String user, User follow) {
         for(User f: follow.getFollows()) {
             if(f.getUsername().equals(user)) return true;
