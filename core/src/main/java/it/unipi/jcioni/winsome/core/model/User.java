@@ -1,9 +1,11 @@
 package it.unipi.jcioni.winsome.core.model;
 
+import it.unipi.jcioni.winsome.core.exception.InvalidOperationException;
 import it.unipi.jcioni.winsome.core.exception.LoginException;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class User {
     private String firstname;
@@ -80,8 +82,17 @@ public class User {
         if (this.follows == null) this.follows = new ArrayList<>();
     }
 
-    public void addFollows(User following) {
+    public void addFollows(User following) throws InvalidOperationException {
+        if (follows.stream().filter(user -> user.equals(following)).collect(Collectors.toList()).size() > 0) {
+            throw new InvalidOperationException();
+        }
         follows.add(following);
+    }
+
+    public void removeFollows(User followed) throws InvalidOperationException {
+        if (!follows.remove(followed)) {
+            throw new InvalidOperationException();
+        }
     }
 
     public List<Tag> getTags() {
@@ -95,5 +106,13 @@ public class User {
 
     public Blog getBlog() {
         return blog;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        User user = (User) o;
+        return username.equals(user.username);
     }
 }
