@@ -1,6 +1,9 @@
 package it.unipi.jcioni.winsome.core.service.impl;
 
+import it.unipi.jcioni.winsome.core.exception.InvalidOperationException;
 import it.unipi.jcioni.winsome.core.exception.LoginException;
+import it.unipi.jcioni.winsome.core.exception.SameUserException;
+import it.unipi.jcioni.winsome.core.exception.UserNotFoundException;
 import it.unipi.jcioni.winsome.core.model.Post;
 import it.unipi.jcioni.winsome.core.model.Tag;
 import it.unipi.jcioni.winsome.core.model.User;
@@ -136,25 +139,50 @@ public class WinsomeServiceImpl implements WinsomeService {
         u.getBlog().getPosts().add(new Post(u, title, text));
     }
 
-    public void followUser(String username, String following) throws RemoteException {
-        boolean result = false;
+    @Override
+    public void followUser(String username, String following)
+            throws RemoteException, SameUserException, UserNotFoundException, InvalidOperationException {
         if(username.equals(following)) {
-            System.out.println("Error, same user.");
-            return;
+            System.out.println("Error, same user");
+            throw new SameUserException();
         }
+        if(!searchUser(following)) {
+            System.out.println("Error, user does not exist");
+            throw new UserNotFoundException();
+        }
+        User follow = null;
         for(User u: users) {
-            if (u.getUsername().equals(following)) {
+            if(u.getUsername().equals(following)) {
+                follow = u;
+                break;
+            }
+        }
+        if(!emptyFollower(follow) && searchFollower(username, follow)) {
+            System.out.println("Error, invalid operation");
+            throw new InvalidOperationException();
+        }
+    }
+
+    private boolean searchUser(String user) {
+        boolean result = false;
+        for(User u: users) {
+            if(u.getUsername().equals(user)) {
                 result = true;
                 break;
             }
         }
-        if(!result) {
-            System.out.println("Error, user does not exist.");
-            return;
+        return result;
+    }
+
+    private boolean emptyFollower(User follow) {
+        if(follow.getFollows() == null) return true;
+        return false;
+    }
+    //Questo metodo cerca se tra la lista dei follower dell'utente che u vuole followare è presente u
+    private boolean searchFollower(String user, User follow) {
+        for(User f: follow.getFollows()) {
+            if(f.getUsername().equals(user)) return true;
         }
-
-        //Aggiungere follow, da rivedere
-
-
+        return false;
     }
 }

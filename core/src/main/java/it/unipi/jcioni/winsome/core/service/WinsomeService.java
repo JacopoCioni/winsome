@@ -1,5 +1,8 @@
 package it.unipi.jcioni.winsome.core.service;
 
+import it.unipi.jcioni.winsome.core.exception.InvalidOperationException;
+import it.unipi.jcioni.winsome.core.exception.SameUserException;
+import it.unipi.jcioni.winsome.core.exception.UserNotFoundException;
 import it.unipi.jcioni.winsome.core.model.User;
 
 import java.rmi.Remote;
@@ -14,6 +17,7 @@ public interface WinsomeService extends Remote {
     List<User> listUsers(User user) throws RemoteException;
 
     void createPost(String title, String text, User u) throws RemoteException;
-    void followUser(String username, String following) throws RemoteException;
+    void followUser(String username, String following)
+            throws RemoteException, SameUserException, UserNotFoundException, InvalidOperationException;
     // void unfollowUser(String username, String unfollowing);
 }
