@@ -150,17 +150,19 @@ public class WinsomeServiceImpl implements WinsomeService {
             System.out.println("Error, user does not exist");
             throw new UserNotFoundException();
         }
-        User follow = null;
-        for(User u: users) {
-            if(u.getUsername().equals(following)) {
-                follow = u;
-                break;
-            }
-        }
+        User follow = users.stream()
+                .filter(f ->
+                        f.getUsername().equals(following))
+                .findFirst().orElse(null);
         if(!emptyFollower(follow) && searchFollower(username, follow)) {
             System.out.println("Error, invalid operation");
             throw new InvalidOperationException();
         }
+        User user = users.stream()
+                .filter(u ->
+                        u.getUsername().equals(username))
+                .findFirst().orElse(null);
+        user.addFollows(follow);
     }
 
     private boolean searchUser(String user) {
