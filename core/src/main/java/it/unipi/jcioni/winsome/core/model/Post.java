@@ -1,14 +1,13 @@
 package it.unipi.jcioni.winsome.core.model;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class Post extends Content {
     private Post rewin;
     public static final int MAX_TITLE_LENGHT = 20;
     public static final int MAX_TEXT_LENGHT = 500;
+    private final String idPost = UUID.randomUUID().toString();
+    private final Date timestamp = new Date();
     private String title;
     private String text;
     private List<Comment> comments = new ArrayList<>();
@@ -35,6 +34,14 @@ public class Post extends Content {
 
     public Post getRewin() {
         return rewin;
+    }
+
+    public String getIdPost() {
+        return idPost;
+    }
+
+    public Date getTimestamp() {
+        return timestamp;
     }
 
     public String getText() {
