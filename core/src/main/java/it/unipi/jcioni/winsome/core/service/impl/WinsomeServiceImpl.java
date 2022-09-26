@@ -15,6 +15,12 @@ import java.util.stream.Collectors;
 public class WinsomeServiceImpl implements WinsomeService {
     private List<User> users = new ArrayList<>();
 
+    /*
+    @param username, user username
+    @param password, user password
+    @return true/false
+    @effects registra un utente alla piattaforma winsome.
+     */
     @Override
     public boolean register(String username, String password, String tags) {
         System.out.println("User registration " + username + " START");
@@ -45,6 +51,14 @@ public class WinsomeServiceImpl implements WinsomeService {
         return true;
     }
 
+    /*
+    @param username, user username
+    @param password, user password
+    @return true/false
+    @throws NullPointerException se l'username o la password è errata
+    @throws LoginException se l'utente è gia loggato
+    @effects permette la login di un utente alla piattaforma winsome
+     */
     @Override
     public boolean login(String username, String password) {
         System.out.println("User login " + username + " START");
@@ -65,6 +79,12 @@ public class WinsomeServiceImpl implements WinsomeService {
         return true;
     }
 
+    /*
+    @param username, user username
+    @return true/false
+    @throws NullPointerException se l'utente non viene trovato
+    @effect permette la logout di un utente dalla piattaforma winsome
+     */
     @Override
     public boolean logout(String username) {
         System.out.println("User logout " + username + " START");
@@ -82,6 +102,11 @@ public class WinsomeServiceImpl implements WinsomeService {
         return true;
     }
 
+    /*
+    @param user, user
+    @return list of users
+    @effects viene restituita la lista degli utenti registrati al servizio che hanno almeno un tag in comune
+     */
     @Override
     public List<User> listUsers(User user) {
         return users.stream().filter(u -> {
@@ -96,6 +121,13 @@ public class WinsomeServiceImpl implements WinsomeService {
         }).collect(Collectors.toList());
     }
 
+    /*
+    @param title, titolo del post
+    @param text, contenuto del post
+    @param u, user
+    @throws RemoteException
+    @effects aggiunge un post alla piattaforma
+     */
     @Override
     public void createPost(String title, String text, User u) throws RemoteException {
         if (title.length() > Post.MAX_TITLE_LENGHT || text.length() > Post.MAX_TEXT_LENGHT) {
