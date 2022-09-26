@@ -22,7 +22,7 @@ public class WinsomeServiceImpl implements WinsomeService {
     @effects registra un utente alla piattaforma winsome.
      */
     @Override
-    public boolean register(String username, String password, String tags) {
+    public boolean register(String username, String password, String tags) throws RemoteException {
         System.out.println("User registration " + username + " START");
         String[] array = tags.split("\\s+");
         if (username == null) {
@@ -60,7 +60,7 @@ public class WinsomeServiceImpl implements WinsomeService {
     @effects permette la login di un utente alla piattaforma winsome
      */
     @Override
-    public boolean login(String username, String password) {
+    public boolean login(String username, String password) throws RemoteException {
         System.out.println("User login " + username + " START");
         User user = users.stream()
                     .filter(u ->
@@ -86,7 +86,7 @@ public class WinsomeServiceImpl implements WinsomeService {
     @effect permette la logout di un utente dalla piattaforma winsome
      */
     @Override
-    public boolean logout(String username) {
+    public boolean logout(String username) throws RemoteException {
         System.out.println("User logout " + username + " START");
         User user = users.stream()
                 .filter(u ->
@@ -108,7 +108,7 @@ public class WinsomeServiceImpl implements WinsomeService {
     @effects viene restituita la lista degli utenti registrati al servizio che hanno almeno un tag in comune
      */
     @Override
-    public List<User> listUsers(User user) {
+    public List<User> listUsers(User user) throws RemoteException {
         return users.stream().filter(u -> {
             for (int i = 0; i < user.getTags().size(); i++) {
                 for (int j = 0; j < u.getTags().size(); j++) {
@@ -136,7 +136,7 @@ public class WinsomeServiceImpl implements WinsomeService {
         u.getBlog().getPosts().add(new Post(u, title, text));
     }
 
-    public void followUser(String username, String following) {
+    public void followUser(String username, String following) throws RemoteException {
         boolean result = false;
         if(username.equals(following)) {
             System.out.println("Error, same user.");
