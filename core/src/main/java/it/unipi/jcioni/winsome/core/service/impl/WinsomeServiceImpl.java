@@ -1,12 +1,10 @@
 package it.unipi.jcioni.winsome.core.service.impl;
 
-import it.unipi.jcioni.winsome.core.exception.InvalidOperationException;
-import it.unipi.jcioni.winsome.core.exception.LoginException;
-import it.unipi.jcioni.winsome.core.exception.SameUserException;
-import it.unipi.jcioni.winsome.core.exception.UserNotFoundException;
+import it.unipi.jcioni.winsome.core.exception.*;
 import it.unipi.jcioni.winsome.core.model.Post;
 import it.unipi.jcioni.winsome.core.model.Tag;
 import it.unipi.jcioni.winsome.core.model.User;
+import it.unipi.jcioni.winsome.core.model.Vote;
 import it.unipi.jcioni.winsome.core.service.WinsomeService;
 
 import java.rmi.RemoteException;
@@ -226,6 +224,32 @@ public class WinsomeServiceImpl implements WinsomeService {
                 "Rewin",
                 "Rewin post");
         user.getBlog().getPosts().add(p);
+    }
+
+    @Override
+    public void ratePost(String idPost, Vote vote, User user)
+            throws RemoteException, UserNotFoundException, PostNotFoundException, InvalidOperationException {
+        User owner = users.stream().filter(u -> {
+            return u.getBlog().getPosts().stream().filter(p -> {
+                return p.getIdPost().equals(idPost);
+            }).findFirst().orElse(null) != null;
+        }).findFirst().orElse(null);
+        if (owner == null) {
+            throw new UserNotFoundException();
+        }
+        Post post = owner.getBlog().getPosts().stream().filter(p -> {
+            return p.getIdPost().equals(idPost);
+        }).findFirst().orElse(null);
+        if (post == null) {
+            throw new PostNotFoundException();
+        }
+        if (!existPostInUserFeed(post, user)) throw new InvalidOperationException();
+        boolean success = post.addVote(user, vote);
+        if (!success) throw new InvalidOperationException();
+    }
+
+    private boolean existPostInUserFeed (Post post, User user) throws RemoteException{
+        return showFeed(user).contains(post);
     }
 
     /*

@@ -1,10 +1,12 @@
 package it.unipi.jcioni.winsome.core.service;
 
 import it.unipi.jcioni.winsome.core.exception.InvalidOperationException;
+import it.unipi.jcioni.winsome.core.exception.PostNotFoundException;
 import it.unipi.jcioni.winsome.core.exception.SameUserException;
 import it.unipi.jcioni.winsome.core.exception.UserNotFoundException;
 import it.unipi.jcioni.winsome.core.model.Post;
 import it.unipi.jcioni.winsome.core.model.User;
+import it.unipi.jcioni.winsome.core.model.Vote;
 
 import java.rmi.Remote;
 import java.rmi.RemoteException;
@@ -25,4 +27,7 @@ public interface WinsomeService extends Remote {
     void createPost(String title, String text, User u) throws RemoteException;
     List<Post> showFeed(User user) throws RemoteException;
     void rewinPost(User user, String idPost) throws RemoteException;
+
+    void ratePost(String idPost, Vote vote, User user)
+            throws RemoteException, UserNotFoundException, PostNotFoundException, InvalidOperationException;
 }
