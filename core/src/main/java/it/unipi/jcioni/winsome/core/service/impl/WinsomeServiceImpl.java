@@ -226,6 +226,16 @@ public class WinsomeServiceImpl implements WinsomeService {
         user.getBlog().getPosts().add(p);
     }
 
+    /*
+    @param idPost, id del post
+    @param vote, voto da assegnare al post
+    @param user, utente che vuole assegnare il voto
+    @throws RemoteException
+    @throws UserNotFoundException se l'utente non viene trovato
+    @throws PostNotFoundException se il post non viene trovato
+    @throws InvalidOperationException se l'operazione non è corretta
+    @effects aggiunge un voto al post
+     */
     @Override
     public void ratePost(String idPost, Vote vote, User user)
             throws RemoteException, UserNotFoundException, PostNotFoundException, InvalidOperationException {
