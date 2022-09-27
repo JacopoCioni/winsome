@@ -73,4 +73,18 @@ public class Post extends Content {
         }
         return original;
     }
+
+    public boolean addVote(User user, Vote vote) {
+        if (user == null || vote == null || votes.get(user) != null) return false;
+        votes.put(user, vote);
+        return true;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Post post = (Post) o;
+        return idPost.equals(post.idPost);
+    }
 }
