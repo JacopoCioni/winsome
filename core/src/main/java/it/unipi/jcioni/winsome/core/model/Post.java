@@ -80,6 +80,12 @@ public class Post extends Content {
         return true;
     }
 
+    public boolean addComment(User user, Comment comment) {
+        if (user == null || comment == null) return false;
+        comments.add(comment);
+        return true;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
