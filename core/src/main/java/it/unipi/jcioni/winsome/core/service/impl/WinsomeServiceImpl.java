@@ -213,6 +213,47 @@ public class WinsomeServiceImpl implements WinsomeService {
                 .collect(Collectors.toList());
     }
 
+    private Post showPost(User user, String idPost)
+            throws RemoteException, PostNotFoundException {
+        Post post = user.getBlog().getPosts().stream()
+                .filter(p -> p.getIdPost().equals(idPost))
+                .findFirst().orElse(null);
+        if (post == null) throw new PostNotFoundException();
+        return post;
+    }
+
+    @Override
+    public Post showPost(String idPost)
+            throws RemoteException, PostNotFoundException {
+        for (User u: users) {
+            for (Post p: u.getBlog().getPosts()) {
+                if (p.getIdPost().equals(idPost)) {
+                    return p;
+                }
+            }
+        }
+        throw new PostNotFoundException();
+    }
+
+    @Override
+    public void deletePost(User user, String idPost)
+            throws RemoteException, InvalidOperationException, PostNotFoundException {
+        for (User u: users) {
+            for (Post p: u.getBlog().getPosts()) {
+                if (p.getIdPost().equals(idPost)) {
+                    if (!u.equals(user)) throw new InvalidOperationException();
+                    u.getBlog().getPosts().remove(p);
+                }
+            }
+        }
+        throw new PostNotFoundException();
+    }
+
+    @Override
+    public Wallet getWallet(User user) throws RemoteException{
+        return user.getWallet();
+    }
+
     @Override
     public void rewinPost(User user, String idPost) throws RemoteException{
         List<Post> feed = this.showFeed(user);
