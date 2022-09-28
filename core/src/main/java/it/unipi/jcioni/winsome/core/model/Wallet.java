@@ -4,19 +4,8 @@ import java.util.concurrent.ConcurrentLinkedDeque;
 
 public class Wallet {
 
-    private final User owner;
-
     // ThreadSafe queue, you might have multiple threads wanting to access this collection
     private ConcurrentLinkedDeque<Transaction> transactions = new ConcurrentLinkedDeque<>();
-
-    public Wallet(User owner) {
-        this.owner = owner;
-    }
-
-    public User getOwner() {
-        return owner;
-    }
-
     public ConcurrentLinkedDeque<Transaction> getTransactions() {
         return transactions;
     }

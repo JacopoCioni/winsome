@@ -17,6 +17,7 @@ public class User {
     private List<User> follows = new ArrayList<>();
     private List<Tag> tags;
     private Blog blog;
+    private Wallet wallet = new Wallet();
 
     public User(String username, String password, List<Tag> tags) {
         this.username = username;
@@ -106,6 +107,10 @@ public class User {
 
     public Blog getBlog() {
         return blog;
+    }
+
+    public Wallet getWallet() {
+        return wallet;
     }
 
     @Override
