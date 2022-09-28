@@ -236,17 +236,17 @@ public class WinsomeServiceImpl implements WinsomeService {
     @Override
     public void ratePost(String idPost, Vote vote, User user)
             throws RemoteException, UserNotFoundException, PostNotFoundException, InvalidOperationException {
-        User owner = users.stream().filter(u -> {
-            return u.getBlog().getPosts().stream().filter(p -> {
-                return p.getIdPost().equals(idPost);
-            }).findFirst().orElse(null) != null;
-        }).findFirst().orElse(null);
+        User owner = users.stream()
+                .filter(u -> u.getBlog().getPosts().stream()
+                        .filter(p -> p.getIdPost().equals(idPost))
+                        .findFirst().orElse(null) != null)
+                .findFirst().orElse(null);
         if (owner == null) {
             throw new UserNotFoundException();
         }
-        Post post = owner.getBlog().getPosts().stream().filter(p -> {
-            return p.getIdPost().equals(idPost);
-        }).findFirst().orElse(null);
+        Post post = owner.getBlog().getPosts().stream()
+                .filter(p -> p.getIdPost().equals(idPost))
+                .findFirst().orElse(null);
         if (post == null) {
             throw new PostNotFoundException();
         }
@@ -258,17 +258,17 @@ public class WinsomeServiceImpl implements WinsomeService {
     @Override
     public void addComment(String idPost, Comment comment, User user)
             throws RemoteException, UserNotFoundException, PostNotFoundException, InvalidOperationException {
-        User owner = users.stream().filter(u -> {
-            return u.getBlog().getPosts().stream().filter(p -> {
-                return p.getIdPost().equals(idPost);
-            }).findFirst().orElse(null) != null;
-        }).findFirst().orElse(null);
+        User owner = users.stream()
+                .filter(u -> u.getBlog().getPosts().stream()
+                        .filter(p -> p.getIdPost().equals(idPost))
+                        .findFirst().orElse(null) != null)
+                .findFirst().orElse(null);
         if (owner == null) {
             throw new UserNotFoundException();
         }
-        Post post = owner.getBlog().getPosts().stream().filter(p -> {
-            return p.getIdPost().equals(idPost);
-        }).findFirst().orElse(null);
+        Post post = owner.getBlog().getPosts().stream()
+                .filter(p -> p.getIdPost().equals(idPost))
+                .findFirst().orElse(null);
         if (post == null) {
             throw new PostNotFoundException();
         }
