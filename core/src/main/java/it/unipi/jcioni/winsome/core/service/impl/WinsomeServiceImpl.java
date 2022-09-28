@@ -1,10 +1,7 @@
 package it.unipi.jcioni.winsome.core.service.impl;
 
 import it.unipi.jcioni.winsome.core.exception.*;
-import it.unipi.jcioni.winsome.core.model.Post;
-import it.unipi.jcioni.winsome.core.model.Tag;
-import it.unipi.jcioni.winsome.core.model.User;
-import it.unipi.jcioni.winsome.core.model.Vote;
+import it.unipi.jcioni.winsome.core.model.*;
 import it.unipi.jcioni.winsome.core.service.WinsomeService;
 
 import java.rmi.RemoteException;
@@ -255,6 +252,28 @@ public class WinsomeServiceImpl implements WinsomeService {
         }
         if (!existPostInUserFeed(post, user)) throw new InvalidOperationException();
         boolean success = post.addVote(user, vote);
+        if (!success) throw new InvalidOperationException();
+    }
+
+    @Override
+    public void addComment(String idPost, Comment comment, User user)
+            throws RemoteException, UserNotFoundException, PostNotFoundException, InvalidOperationException {
+        User owner = users.stream().filter(u -> {
+            return u.getBlog().getPosts().stream().filter(p -> {
+                return p.getIdPost().equals(idPost);
+            }).findFirst().orElse(null) != null;
+        }).findFirst().orElse(null);
+        if (owner == null) {
+            throw new UserNotFoundException();
+        }
+        Post post = owner.getBlog().getPosts().stream().filter(p -> {
+            return p.getIdPost().equals(idPost);
+        }).findFirst().orElse(null);
+        if (post == null) {
+            throw new PostNotFoundException();
+        }
+        if(!existPostInUserFeed(post, user)) throw new InvalidOperationException();
+        boolean success = post.addComment(user, comment);
         if (!success) throw new InvalidOperationException();
     }
 
