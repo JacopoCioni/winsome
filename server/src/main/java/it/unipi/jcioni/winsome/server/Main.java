@@ -1,4 +1,4 @@
-package it.unipi.jcioni;
+package it.unipi.jcioni.winsome.server;
 
 public class Main {
     public static void main(String[] args) {
