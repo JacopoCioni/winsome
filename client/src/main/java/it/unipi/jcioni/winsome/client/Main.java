@@ -50,12 +50,14 @@ public class Main {
                 PrintWriter output = new PrintWriter(socket.getOutputStream(), true);
                 BufferedReader input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
                 String command;
+                String request;
                 while (true) {
                     try {
                         command = read.nextLine();
                     } catch (NoSuchElementException e) {
                         continue;
                     }
+                    request = command;
                     command = command.trim();
                     String[] arguments = command.split("\\s+");
                     command = arguments[0];
@@ -81,11 +83,51 @@ public class Main {
                                 System.err.println("Richiesti almeno 3 argomenti, massimo 7.\n<username> <password> [tags]");
                             } catch (RemoteException ignored) { }
                             break;
+                        case "login":
+                            invia(output, request);
+                            String response = ricevi(input);
+                            if(response.equalsIgnoreCase("login ok")) {
+                                String username = arguments[0];
+                                //Registrazione della callback per l'aggiornamento della listafollower
+
+                            }
+                            else {
+                                // ci sarà la risposta del server per capire come mai non è andato a buon fine
+                                System.out.println("Errore: " + response);
+                            }
+                            break;
+                        case "logout":
+                            //Da completare
                     }
                 }
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
         }
+    }
+
+    private static void invia (PrintWriter output, String send) {
+        int bytes = send.getBytes().length;
+        output.println(bytes);
+        output.print(send);
+        output.flush();
+    }
+
+    private static String ricevi (BufferedReader input) throws IOException {
+        StringBuilder string = new StringBuilder();
+        String data = input.readLine();
+        if (data == null) throw new IOException();
+        int j;
+        try {
+            j = Integer.parseInt(data);
+        } catch (NumberFormatException e) {
+            return data;
+        }
+        int i=0;
+        while (i < j) {
+            string.append((char) input.read());
+            i++;
+        }
+        return string.toString();
     }
 }
