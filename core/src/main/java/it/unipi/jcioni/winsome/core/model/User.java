@@ -30,7 +30,8 @@ public class User {
         logged = true;
     }
 
-    public void logout() {
+    public void logout() throws LoginException{
+        if (!logged) throw new LoginException();
         logged = false;
     }
 
