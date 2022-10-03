@@ -1,6 +1,8 @@
 package it.unipi.jcioni.winsome.server;
 
 import com.sun.jdi.IntegerValue;
+import it.unipi.jcioni.winsome.core.model.User;
+import it.unipi.jcioni.winsome.core.service.WinsomeData;
 import it.unipi.jcioni.winsome.core.service.WinsomeService;
 import it.unipi.jcioni.winsome.core.service.impl.WinsomeServiceImpl;
 
@@ -12,12 +14,16 @@ import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 public class Main {
+
+    private static WinsomeData winsomeData;
     public static void main(String[] args) {
 
         int serverPort = args.length > 0 && args[0] != null && args[0].length() > 0 ? Integer.parseInt(args[0]) : 8080;
@@ -26,6 +32,10 @@ public class Main {
         Socket clientSocket = null;
         ConcurrentLinkedDeque<Socket> sockets = new ConcurrentLinkedDeque<>();
         ThreadPoolExecutor executor = (ThreadPoolExecutor) Executors.newCachedThreadPool();
+
+        // Inizializzazione del social Winsome
+        winsomeData = new WinsomeData();
+
         try {
             /* Creazione di un'istanza dell'oggetto WinsomeServiceImpl */
             WinsomeServiceImpl winsomeServ = new WinsomeServiceImpl();
@@ -56,7 +66,7 @@ public class Main {
                 //bloccante fino a quando non avviene una connessione
                 clientSocket = serverSocket.accept();
                 sockets.add(clientSocket);
-                executor.submit(new Handler(clientSocket));
+                executor.submit(new Handler(clientSocket, winsomeData));
             } catch (SocketException e) {
                 e.printStackTrace();
                 break;
