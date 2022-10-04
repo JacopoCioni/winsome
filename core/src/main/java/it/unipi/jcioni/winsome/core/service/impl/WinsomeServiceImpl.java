@@ -95,6 +95,8 @@ public class WinsomeServiceImpl implements WinsomeService {
         } catch (NullPointerException ex) {
             System.out.println("Error, user not found");
             return false;
+        } catch (LoginException e) {
+            throw new RuntimeException(e);
         }
         System.out.println("User logout " + username + " END");
         return true;
