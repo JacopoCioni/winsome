@@ -1,6 +1,7 @@
 package it.unipi.jcioni.winsome.server;
 
 import it.unipi.jcioni.winsome.core.exception.LoginException;
+import it.unipi.jcioni.winsome.core.model.Tag;
 import it.unipi.jcioni.winsome.core.model.User;
 import it.unipi.jcioni.winsome.core.service.WinsomeData;
 
@@ -19,6 +20,9 @@ public class Handler implements Runnable {
     private PrintWriter output = null;
     private BufferedReader input = null;
     private WinsomeData winsomeData;
+
+    // Variabili per rintracciare l'utente in sessione
+    private String clientUsername = null;
     private boolean logged = false;
 
 
@@ -57,7 +61,8 @@ public class Handler implements Runnable {
                     switch (command) {
                         case "login":
                             if (arguments.length == 2) {
-                                // Temp descrive l'esecuzione del metodo
+                                clientUsername = arguments[0];
+                                // Result descrive l'esecuzione del metodo
                                 boolean result = login(arguments[0], arguments[1]);
                                 if (!result) invia(output, "Errore: l'utente è loggato o i dati sono errati.");
                             } else {
@@ -78,10 +83,10 @@ public class Handler implements Runnable {
                             if(!logged) {
                                 invia(output, "Errore, non è ancora stato effettuato il login.");
                             } else {
-                                listUsers(); //Da implementare
+                                listUsers();
                             }
                             break;
-
+                        case "listfollowing":
 
                     }
                 }
@@ -133,7 +138,47 @@ public class Handler implements Runnable {
     }
 
     private void listUsers() {
-
+        List<Tag> sessionUserTag = null;
+        // Ricerco la lista dei tag dell'utente che si trova attualmente in sessione
+        for (User u: winsomeData.getUsers()) {
+            if (u.getUsername().equals(clientUsername)) {
+                sessionUserTag = u.getTags();
+            }
+        }
+        // Se la lista dovesse essere vuota abbiamo un errore.
+        if (sessionUserTag == null) {
+            invia(output, "Errore, non hai nessun tag impostato.");
+            return;
+        }
+        List<User> sameTag = new ArrayList<>();
+        int cont = 0;
+        for (User u: winsomeData.getUsers()) {
+            for (Tag t: u.getTags()) {
+                for (Tag t2: sessionUserTag) {
+                    if (t2.equals(t)) cont++;
+                }
+                // Utilizzo un contatore per contare i tags.
+                // Ogni volta che ne trovo almeno uno in comune aggiungo l'utente alla lista
+                if (cont > 0) {
+                    sameTag.add(u);
+                }
+                cont = 0;
+            }
+        }
+        // Finito questo ciclo controllo se ho ho trovato utenti con un tag in comune
+        if (sameTag.size() == 0) {
+            invia(output, "Nessun utente ha almeno un tag in comune con te.");
+            return;
+        }
+        // A questo punto mi occupo di inoltrare la lista di utenti trovata
+        StringBuilder out = new StringBuilder();
+        out.append("Lista degli utenti con Tag in comune:\n");
+        for (User u: sameTag) {
+            out.append("->Utente: ").append(u.getUsername()).append("\n");
+        }
+        out.append("\n");
+        // Composto il messaggio, lo inoltro
+        invia(output, out.toString());
     }
 
     private static void invia (PrintWriter output, String send) {
