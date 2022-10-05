@@ -1,43 +1,40 @@
 package it.unipi.jcioni.winsome.server;
 
-import com.sun.jdi.IntegerValue;
-import it.unipi.jcioni.winsome.core.model.User;
 import it.unipi.jcioni.winsome.core.service.WinsomeData;
 import it.unipi.jcioni.winsome.core.service.WinsomeService;
 import it.unipi.jcioni.winsome.core.service.impl.WinsomeServiceImpl;
 
 import java.io.IOException;
-import java.net.ServerSocket;
-import java.net.Socket;
-import java.net.SocketException;
+import java.net.*;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import static it.unipi.jcioni.winsome.core.service.WinsomeService.SERVER_RMI_PORT;
+import static it.unipi.jcioni.winsome.core.service.WinsomeService.SERVER_TCP_PORT;
+
 public class Main {
-
-    private static WinsomeData winsomeData;
+    private static WinsomeData WINSOME_DATA;
     public static void main(String[] args) {
-
-        int serverPort = args.length > 0 && args[0] != null && args[0].length() > 0 ? Integer.parseInt(args[0]) : 8080;
-        int rmiPort = args.length > 0 && args[1] != null && args[1].length() > 0 ? Integer.parseInt(args[1]) : 6969;
+        int serverPort = args.length > 0 && args[0] != null && args[0].length() > 0
+                ? Integer.parseInt(args[0]) : SERVER_TCP_PORT;
+        int rmiPort = args.length > 0 && args[1] != null && args[1].length() > 0
+                ? Integer.parseInt(args[1]) : SERVER_RMI_PORT;
         ServerSocket serverSocket = null;
-        Socket clientSocket = null;
+        Socket clientSocket;
         ConcurrentLinkedDeque<Socket> sockets = new ConcurrentLinkedDeque<>();
         ThreadPoolExecutor executor = (ThreadPoolExecutor) Executors.newCachedThreadPool();
 
         // Inizializzazione del social Winsome
-        winsomeData = new WinsomeData();
+        WINSOME_DATA = new WinsomeData();
 
         try {
-            /* Creazione di un'istanza dell'oggetto WinsomeServiceImpl */
+            /* Creazione di un'istanza dell'oggetto WinsomeService */
             WinsomeServiceImpl winsomeServ = new WinsomeServiceImpl();
             /* Esportazione dell'Oggetto */
             WinsomeService stub = (WinsomeService) UnicastRemoteObject.exportObject(winsomeServ, 0);
@@ -61,12 +58,12 @@ public class Main {
             e.printStackTrace();
         }
 
-        while(true) {
+        while (true) {
             try {
                 //bloccante fino a quando non avviene una connessione
                 clientSocket = serverSocket.accept();
                 sockets.add(clientSocket);
-                executor.submit(new Handler(clientSocket, winsomeData));
+                executor.submit(new Handler(clientSocket, WINSOME_DATA));
             } catch (SocketException e) {
                 e.printStackTrace();
                 break;
@@ -92,13 +89,13 @@ public class Main {
         //Chiusura del pool
         executor.shutdown();
         try {
-            if(!executor.awaitTermination(3000, TimeUnit.MILLISECONDS)) executor.shutdownNow();
+            if (!executor.awaitTermination(3000, TimeUnit.MILLISECONDS))
+                executor.shutdownNow();
         } catch (InterruptedException e) {
             executor.shutdownNow();
             System.out.println("Il pool è stato chiuso forzatamente.");
         }
         System.out.println("Il pool è stato chiuso.");
         System.out.println("Server closed.");
-
     }
 }
