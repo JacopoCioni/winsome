@@ -64,8 +64,7 @@ public class Handler implements Runnable {
                             if (arguments.length == 2) {
                                 clientUsername = arguments[0];
                                 // Result descrive l'esecuzione del metodo
-                                boolean result = login(arguments[0], arguments[1]);
-                                if (!result) invia(output, "Errore: l'utente è loggato o i dati sono errati.");
+                                login(arguments[0], arguments[1]);
                             } else {
                                 // Invio risposta di errore comando al client
                                 invia(output, "Errore, utilizzare: login <username> <password>");
@@ -73,8 +72,7 @@ public class Handler implements Runnable {
                             break;
                         case "logout":
                             if (arguments.length == 1) {
-                                boolean result = logout(arguments[0]);
-                                if(!result) invia(output, "Errore: l'utente non è loggato o non è stato trovato.");
+                                logout(arguments[0]);
                             } else {
                                 // Invio risposta di errore comando al client
                                 invia(output, "Errore, utilizzare: logout <username>");
@@ -128,8 +126,8 @@ public class Handler implements Runnable {
         }
     }
 
-    private boolean login (String username, String password) {
-        System.out.println("User login " + username + " START");
+    private void login (String username, String password) {
+        System.out.println("User login: " + username + " START");
         User user = winsomeData.getUsers().stream()
                 .filter(u ->
                         u.getUsername().equals(username) && u.getPassword().equals(password))
@@ -138,18 +136,17 @@ public class Handler implements Runnable {
             user.login();
         } catch (NullPointerException ex) {
             System.out.println("Errore, username o password errati.");
-            return false;
+            invia(output, "Errore, username o password errati.");
         } catch (LoginException ex) {
             System.out.println("Errore, l'utente è già loggato.");
-            return false;
+            invia(output, "Errore, l'utente è già loggato.");
         }
-        System.out.println("User login " + username + " END");
+        System.out.println("User login: " + username + " END");
         logged = true;
         invia(output, "login ok");
-        return true;
     }
 
-    private boolean logout (String username) {
+    private void logout (String username) {
         System.out.println("User logout " + username + " START");
         User user = winsomeData.getUsers().stream()
                 .filter(u ->
@@ -158,15 +155,13 @@ public class Handler implements Runnable {
         try {
             user.logout();
         } catch (NullPointerException ex) {
-            System.out.println("Errore, utente non trovato.");
-            return false;
+            System.err.println("Errore, utente non trovato.");
         } catch (LogoutException ex) {
-            System.out.println("Errore, l'utente non è loggato.");
+            System.err.println("Errore, l'utente non è loggato.");
         }
         System.out.println("User logout " + username + " END");
         logged = false;
         invia(output, "logout ok");
-        return true;
     }
 
     private void listUsers () {
