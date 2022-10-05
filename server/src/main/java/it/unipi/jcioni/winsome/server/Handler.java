@@ -2,6 +2,7 @@ package it.unipi.jcioni.winsome.server;
 
 import it.unipi.jcioni.winsome.core.exception.InvalidOperationException;
 import it.unipi.jcioni.winsome.core.exception.LoginException;
+import it.unipi.jcioni.winsome.core.model.Post;
 import it.unipi.jcioni.winsome.core.model.Tag;
 import it.unipi.jcioni.winsome.core.model.User;
 import it.unipi.jcioni.winsome.core.service.WinsomeData;
@@ -114,7 +115,12 @@ public class Handler implements Runnable {
                                 unfollowUser(arguments[0]);
                             }
                             break;
-                        case "post":     
+                        case "blog":
+                            if (!logged) {
+                                invia(output, "Errore, non è ancora stato effettuato il login.");
+                            } else {
+                                viewBlog();
+                            }
                     }
                 }
             } catch (IOException e) {
@@ -242,7 +248,7 @@ public class Handler implements Runnable {
         invia(output, out.toString());
     }
 
-    public void followUser (String username) {
+    private void followUser (String username) {
         if (username.equals(clientUsername)) {
             invia(output, "Errore, non puoi seguire te stesso.");
             return;
@@ -300,6 +306,34 @@ public class Handler implements Runnable {
             e.printStackTrace();
             invia(output, "Errore, non è stato possibile eseguire l'operazione.");
         }
+    }
+
+    private void viewBlog () {
+        List<Post> sessionUserBlog = new ArrayList<>();
+        User clientUser = null;
+        // Ricerco lo user in sessione
+        for (User u: winsomeData.getUsers()) {
+            if (u.getUsername().equals(clientUsername)) {
+                clientUser = u;
+            }
+        }
+        if (clientUser == null) {
+            invia(output, "Errore, non è stato possibile fornire il servizio.");
+            return;
+        }
+        sessionUserBlog = clientUser.getBlog().getPosts();
+        if (sessionUserBlog.size() == 0) {
+            invia(output, "Il blog è vuoto.");
+            return;
+        }
+        StringBuilder out = new StringBuilder();
+        out.append("Lista dei post presenti nel blog: \n");
+        for (Post p: sessionUserBlog) {
+            out.append("-> PostId: "+p.getIdPost()+"\n");
+        }
+        out.append("\n");
+        // Composto il messaggio, lo inoltro
+        invia(output, out.toString());
     }
 
     private boolean existUser(String user) {
