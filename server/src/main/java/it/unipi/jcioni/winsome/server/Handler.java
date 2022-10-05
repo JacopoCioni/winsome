@@ -2,6 +2,7 @@ package it.unipi.jcioni.winsome.server;
 
 import it.unipi.jcioni.winsome.core.exception.InvalidOperationException;
 import it.unipi.jcioni.winsome.core.exception.LoginException;
+import it.unipi.jcioni.winsome.core.exception.LogoutException;
 import it.unipi.jcioni.winsome.core.model.Post;
 import it.unipi.jcioni.winsome.core.model.Tag;
 import it.unipi.jcioni.winsome.core.model.User;
@@ -12,10 +13,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
-import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ConcurrentLinkedDeque;
 
 public class Handler implements Runnable {
     private final Socket clientSocket;
@@ -161,7 +160,7 @@ public class Handler implements Runnable {
         } catch (NullPointerException ex) {
             System.out.println("Errore, utente non trovato.");
             return false;
-        } catch (LoginException ex) {
+        } catch (LogoutException ex) {
             System.out.println("Errore, l'utente non è loggato.");
         }
         System.out.println("User logout " + username + " END");

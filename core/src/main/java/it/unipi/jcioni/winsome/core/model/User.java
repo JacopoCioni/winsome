@@ -2,6 +2,7 @@ package it.unipi.jcioni.winsome.core.model;
 
 import it.unipi.jcioni.winsome.core.exception.InvalidOperationException;
 import it.unipi.jcioni.winsome.core.exception.LoginException;
+import it.unipi.jcioni.winsome.core.exception.LogoutException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,8 +31,8 @@ public class User {
         logged = true;
     }
 
-    public void logout() throws LoginException{
-        if (!logged) throw new LoginException();
+    public void logout() throws LogoutException {
+        if (!logged) throw new LogoutException();
         logged = false;
     }
 
