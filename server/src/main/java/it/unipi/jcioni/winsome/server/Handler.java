@@ -1,5 +1,6 @@
 package it.unipi.jcioni.winsome.server;
 
+import it.unipi.jcioni.winsome.core.exception.InvalidOperationException;
 import it.unipi.jcioni.winsome.core.exception.LoginException;
 import it.unipi.jcioni.winsome.core.model.Tag;
 import it.unipi.jcioni.winsome.core.model.User;
@@ -80,14 +81,26 @@ public class Handler implements Runnable {
                             }
                             break;
                         case "listusers":
-                            if(!logged) {
+                            if (!logged) {
                                 invia(output, "Errore, non è ancora stato effettuato il login.");
                             } else {
                                 listUsers();
                             }
                             break;
                         case "listfollowing":
-
+                            if (!logged) {
+                                invia(output, "Errore, non è ancora stato effettuato il login.");
+                            } else {
+                                listFollowing();
+                            }
+                            break;
+                        case "follow":
+                            if(!logged) {
+                                invia(output, "Errore, non è ancora stato effettuato il login.");
+                            } else {
+                                followUser(arguments[0]);
+                            }
+                            break;
                     }
                 }
             } catch (IOException e) {
@@ -96,7 +109,7 @@ public class Handler implements Runnable {
         }
     }
 
-    private boolean login(String username, String password) {
+    private boolean login (String username, String password) {
         System.out.println("User login " + username + " START");
         User user = winsomeData.getUsers().stream()
                 .filter(u ->
@@ -117,7 +130,7 @@ public class Handler implements Runnable {
         return true;
     }
 
-    private boolean logout(String username) {
+    private boolean logout (String username) {
         System.out.println("User logout " + username + " START");
         User user = winsomeData.getUsers().stream()
                 .filter(u ->
@@ -137,7 +150,7 @@ public class Handler implements Runnable {
         return true;
     }
 
-    private void listUsers() {
+    private void listUsers () {
         List<Tag> sessionUserTag = null;
         // Ricerco la lista dei tag dell'utente che si trova attualmente in sessione
         for (User u: winsomeData.getUsers()) {
@@ -179,6 +192,81 @@ public class Handler implements Runnable {
         out.append("\n");
         // Composto il messaggio, lo inoltro
         invia(output, out.toString());
+    }
+
+    private void listFollowing () {
+        List<User> sessionUserFollowing = new ArrayList<>();
+        User clientUser = null;
+        // Ricerco lo user in sessione
+        for (User u: winsomeData.getUsers()) {
+            if (u.getUsername().equals(clientUsername)) {
+                clientUser = u;
+            }
+        }
+        if (clientUser == null) {
+            invia(output, "Errore, non è stato possibile fornire il servizio.");
+            return;
+        }
+        // Ricerco tutti gli utenti che followano lo user in sessione
+        for (User f: winsomeData.getUsers()) {
+            if (f.getFollows().contains(clientUser)) {
+                sessionUserFollowing.add(f);
+            }
+        }
+        if (sessionUserFollowing.size() == 0) {
+            invia(output, "Non sei seguito da nessun utente.");
+            return;
+        }
+        // Invio la risposta
+        StringBuilder out = new StringBuilder();
+        out.append("Lista degli utente che seguono lo user in sessione:\n");
+        for (User user: sessionUserFollowing) {
+            out.append("->Utente: ").append(user.getUsername()).append("\n");
+        }
+        out.append("\n");
+        // Composto il messaggio, lo inoltro
+        invia(output, out.toString());
+    }
+
+    public void followUser(String username) {
+        if (username.equals(clientUsername)) {
+            invia(output, "Errore, non puoi seguire te stesso.");
+            return;
+        }
+        if (!existUser(username)) {
+            invia(output, "Errore, l'utente che vuoi seguire non esiste.");
+            return;
+        }
+        // Cerco l'utente da seguire con username dato in input
+        User follow = winsomeData.getUsers().stream()
+                .filter(f ->
+                        f.getUsername().equals(username))
+                .findFirst().orElse(null);
+        // Ricerco lo user in sessione
+        User clientUser = winsomeData.getUsers().stream()
+                .filter(f ->
+                        f.getUsername().equals(clientUsername))
+                .findFirst().orElse(null);
+        // Aggiungo il follow
+        try {
+            clientUser.addFollows(follow);
+            invia(output, "Hai cominciato a seguire l'utente: "+username);
+            // Notifica chiamata callback DA FARE
+        } catch (InvalidOperationException e) {
+            e.printStackTrace();
+            invia(output, "Errore, non è stato possibile eseguire l'operazione.");
+        }
+    }
+
+    private boolean existUser(String user) {
+        boolean result = false;
+        for (User u: winsomeData.getUsers()) {
+            if (u.getUsername().equals(user)) {
+                result = true;
+                break;
+            }
+        }
+        return result;
     }
 
     private static void invia (PrintWriter output, String send) {
