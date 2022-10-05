@@ -2,24 +2,21 @@ package it.unipi.jcioni.winsome.core.model;
 
 import java.util.*;
 
-public class Post extends Content {
+public class Post {
     private Post rewin;
     public static final int MAX_TITLE_LENGHT = 20;
     public static final int MAX_TEXT_LENGHT = 500;
     private final String idPost = UUID.randomUUID().toString();
     private final Date timestamp = new Date();
+    private User creator;
     private String title;
     private String text;
     private List<Comment> comments = new ArrayList<>();
     private Map<User, Vote> votes = new HashMap<>();
-
-//    public Post(User creator) {
-//        super(creator);
-//    }
-
+    
     // Post rewin
     public Post(User creator, Post rewin, String title, String text) {
-        super(creator);
+        this.creator = creator;
         this.rewin = rewin;
         this.title = title;
         this.text = text;
@@ -27,7 +24,7 @@ public class Post extends Content {
 
     // Post originale
     public Post(User creator, String title, String text) {
-        super(creator);
+        this.creator = creator;
         this.title = title;
         this.text = text;
     }
@@ -38,6 +35,14 @@ public class Post extends Content {
 
     public String getIdPost() {
         return idPost;
+    }
+
+    public User getCreator() {
+        return creator;
+    }
+
+    public String getTitle() {
+        return title;
     }
 
     public Date getTimestamp() {
