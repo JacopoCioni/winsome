@@ -95,12 +95,26 @@ public class Handler implements Runnable {
                             }
                             break;
                         case "follow":
-                            if(!logged) {
+                            if (arguments.length != 1) {
+                                invia(output, "Errore, utilizzare: follow <username>");
+                            }
+                            if (!logged) {
                                 invia(output, "Errore, non è ancora stato effettuato il login.");
                             } else {
                                 followUser(arguments[0]);
                             }
                             break;
+                        case "unfollow":
+                            if (arguments.length != 1) {
+                                invia(output, "Errore, utilizzare: unfollow <username>");
+                            }
+                            if (!logged) {
+                                invia(output, "Errore, non è ancora stato effettuato il login.");
+                            } else {
+                                unfollowUser(arguments[0]);
+                            }
+                            break;
+                        case "post":     
                     }
                 }
             } catch (IOException e) {
@@ -228,7 +242,7 @@ public class Handler implements Runnable {
         invia(output, out.toString());
     }
 
-    public void followUser(String username) {
+    public void followUser (String username) {
         if (username.equals(clientUsername)) {
             invia(output, "Errore, non puoi seguire te stesso.");
             return;
@@ -252,6 +266,36 @@ public class Handler implements Runnable {
             clientUser.addFollows(follow);
             invia(output, "Hai cominciato a seguire l'utente: "+username);
             // Notifica chiamata callback DA FARE
+        } catch (InvalidOperationException e) {
+            e.printStackTrace();
+            invia(output, "Errore, non è stato possibile eseguire l'operazione.");
+        }
+    }
+
+    private void unfollowUser (String username) {
+        if (username.equals(clientUsername)) {
+            invia(output, "Errore, non puoi unfolloware te stesso.");
+            return;
+        }
+        if (!existUser(username)) {
+            invia(output, "Errore, l'utente che vuoi unfolloware non esiste.");
+            return;
+        }
+        // Cerco l'utente da unfolloware con username dato in input
+        User follow = winsomeData.getUsers().stream()
+                .filter(f ->
+                        f.getUsername().equals(username))
+                .findFirst().orElse(null);
+        // Ricerco lo user in sessione
+        User clientUser = winsomeData.getUsers().stream()
+                .filter(f ->
+                        f.getUsername().equals(clientUsername))
+                .findFirst().orElse(null);
+        // Rimuovo il follow
+        try {
+            clientUser.removeFollows(follow);
+            invia(output, "Hai smesso di seguire l'utente: "+username);
+            // Notifica chiamata callbak DA FARE
         } catch (InvalidOperationException e) {
             e.printStackTrace();
             invia(output, "Errore, non è stato possibile eseguire l'operazione.");
