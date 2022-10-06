@@ -2,6 +2,7 @@ package it.unipi.jcioni.winsome.core.service.impl;
 
 import it.unipi.jcioni.winsome.core.exception.*;
 import it.unipi.jcioni.winsome.core.model.*;
+import it.unipi.jcioni.winsome.core.service.WinsomeData;
 import it.unipi.jcioni.winsome.core.service.WinsomeService;
 
 import java.rmi.RemoteException;
@@ -11,7 +12,13 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class WinsomeServiceImpl implements WinsomeService {
+    // Questa lista deve essere eliminata totalmente
     private List<User> users = new ArrayList<>();
+    // WinsomeData mi servirà per accedere alla lista degli utenti che è condivisa da tutto il servizio
+    private WinsomeData winsomeData;
+    public WinsomeServiceImpl(WinsomeData winsomeData) {
+        this.winsomeData = winsomeData;
+    }
 
     /*
     @param username, user username
@@ -36,7 +43,7 @@ public class WinsomeServiceImpl implements WinsomeService {
             System.out.println("Error, there are to many tags.");
             return false;
         }
-        for (User u: users) {
+        for (User u: winsomeData.getUsers()) {
             if (u.getUsername().equals(username)) {
                 System.out.println("Error, username already exists.");
                 return false;
@@ -44,7 +51,7 @@ public class WinsomeServiceImpl implements WinsomeService {
         }
         User newUser = new User(username, password,
                 Arrays.stream(array).map(Tag::new).collect(Collectors.toList()));
-        users.add(newUser);
+        winsomeData.getUsers().add(newUser);
         System.out.println("User registration " + username + " END");
         return true;
     }
