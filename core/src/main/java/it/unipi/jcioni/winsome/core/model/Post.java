@@ -2,7 +2,7 @@ package it.unipi.jcioni.winsome.core.model;
 
 import java.util.*;
 
-public class Post {
+public class Post extends Content{
     private Post rewin;
     public static final int MAX_TITLE_LENGHT = 20;
     public static final int MAX_TEXT_LENGHT = 500;
@@ -13,9 +13,11 @@ public class Post {
     private String text;
     private List<Comment> comments = new ArrayList<>();
     private Map<User, Vote> votes = new HashMap<>();
-    
+
     // Post rewin
     public Post(User creator, Post rewin, String title, String text) {
+        //Da rivedere questo
+        super(creator);
         this.creator = creator;
         this.rewin = rewin;
         this.title = title;
@@ -24,6 +26,8 @@ public class Post {
 
     // Post originale
     public Post(User creator, String title, String text) {
+        // Da rivedere questo
+        super(creator);
         this.creator = creator;
         this.title = title;
         this.text = text;
