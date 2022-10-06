@@ -15,8 +15,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-import static it.unipi.jcioni.winsome.core.service.WinsomeService.SERVER_RMI_PORT;
-import static it.unipi.jcioni.winsome.core.service.WinsomeService.SERVER_TCP_PORT;
+import static it.unipi.jcioni.winsome.core.service.WinsomeService.*;
 
 public class Main {
     private static WinsomeData WINSOME_DATA;
@@ -35,14 +34,14 @@ public class Main {
 
         try {
             /* Creazione di un'istanza dell'oggetto WinsomeService */
-            WinsomeServiceImpl winsomeServ = new WinsomeServiceImpl();
+            WinsomeServiceImpl winsomeServ = new WinsomeServiceImpl(WINSOME_DATA);
             /* Esportazione dell'Oggetto */
             WinsomeService stub = (WinsomeService) UnicastRemoteObject.exportObject(winsomeServ, 0);
             /* Creazione di un registry sulla porta rmiPort */
             LocateRegistry.createRegistry(rmiPort);
             /*Pubblicazione dello stub nel registry */
             Registry r = LocateRegistry.getRegistry(rmiPort);
-            r.rebind("WINSOME-SERVER", stub);
+            r.rebind(RMI_SERVER_REGISTRY_NAME, stub);
             System.out.println("RMI pronto sulla porta " + rmiPort);
         }
         /* If any communication failures occur... */

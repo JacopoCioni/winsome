@@ -45,7 +45,7 @@ public class Main {
                 e.printStackTrace();
                 return;
             }
-
+            System.out.println("connessione stabilita");
             try {
                 PrintWriter output = new PrintWriter(socket.getOutputStream(), true);
                 BufferedReader input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
@@ -61,7 +61,10 @@ public class Main {
                     command = command.trim();
                     String[] arguments = command.split("\\s+");
                     command = arguments[0];
-                    arguments = (String[]) Arrays.stream(arguments).collect(Collectors.toList()).subList(1, arguments.length).toArray();
+                    arguments = Arrays.stream(arguments)
+                            .collect(Collectors.toList())
+                                    .subList(1, arguments.length)
+                                            .toArray(new String[arguments.length - 1]);
                     switch (command) {
                         case "register":
                             try {
@@ -87,6 +90,7 @@ public class Main {
                             invia(output, request);
                             String response = ricevi(input);
                             if(response.equalsIgnoreCase("login ok")) {
+                                System.out.println("Stato login: " + response);
                                 String username = arguments[0];
                                 //Registrazione della callback per l'aggiornamento della listafollower
 

@@ -15,6 +15,7 @@ import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class Handler implements Runnable {
     private final Socket clientSocket;
@@ -52,6 +53,7 @@ public class Handler implements Runnable {
         while (true) {
             try {
                 request = ricevi(input);
+                // Sarebbe meglio farla come nel clientMain
                 if (request != null) {
                     String[] temp = request.split(" ");
                     String command  = temp[0];
@@ -61,32 +63,44 @@ public class Handler implements Runnable {
                     // Gestione della richiesta.
                     switch (command) {
                         case "login":
-                            if (arguments.length == 2) {
+                            for (User u: winsomeData.getUsers())
+                                System.out.println(u.getUsername()+" ");
+                            if (logged) {
+                                invia(output, "Errore, sei già loggato.");
+                            } else if (arguments.length == 2) {
                                 clientUsername = arguments[0];
                                 // Result descrive l'esecuzione del metodo
                                 login(arguments[0], arguments[1]);
+                                logged = true;
                             } else {
                                 // Invio risposta di errore comando al client
                                 invia(output, "Errore, utilizzare: login <username> <password>");
                             }
                             break;
                         case "logout":
-                            if (arguments.length == 1) {
+                            if(!logged) {
+                                invia(output, "Errore, non sei loggato.");
+                            } else if (arguments.length == 1) {
                                 logout(arguments[0]);
+                                logged = false;
                             } else {
                                 // Invio risposta di errore comando al client
                                 invia(output, "Errore, utilizzare: logout <username>");
                             }
                             break;
                         case "listusers":
-                            if (!logged) {
+                            if (arguments.length != 0) {
+                                invia(output, "Errore, utilizzare: listusers");
+                            } else if (!logged) {
                                 invia(output, "Errore, non è ancora stato effettuato il login.");
                             } else {
                                 listUsers();
                             }
                             break;
                         case "listfollowing":
-                            if (!logged) {
+                            if (arguments.length != 0) {
+                                invia(output, "Errore, utilizzare: listfollowing");
+                            } else if (!logged) {
                                 invia(output, "Errore, non è ancora stato effettuato il login.");
                             } else {
                                 listFollowing();
@@ -95,8 +109,7 @@ public class Handler implements Runnable {
                         case "follow":
                             if (arguments.length != 1) {
                                 invia(output, "Errore, utilizzare: follow <username>");
-                            }
-                            if (!logged) {
+                            } else if (!logged) {
                                 invia(output, "Errore, non è ancora stato effettuato il login.");
                             } else {
                                 followUser(arguments[0]);
@@ -105,19 +118,40 @@ public class Handler implements Runnable {
                         case "unfollow":
                             if (arguments.length != 1) {
                                 invia(output, "Errore, utilizzare: unfollow <username>");
-                            }
-                            if (!logged) {
+                            } else if (!logged) {
                                 invia(output, "Errore, non è ancora stato effettuato il login.");
                             } else {
                                 unfollowUser(arguments[0]);
                             }
                             break;
                         case "blog":
-                            if (!logged) {
+                            if (arguments.length != 0) {
+                                invia(output, "Errore, utilizzare: blog");
+                            } else if (!logged) {
                                 invia(output, "Errore, non è ancora stato effettuato il login.");
                             } else {
                                 viewBlog();
                             }
+                            break;
+                        case "post":
+                            if (arguments.length != 2) {
+                                invia(output, "Errore, utilizzare: post <title> <content>");
+                            } else if (!logged) {
+                               invia(output, "Errore, non è ancora stato effettuato il login.");
+                            } else {
+                                createPost(arguments[0], arguments[1]);
+                            }
+                            break;
+                        case "showfeed":
+                            if (arguments.length != 0) {
+                                invia(output, "Errore, utilizzare: showfeed");
+                            } else if(!logged) {
+                                invia(output, "Errore, non è ancora stato effettuato il login.");
+                            } else {
+                                showFeed();
+                            }
+                        case "showpost":
+                            // Continuare da qui.
                     }
                 }
             } catch (IOException e) {
@@ -142,7 +176,6 @@ public class Handler implements Runnable {
             invia(output, "Errore, l'utente è già loggato.");
         }
         System.out.println("User login: " + username + " END");
-        logged = true;
         invia(output, "login ok");
     }
 
@@ -160,7 +193,6 @@ public class Handler implements Runnable {
             System.err.println("Errore, l'utente non è loggato.");
         }
         System.out.println("User logout " + username + " END");
-        logged = false;
         invia(output, "logout ok");
     }
 
@@ -303,7 +335,7 @@ public class Handler implements Runnable {
     }
 
     private void viewBlog () {
-        List<Post> sessionUserBlog = new ArrayList<>();
+        List<Post> sessionUserBlog;
         User clientUser = null;
         // Ricerco lo user in sessione
         for (User u: winsomeData.getUsers()) {
@@ -324,6 +356,59 @@ public class Handler implements Runnable {
         out.append("Lista dei post presenti nel blog: \n");
         for (Post p: sessionUserBlog) {
             out.append("-> PostId: "+p.getIdPost()+"\n");
+        }
+        out.append("\n");
+        // Composto il messaggio, lo inoltro
+        invia(output, out.toString());
+    }
+
+    private void createPost (String title, String text) {
+        User clientUser = null;
+        // Ricerco lo user in sessione
+        for (User u: winsomeData.getUsers()) {
+            if (u.getUsername().equals(clientUsername)) {
+                clientUser = u;
+            }
+        }
+        if (clientUser == null) {
+            invia(output, "Errore, non è stato possibile fornire il servizio.");
+            return;
+        }
+        if (title.length() > Post.MAX_TITLE_LENGHT || text.length() > Post.MAX_TEXT_LENGHT) {
+            invia(output, "Errore, il titolo o il contenuto contengono troppi caratteri.");
+        }
+        clientUser.getBlog().getPosts().add(new Post(clientUser, title, text));
+        invia(output, "Il post intitolato '"+title+"' è stato creato correttamente.");
+    }
+
+    private void showFeed() {
+        User clientUser = null;
+        // Ricerco lo user in sessione
+        for (User u: winsomeData.getUsers()) {
+            if (u.getUsername().equals(clientUsername)) {
+                clientUser = u;
+            }
+        }
+        if (clientUser == null) {
+            invia(output, "Errore, non è stato possibile fornire il servizio.");
+            return;
+        }
+        List<Post> sessionUserFeed = new ArrayList<>();
+        // Aggiungo tutti i post presenti nel mio blog
+        clientUser.getFollows().stream().forEach(user -> sessionUserFeed.addAll(user.getBlog().getPosts()));
+        // Controllo che il feed non sia vuoto
+        if (sessionUserFeed.size() == 0) {
+            invia(output, "Il feed è vuoto.");
+        }
+        // Ordino la lista feed
+        sessionUserFeed.stream().sorted((o1, o2) ->
+                (int) (o2.getTimestamp().getTime() - o1.getTimestamp().getTime()))
+                .collect(Collectors.toList());
+
+        StringBuilder out = new StringBuilder();
+        out.append("Lista dei post presenti nel feed: \n");
+        for (Post p: sessionUserFeed) {
+            out.append("-> Post: "+p.getIdPost()+" - Autore: "+p.getCreator().getUsername()+" - Titolo: "+p.getTitle()+"\n");
         }
         out.append("\n");
         // Composto il messaggio, lo inoltro
