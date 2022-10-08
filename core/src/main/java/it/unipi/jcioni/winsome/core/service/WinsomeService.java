@@ -19,6 +19,7 @@ public interface WinsomeService extends Remote {
     String SERVER_ADDRESS = "localhost";
 
     boolean register(String username, String password, String tags) throws RemoteException;
+    /*
     boolean login(String username, String password) throws RemoteException;
     boolean logout(String username) throws RemoteException;
     List<User> listUsers(User user) throws RemoteException;
@@ -47,4 +48,6 @@ public interface WinsomeService extends Remote {
 
     void addComment(String idPost, Comment comment, User user)
             throws RemoteException, UserNotFoundException, PostNotFoundException, InvalidOperationException;
+
+     */
 }

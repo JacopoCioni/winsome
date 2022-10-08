@@ -63,7 +63,7 @@ public class WinsomeServiceImpl implements WinsomeService {
     @throws NullPointerException se l'username o la password è errata
     @throws LoginException se l'utente è gia loggato
     @effects permette la login di un utente alla piattaforma winsome
-     */
+
     @Override
     public boolean login(String username, String password) throws RemoteException {
         System.out.println("User login " + username + " START");
@@ -84,12 +84,14 @@ public class WinsomeServiceImpl implements WinsomeService {
         return true;
     }
 
+     */
+
     /*
     @param username, user username
     @return true/false
     @throws NullPointerException se l'utente non viene trovato
     @effects permette la logout di un utente dalla piattaforma winsome
-     */
+
     @Override
     public boolean logout(String username) throws RemoteException {
         System.out.println("User logout " + username + " START");
@@ -109,11 +111,13 @@ public class WinsomeServiceImpl implements WinsomeService {
         return true;
     }
 
+     */
+
     /*
     @param user, user
     @return list of users
     @effects viene restituita la lista degli utenti registrati al servizio che hanno almeno un tag in comune
-     */
+
     @Override
     public List<User> listUsers(User user) throws RemoteException {
         return users.stream().filter(u -> {
@@ -128,17 +132,25 @@ public class WinsomeServiceImpl implements WinsomeService {
         }).collect(Collectors.toList());
     }
 
+     */
+
+    /*
     @Override
     public List<User> listFollowers(User user) throws RemoteException {
         return user.getFollows();
     }
 
+     */
+
+    /*
     @Override
     public List<User> listFollowing(User following) throws RemoteException {
         return users.stream().filter(
                 user -> user.getFollows().contains(following))
                 .collect(Collectors.toList());
     }
+
+     */
 
     /*
     @param username, username dello user a cui voglio far followare
@@ -148,7 +160,7 @@ public class WinsomeServiceImpl implements WinsomeService {
     @throws UserNotFound se following non è presente nella lista users
     @throws InvalidOperationException se following è già followato da username
     @effects consente a username di followare following
-     */
+
     @Override
     public void followUser(String username, String following)
             throws RemoteException, SameUserException, UserNotFoundException, InvalidOperationException {
@@ -171,6 +183,9 @@ public class WinsomeServiceImpl implements WinsomeService {
         user.addFollows(follow);
     }
 
+     */
+
+    /*
     @Override
     public void unfollowUser(String username, String followed)
             throws RemoteException, SameUserException, UserNotFoundException, InvalidOperationException {
@@ -193,10 +208,15 @@ public class WinsomeServiceImpl implements WinsomeService {
         user.removeFollows(follow);
     }
 
+     */
+
+    /*
     @Override
     public List<Post> viewBlog(User user) throws RemoteException{
         return user.getBlog().getPosts();
     }
+
+    */
 
     /*
     @param title, titolo del post
@@ -204,7 +224,7 @@ public class WinsomeServiceImpl implements WinsomeService {
     @param u, user
     @throws RemoteException
     @effects aggiunge un post alla piattaforma
-     */
+
     @Override
     public void createPost(String title, String text, User u) throws RemoteException {
         if (title.length() > Post.MAX_TITLE_LENGHT || text.length() > Post.MAX_TEXT_LENGHT) {
@@ -213,6 +233,9 @@ public class WinsomeServiceImpl implements WinsomeService {
         u.getBlog().getPosts().add(new Post(u, title, text));
     }
 
+     */
+
+    /*
     @Override
     public List<Post> showFeed(User user) throws RemoteException{
         List<Post> feed = new ArrayList<>();
@@ -221,7 +244,9 @@ public class WinsomeServiceImpl implements WinsomeService {
                 (int) (o2.getTimestamp().getTime() - o1.getTimestamp().getTime()))
                 .collect(Collectors.toList());
     }
+    */
 
+    /*
     private Post showPost(User user, String idPost)
             throws RemoteException, PostNotFoundException {
         Post post = user.getBlog().getPosts().stream()
@@ -231,6 +256,9 @@ public class WinsomeServiceImpl implements WinsomeService {
         return post;
     }
 
+     */
+
+    /*
     @Override
     public Post showPost(String idPost)
             throws RemoteException, PostNotFoundException {
@@ -244,6 +272,9 @@ public class WinsomeServiceImpl implements WinsomeService {
         throw new PostNotFoundException();
     }
 
+     */
+
+    /*
     @Override
     public void deletePost(User user, String idPost)
             throws RemoteException, InvalidOperationException, PostNotFoundException {
@@ -258,11 +289,16 @@ public class WinsomeServiceImpl implements WinsomeService {
         throw new PostNotFoundException();
     }
 
+     */
+
+    /*
     @Override
     public Wallet getWallet(User user) throws RemoteException{
         return user.getWallet();
     }
+     */
 
+    /*
     @Override
     public void rewinPost(User user, String idPost) throws RemoteException{
         List<Post> feed = this.showFeed(user);
@@ -273,6 +309,8 @@ public class WinsomeServiceImpl implements WinsomeService {
         user.getBlog().getPosts().add(p);
     }
 
+     */
+
     /*
     @param idPost, id del post
     @param vote, voto da assegnare al post
@@ -282,7 +320,7 @@ public class WinsomeServiceImpl implements WinsomeService {
     @throws PostNotFoundException se il post non viene trovato
     @throws InvalidOperationException se l'operazione non è corretta
     @effects aggiunge un voto al post
-     */
+
     @Override
     public void ratePost(String idPost, Vote vote, User user)
             throws RemoteException, UserNotFoundException, PostNotFoundException, InvalidOperationException {
@@ -305,6 +343,9 @@ public class WinsomeServiceImpl implements WinsomeService {
         if (!success) throw new InvalidOperationException();
     }
 
+     */
+
+    /*
     @Override
     public void addComment(String idPost, Comment comment, User user)
             throws RemoteException, UserNotFoundException, PostNotFoundException, InvalidOperationException {
@@ -331,11 +372,13 @@ public class WinsomeServiceImpl implements WinsomeService {
         return showFeed(user).contains(post);
     }
 
+     */
+
     /*
     @param user, username dell'utente che voglio cercare nella lista di users
     @return true/false
     @effects restituisce true se lo username fa parte di un utente
-     */
+
     private boolean existUser(String user) {
         boolean result = false;
         for (User u: users) {
@@ -347,14 +390,18 @@ public class WinsomeServiceImpl implements WinsomeService {
         return result;
     }
 
+     */
+
     /*
     @param follow, utente che voglio followare
     @return true/false
     @effects restituisce true se la lista dei follow è vuota
-     */
+
     private boolean emptyFollower(User follow) {
         return follow.getFollows() == null;
     }
+
+     */
 
     /*
     Questo metodo cerca se tra la lista dei follower dell'utente che u vuole followare è presente u
@@ -362,11 +409,13 @@ public class WinsomeServiceImpl implements WinsomeService {
     @param follow
     @return true/false
     @effects restituisce true se la lista dei follow contiene user.
-     */
+
     private boolean searchFollower(String user, User follow) {
         for(User f: follow.getFollows()) {
             if (f.getUsername().equals(user)) return true;
         }
         return false;
     }
+    
+     */
 }
