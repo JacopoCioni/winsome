@@ -3,7 +3,9 @@ package it.unipi.jcioni.winsome.server;
 import it.unipi.jcioni.winsome.core.exception.InvalidOperationException;
 import it.unipi.jcioni.winsome.core.exception.LoginException;
 import it.unipi.jcioni.winsome.core.exception.LogoutException;
+import it.unipi.jcioni.winsome.core.exception.UserNotFoundException;
 import it.unipi.jcioni.winsome.core.model.Post;
+import it.unipi.jcioni.winsome.core.model.Session;
 import it.unipi.jcioni.winsome.core.model.Tag;
 import it.unipi.jcioni.winsome.core.model.User;
 import it.unipi.jcioni.winsome.core.service.WinsomeData;
@@ -22,6 +24,7 @@ public class Handler implements Runnable {
     private PrintWriter output = null;
     private BufferedReader input = null;
     private WinsomeData winsomeData;
+    private Session session;
 
     // Variabili per rintracciare l'utente in sessione
     private String clientUsername = null;
@@ -31,6 +34,7 @@ public class Handler implements Runnable {
     public Handler(Socket clientSocket, WinsomeData winsomeData) {
         this.clientSocket = clientSocket;
         this.winsomeData = winsomeData;
+        this.session = null;
     }
 
     public void run() {
@@ -63,29 +67,30 @@ public class Handler implements Runnable {
                     // Gestione della richiesta.
                     switch (command) {
                         case "login":
+                            // Messo qui momentaneamente per vedere gli utenti registrati
                             for (User u: winsomeData.getUsers())
                                 System.out.println(u.getUsername()+" ");
-                            if (logged) {
-                                invia(output, "Errore, sei già loggato.");
-                            } else if (arguments.length == 2) {
+                            // Restituisce TRUE se l'utente non è loggato
+                            if (arguments.length == 2) {
                                 clientUsername = arguments[0];
-                                // Result descrive l'esecuzione del metodo
                                 login(arguments[0], arguments[1]);
-                                logged = true;
                             } else {
                                 // Invio risposta di errore comando al client
                                 invia(output, "Errore, utilizzare: login <username> <password>");
                             }
                             break;
                         case "logout":
-                            if(!logged) {
+                            // Controllo che l'utente sia loggato
+                            if(!clientLogged()) {
                                 invia(output, "Errore, non sei loggato.");
-                            } else if (arguments.length == 1) {
-                                logout(arguments[0]);
-                                logged = false;
                             } else {
-                                // Invio risposta di errore comando al client
-                                invia(output, "Errore, utilizzare: logout <username>");
+                                // Effettuo il logout
+                                if (arguments.length == 0) {
+                                    logout(session.getUsername());
+                                } else {
+                                    // Invio risposta di errore comando al client
+                                    invia(output, "Errore, utilizzare: logout <username>");
+                                }
                             }
                             break;
                         case "listusers":
@@ -161,39 +166,67 @@ public class Handler implements Runnable {
     }
 
     private void login (String username, String password) {
-        System.out.println("User login: " + username + " START");
+        // Controllo che non sia già in una sessione aperta
+        if (clientLogged()) {
+            invia(output, "Sei attualmente collegato con l'account: " + session.getUsername());
+            return;
+        }
+        System.out.println("User login: " + username + ": START");
+        // Controllo che l'utente sia registrato
         User user = winsomeData.getUsers().stream()
                 .filter(u ->
                         u.getUsername().equals(username) && u.getPassword().equals(password))
                 .findFirst().orElse(null);
-        try {
-            user.login();
-        } catch (NullPointerException ex) {
-            System.out.println("Errore, username o password errati.");
-            invia(output, "Errore, username o password errati.");
-        } catch (LoginException ex) {
-            System.out.println("Errore, l'utente è già loggato.");
-            invia(output, "Errore, l'utente è già loggato.");
+        if (user == null) {
+            invia(output, "Errore, utente non trovato. Verificare username & password.");
+            return;
         }
-        System.out.println("User login: " + username + " END");
+        // Controllo che l'utente di cui voglio fare l'accesso non sia già loggato
+        Session temp = Main.sessions.get(username);
+        if (temp != null) {
+            if (temp.getClientSocket() == clientSocket) {
+                invia(output, "Hai già effettuato il login.");
+            }
+            else {
+                invia(output, "L'utente è attualmente collegato in un'altra sessione.");
+            }
+            return;
+        } else {
+            Main.sessions.put(username, new Session(clientSocket, username));
+            session = new Session(clientSocket, username);
+        }
+        System.out.println("User login: " + username + ": END");
         invia(output, "login ok");
     }
 
     private void logout (String username) {
-        System.out.println("User logout " + username + " START");
+        System.out.println("User logout " + username + ": START");
+        // Verifico prima di tutto che l'utente sia registrato cercandolo nella lista utenti registrati
         User user = winsomeData.getUsers().stream()
                 .filter(u ->
                         u.getUsername().equals(username))
                 .findFirst().orElse(null);
-        try {
-            user.logout();
-        } catch (NullPointerException ex) {
+        if (user == null) {
             System.err.println("Errore, utente non trovato.");
-        } catch (LogoutException ex) {
-            System.err.println("Errore, l'utente non è loggato.");
+            invia(output, "Errore, utente non trovato.");
+        } else {
+            // Mi occupo di rimuovere la connessione dal servizio, controllando che l'utente sia effettivamente loggato
+            if (Main.sessions.get(username) != null) {
+                Session temp = Main.sessions.get(username);
+                if (temp.getClientSocket() == clientSocket) {
+                    // Posso effettivamente rimuovere la connessione dal servizio
+                    Main.sessions.remove(username);
+                    // Imposto nuovamente la sessione
+                    session = null;
+                    System.out.println("User logout " + username + ": END");
+                    invia(output, "logout ok");
+                } else {
+                    invia(output, "Errore, non hai effettuato la login.");
+                }
+            } else {
+                invia(output, "Errore, non hai effettuato la login.");
+            }
         }
-        System.out.println("User logout " + username + " END");
-        invia(output, "logout ok");
     }
 
     private void listUsers () {
@@ -424,6 +457,17 @@ public class Handler implements Runnable {
             }
         }
         return result;
+    }
+
+    // Ritorna true se l'utente è loggato.
+    private boolean clientLogged () {
+        if (session != null) {
+            // è loggato
+            return true;
+        } else {
+            // non è loggato
+            return false;
+        }
     }
 
     private static void invia (PrintWriter output, String send) {
