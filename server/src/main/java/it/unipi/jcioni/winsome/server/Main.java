@@ -1,5 +1,6 @@
 package it.unipi.jcioni.winsome.server;
 
+import it.unipi.jcioni.winsome.core.model.Session;
 import it.unipi.jcioni.winsome.core.service.WinsomeData;
 import it.unipi.jcioni.winsome.core.service.WinsomeService;
 import it.unipi.jcioni.winsome.core.service.impl.WinsomeServiceImpl;
@@ -10,15 +11,14 @@ import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
-import java.util.concurrent.ConcurrentLinkedDeque;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 import static it.unipi.jcioni.winsome.core.service.WinsomeService.*;
 
 public class Main {
     private static WinsomeData WINSOME_DATA;
+    public static ConcurrentHashMap<String, Session> sessions = new ConcurrentHashMap<>();
+    public static ConcurrentLinkedDeque<Socket> sockets = new ConcurrentLinkedDeque<>();
     public static void main(String[] args) {
         int serverPort = args.length > 0 && args[0] != null && args[0].length() > 0
                 ? Integer.parseInt(args[0]) : SERVER_TCP_PORT;
@@ -26,7 +26,6 @@ public class Main {
                 ? Integer.parseInt(args[1]) : SERVER_RMI_PORT;
         ServerSocket serverSocket = null;
         Socket clientSocket;
-        ConcurrentLinkedDeque<Socket> sockets = new ConcurrentLinkedDeque<>();
         ThreadPoolExecutor executor = (ThreadPoolExecutor) Executors.newCachedThreadPool();
 
         // Inizializzazione del social Winsome
