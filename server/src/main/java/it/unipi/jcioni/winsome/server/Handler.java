@@ -1,19 +1,17 @@
 package it.unipi.jcioni.winsome.server;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import it.unipi.jcioni.winsome.core.exception.InvalidOperationException;
-import it.unipi.jcioni.winsome.core.model.Post;
-import it.unipi.jcioni.winsome.core.model.Session;
-import it.unipi.jcioni.winsome.core.model.Tag;
-import it.unipi.jcioni.winsome.core.model.User;
+import it.unipi.jcioni.winsome.core.model.*;
 import it.unipi.jcioni.winsome.core.service.WinsomeData;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import java.io.*;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class Handler implements Runnable {
@@ -22,16 +20,16 @@ public class Handler implements Runnable {
     private BufferedReader input = null;
     private WinsomeData winsomeData;
     private Session session;
-
-    // Variabili per rintracciare l'utente in sessione
-    private String clientUsername = null;
-    private boolean logged = false;
-
+    private final Gson gson;
 
     public Handler(Socket clientSocket, WinsomeData winsomeData) {
         this.clientSocket = clientSocket;
         this.winsomeData = winsomeData;
         this.session = null;
+        gson = new GsonBuilder()
+                .setPrettyPrinting()
+                .serializeNulls()
+                .create();
     }
 
     public void run() {
@@ -48,6 +46,7 @@ public class Handler implements Runnable {
         }
         else {
             System.out.println("Gestione della richiesta in corso...");
+            serialize();
         }
 
         String request;
@@ -68,9 +67,10 @@ public class Handler implements Runnable {
                             System.out.println("Utenti registrati: ");
                             for (User u: winsomeData.getUsers())
                                 System.out.println(u.getUsername()+" ");
+                            System.out.println("CiaoCiao");
+
                             // Restituisce TRUE se l'utente non è loggato
                             if (arguments.length == 2) {
-                                clientUsername = arguments[0];
                                 login(arguments[0], arguments[1]);
                             } else {
                                 // Invio risposta di errore comando al client
@@ -421,8 +421,9 @@ public class Handler implements Runnable {
         }
         if (title.length() > Post.MAX_TITLE_LENGHT || text.length() > Post.MAX_TEXT_LENGHT) {
             invia(output, "Errore, il titolo o il contenuto contengono troppi caratteri.");
+            return;
         }
-        clientUser.getBlog().getPosts().add(new Post(clientUser, title, text));
+        clientUser.getBlog().getPosts().add(new Post(session.getUsername(), title, text));
         invia(output, "Il post intitolato '"+title+"' è stato creato correttamente.");
     }
 
@@ -444,6 +445,7 @@ public class Handler implements Runnable {
         // Controllo che il feed non sia vuoto
         if (sessionUserFeed.size() == 0) {
             invia(output, "Il feed è vuoto.");
+            return;
         }
         // Ordino la lista feed
         sessionUserFeed.stream().sorted((o1, o2) ->
@@ -453,7 +455,7 @@ public class Handler implements Runnable {
         StringBuilder out = new StringBuilder();
         out.append("Lista dei post presenti nel feed: \n");
         for (Post p: sessionUserFeed) {
-            out.append("-> Post: "+p.getIdPost()+" - Autore: "+p.getCreator().getUsername()+" - Titolo: "+p.getTitle()+"\n");
+            out.append("-> Post: "+p.getIdPost()+" - Autore: "+p.getCreator()+" - Titolo: "+p.getTitle()+"\n");
         }
         out.append("\n");
         // Composto il messaggio, lo inoltro
@@ -479,6 +481,53 @@ public class Handler implements Runnable {
         } else {
             // non è loggato
             return false;
+        }
+    }
+
+    // Prende il contenuto della lista di utenti e la salva su disco come file .json
+    public void serialize() {
+        // Questa è una prova della serializzazione, di fatto non deve funzionare così
+        List<User> utenti = new ArrayList<>();
+
+        List<Tag> tags  = new ArrayList<>();
+        tags.add(new Tag("Tennis"));
+        tags.add(new Tag("Calcio"));
+        tags.add(new Tag("Nuoto"));
+
+        System.out.println("Dovrebbe funzionare!");
+        List<Post> posts = new ArrayList<>();
+        posts.add(new Post("Jacopo", "Sedia", "Questa è una sedia."));
+        posts.add(new Post("Jacopo", "Sedia", "Questa è una sedia."));
+        for (Post p: posts) {
+            p.addVote("Samuele", Vote.UP);
+            p.addComment(new Comment("Samuele", "Bella sedia!"));
+        }
+
+        System.out.println("Dovrebbe funzionare!");
+
+        utenti.add(new User("Samuele", "prova", tags));
+        utenti.add(new User("Jacopo", "ciao", tags));
+        System.out.println("Dovrebbe funzionare!");
+        for (User u: utenti) {
+            u.getBlog().setPosts(posts);
+        }
+        System.out.println("Dovrebbe funzionare!");
+
+        System.out.println("ProvaProva");
+        String json = gson.toJson(utenti);
+        System.out.println("Ciao: " + json);
+        try {
+            File serverFolder = new File("WinsomeServer");
+            if (!serverFolder.exists()) {
+                serverFolder.mkdir();
+            }
+            File userFile = new File("WinsomeServer"+ File.separator+"Users.json");
+            if (!userFile.exists()) {
+                userFile.createNewFile();
+            }
+            WinsomeUtils.writeFile(json, "WinsomeServer"+ File.separator+"Users.json");
+        } catch (IOException e){
+            e.printStackTrace();
         }
     }
 
