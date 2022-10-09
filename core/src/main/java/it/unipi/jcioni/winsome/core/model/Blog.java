@@ -4,7 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Blog {
-    private List<Post> posts = new ArrayList<>();
+    private List<Post> posts;
+    public Blog(List<Post> posts) {
+        this.posts = posts;
+    }
 
     public List<Post> getPosts() {
         return posts;

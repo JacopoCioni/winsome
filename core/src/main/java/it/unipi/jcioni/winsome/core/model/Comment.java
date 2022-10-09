@@ -1,10 +1,11 @@
 package it.unipi.jcioni.winsome.core.model;
 
-public class Comment extends Content {
+public class Comment {
     private String value;
+    private String creator;
 
-    public Comment(User creator, String value) {
-        super(creator);
+    public Comment(String creator, String value) {
+        this.creator = creator;
         this.value = value;
     }
 

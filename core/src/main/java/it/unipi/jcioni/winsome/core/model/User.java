@@ -1,8 +1,7 @@
 package it.unipi.jcioni.winsome.core.model;
 
 import it.unipi.jcioni.winsome.core.exception.InvalidOperationException;
-import it.unipi.jcioni.winsome.core.exception.LoginException;
-import it.unipi.jcioni.winsome.core.exception.LogoutException;
+
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,26 +13,17 @@ public class User {
     private String email;
     private String username;
     private String password;
-    private boolean logged = false;
-    private List<User> follows = new ArrayList<>();
+    private List<User> follows;
     private List<Tag> tags;
     private Blog blog;
-    private Wallet wallet = new Wallet();
+   // private Wallet wallet = new Wallet();
 
     public User(String username, String password, List<Tag> tags) {
         this.username = username;
         this.password = password;
         this.tags = tags;
-    }
-
-    public void login() throws LoginException {
-        if (logged) throw new LoginException();
-        logged = true;
-    }
-
-    public void logout() throws LogoutException {
-        if (!logged) throw new LogoutException();
-        logged = false;
+        this.follows = new ArrayList<>();
+        this.blog = new Blog(null);
     }
 
     public String getFirstname() {
@@ -111,9 +101,9 @@ public class User {
         return blog;
     }
 
-    public Wallet getWallet() {
-        return wallet;
-    }
+   // public Wallet getWallet() {
+    //    return wallet;
+    //}
 
     @Override
     public boolean equals(Object o) {

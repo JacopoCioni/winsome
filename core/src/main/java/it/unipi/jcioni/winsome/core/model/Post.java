@@ -2,46 +2,46 @@ package it.unipi.jcioni.winsome.core.model;
 
 import java.util.*;
 
-public class Post extends Content{
-    private Post rewin;
+public class Post {
+    //private Post rewin;
     public static final int MAX_TITLE_LENGHT = 20;
     public static final int MAX_TEXT_LENGHT = 500;
     private final String idPost = UUID.randomUUID().toString();
     private final Date timestamp = new Date();
-    private User creator;
+    private String creator;
     private String title;
     private String text;
-    private List<Comment> comments = new ArrayList<>();
-    private Map<User, Vote> votes = new HashMap<>();
+    private List<Comment> comments;
+    private Map<String, Vote> votes;
 
     // Post rewin
-    public Post(User creator, Post rewin, String title, String text) {
-        //Da rivedere questo
-        super(creator);
+    public Post(String creator, Post rewin, String title, String text) {
         this.creator = creator;
-        this.rewin = rewin;
+        //this.rewin = rewin;
         this.title = title;
         this.text = text;
+        this.comments = new ArrayList<>();
+        this.votes = new HashMap<>();
     }
 
     // Post originale
-    public Post(User creator, String title, String text) {
-        // Da rivedere questo
-        super(creator);
+    public Post(String creator, String title, String text) {
         this.creator = creator;
         this.title = title;
         this.text = text;
+        this.comments = new ArrayList<>();
+        this.votes = new HashMap<>();
     }
 
-    public Post getRewin() {
-        return rewin;
-    }
+    //public Post getRewin() {
+    //    return rewin;
+    //}
 
     public String getIdPost() {
         return idPost;
     }
 
-    public User getCreator() {
+    public String getCreator() {
         return creator;
     }
 
@@ -66,16 +66,17 @@ public class Post extends Content{
         if (this.comments == null) this.comments = new ArrayList<>();
     }
 
-    public Map<User, Vote> getVotes() {
+    public Map<String, Vote> getVotes() {
         return votes;
     }
 
-    public void setVotes(Map<User, Vote> votes) {
+    public void setVotes(Map<String, Vote> votes) {
         this.votes = votes;
         if (this.votes == null) this.votes = new HashMap<>();
     }
 
-    public Post retrieveOriginal() {
+
+/*    public Post retrieveOriginal() {
         Post original = this;
         while (original.getRewin() != null) {
             original = original.getRewin();
@@ -83,14 +84,16 @@ public class Post extends Content{
         return original;
     }
 
-    public boolean addVote(User user, Vote vote) {
+ */
+
+    public boolean addVote(String user, Vote vote) {
         if (user == null || vote == null || votes.get(user) != null) return false;
         votes.put(user, vote);
         return true;
     }
 
-    public boolean addComment(User user, Comment comment) {
-        if (user == null || comment == null) return false;
+    public boolean addComment(Comment comment) {
+        if (comment == null) return false;
         comments.add(comment);
         return true;
     }
