@@ -89,7 +89,7 @@ public class Main {
                         case "login":
                             invia(output, request);
                             String response = ricevi(input);
-                            if(response.equalsIgnoreCase("login ok")) {
+                            if (response.equalsIgnoreCase("login ok")) {
                                 System.out.println("Stato login: " + response);
                                 String username = arguments[0];
                                 //Registrazione della callback per l'aggiornamento della listafollower
@@ -101,7 +101,12 @@ public class Main {
                             }
                             break;
                         case "logout":
-                            //Da completare
+                            invia(output, request);
+                            String response = ricevi(input);
+                            // Se sono connesso alla callback e la richiesta è andata a buon fine allora esco
+                            if (response.equalsIgnoreCase("logout ok")) {
+                                System.out.println("Stato login: " + response);
+                            }
                     }
                 }
             } catch (IOException e) {
