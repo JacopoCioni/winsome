@@ -1,9 +1,6 @@
 package it.unipi.jcioni.winsome.server;
 
 import it.unipi.jcioni.winsome.core.exception.InvalidOperationException;
-import it.unipi.jcioni.winsome.core.exception.LoginException;
-import it.unipi.jcioni.winsome.core.exception.LogoutException;
-import it.unipi.jcioni.winsome.core.exception.UserNotFoundException;
 import it.unipi.jcioni.winsome.core.model.Post;
 import it.unipi.jcioni.winsome.core.model.Session;
 import it.unipi.jcioni.winsome.core.model.Tag;
@@ -68,6 +65,7 @@ public class Handler implements Runnable {
                     switch (command) {
                         case "login":
                             // Messo qui momentaneamente per vedere gli utenti registrati
+                            System.out.println("Utenti registrati: ");
                             for (User u: winsomeData.getUsers())
                                 System.out.println(u.getUsername()+" ");
                             // Restituisce TRUE se l'utente non è loggato
@@ -96,64 +94,78 @@ public class Handler implements Runnable {
                         case "listusers":
                             if (arguments.length != 0) {
                                 invia(output, "Errore, utilizzare: listusers");
-                            } else if (!logged) {
-                                invia(output, "Errore, non è ancora stato effettuato il login.");
                             } else {
-                                listUsers();
+                                if (!clientLogged()) {
+                                    invia(output, "Errore, non è ancora stato effettuato il login.");
+                                } else {
+                                    listUsers();
+                                }
                             }
                             break;
                         case "listfollowing":
                             if (arguments.length != 0) {
                                 invia(output, "Errore, utilizzare: listfollowing");
-                            } else if (!logged) {
-                                invia(output, "Errore, non è ancora stato effettuato il login.");
                             } else {
-                                listFollowing();
+                                if (!clientLogged()) {
+                                    invia(output, "Errore, non è ancora stato effettuato il login.");
+                                } else {
+                                    listFollowing();
+                                }
                             }
                             break;
                         case "follow":
                             if (arguments.length != 1) {
                                 invia(output, "Errore, utilizzare: follow <username>");
-                            } else if (!logged) {
-                                invia(output, "Errore, non è ancora stato effettuato il login.");
                             } else {
-                                followUser(arguments[0]);
+                                if (!clientLogged()) {
+                                    invia(output, "Errore, non è ancora stato effettuato il login.");
+                                } else {
+                                    followUser(arguments[0]);
+                                }
                             }
                             break;
                         case "unfollow":
                             if (arguments.length != 1) {
                                 invia(output, "Errore, utilizzare: unfollow <username>");
-                            } else if (!logged) {
-                                invia(output, "Errore, non è ancora stato effettuato il login.");
                             } else {
-                                unfollowUser(arguments[0]);
+                                if (!clientLogged()) {
+                                    invia(output, "Errore, non è ancora stato effettuato il login.");
+                                } else {
+                                    unfollowUser(arguments[0]);
+                                }
                             }
                             break;
                         case "blog":
                             if (arguments.length != 0) {
                                 invia(output, "Errore, utilizzare: blog");
-                            } else if (!logged) {
-                                invia(output, "Errore, non è ancora stato effettuato il login.");
                             } else {
-                                viewBlog();
+                                if (!clientLogged()) {
+                                    invia(output, "Errore, non è ancora stato effettuato il login.");
+                                } else {
+                                    viewBlog();
+                                }
                             }
                             break;
                         case "post":
                             if (arguments.length != 2) {
                                 invia(output, "Errore, utilizzare: post <title> <content>");
-                            } else if (!logged) {
-                               invia(output, "Errore, non è ancora stato effettuato il login.");
                             } else {
-                                createPost(arguments[0], arguments[1]);
+                                if (!clientLogged()) {
+                                    invia(output, "Errore, non è ancora stato effettuato il login.");
+                                } else {
+                                    createPost(arguments[0], arguments[1]);
+                                }
                             }
                             break;
                         case "showfeed":
                             if (arguments.length != 0) {
                                 invia(output, "Errore, utilizzare: showfeed");
-                            } else if(!logged) {
-                                invia(output, "Errore, non è ancora stato effettuato il login.");
                             } else {
-                                showFeed();
+                                if(!clientLogged()) {
+                                    invia(output, "Errore, non è ancora stato effettuato il login.");
+                                } else {
+                                    showFeed();
+                                }
                             }
                         case "showpost":
                             // Continuare da qui.
@@ -233,7 +245,7 @@ public class Handler implements Runnable {
         List<Tag> sessionUserTag = null;
         // Ricerco la lista dei tag dell'utente che si trova attualmente in sessione
         for (User u: winsomeData.getUsers()) {
-            if (u.getUsername().equals(clientUsername)) {
+            if (u.getUsername().equals(session.getUsername())) {
                 sessionUserTag = u.getTags();
             }
         }
@@ -278,7 +290,7 @@ public class Handler implements Runnable {
         User clientUser = null;
         // Ricerco lo user in sessione
         for (User u: winsomeData.getUsers()) {
-            if (u.getUsername().equals(clientUsername)) {
+            if (u.getUsername().equals(session.getUsername())) {
                 clientUser = u;
             }
         }
@@ -308,7 +320,7 @@ public class Handler implements Runnable {
     }
 
     private void followUser (String username) {
-        if (username.equals(clientUsername)) {
+        if (username.equals(session.getUsername())) {
             invia(output, "Errore, non puoi seguire te stesso.");
             return;
         }
@@ -324,7 +336,7 @@ public class Handler implements Runnable {
         // Ricerco lo user in sessione
         User clientUser = winsomeData.getUsers().stream()
                 .filter(f ->
-                        f.getUsername().equals(clientUsername))
+                        f.getUsername().equals(session.getUsername()))
                 .findFirst().orElse(null);
         // Aggiungo il follow
         try {
@@ -338,7 +350,7 @@ public class Handler implements Runnable {
     }
 
     private void unfollowUser (String username) {
-        if (username.equals(clientUsername)) {
+        if (username.equals(session.getUsername())) {
             invia(output, "Errore, non puoi unfolloware te stesso.");
             return;
         }
@@ -354,7 +366,7 @@ public class Handler implements Runnable {
         // Ricerco lo user in sessione
         User clientUser = winsomeData.getUsers().stream()
                 .filter(f ->
-                        f.getUsername().equals(clientUsername))
+                        f.getUsername().equals(session.getUsername()))
                 .findFirst().orElse(null);
         // Rimuovo il follow
         try {
@@ -372,7 +384,7 @@ public class Handler implements Runnable {
         User clientUser = null;
         // Ricerco lo user in sessione
         for (User u: winsomeData.getUsers()) {
-            if (u.getUsername().equals(clientUsername)) {
+            if (u.getUsername().equals(session.getUsername())) {
                 clientUser = u;
             }
         }
@@ -399,7 +411,7 @@ public class Handler implements Runnable {
         User clientUser = null;
         // Ricerco lo user in sessione
         for (User u: winsomeData.getUsers()) {
-            if (u.getUsername().equals(clientUsername)) {
+            if (u.getUsername().equals(session.getUsername())) {
                 clientUser = u;
             }
         }
@@ -418,7 +430,7 @@ public class Handler implements Runnable {
         User clientUser = null;
         // Ricerco lo user in sessione
         for (User u: winsomeData.getUsers()) {
-            if (u.getUsername().equals(clientUsername)) {
+            if (u.getUsername().equals(session.getUsername())) {
                 clientUser = u;
             }
         }
