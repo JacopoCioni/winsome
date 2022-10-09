@@ -66,7 +66,7 @@ public class Main {
                                     .subList(1, arguments.length)
                                             .toArray(new String[arguments.length - 1]);
                     switch (command) {
-                        case "register":
+                        case "register": {
                             try {
                                 if (arguments.length < 3) throw new ArrayIndexOutOfBoundsException();
                                 String username = arguments[0];
@@ -84,9 +84,11 @@ public class Main {
                                 }
                             } catch (ArrayIndexOutOfBoundsException e) {
                                 System.err.println("Richiesti almeno 3 argomenti, massimo 7.\n<username> <password> [tags]");
-                            } catch (RemoteException ignored) { }
+                            } catch (RemoteException ignored) {
+                            }
                             break;
-                        case "login":
+                        }
+                        case "login": {
                             invia(output, request);
                             String response = ricevi(input);
                             if (response.equalsIgnoreCase("login ok")) {
@@ -94,19 +96,21 @@ public class Main {
                                 String username = arguments[0];
                                 //Registrazione della callback per l'aggiornamento della listafollower
 
-                            }
-                            else {
+                            } else {
                                 // ci sarà la risposta del server per capire come mai non è andato a buon fine
                                 System.out.println("Errore: " + response);
                             }
                             break;
-                        case "logout":
+                        }
+                        case "logout": {
                             invia(output, request);
                             String response = ricevi(input);
                             // Se sono connesso alla callback e la richiesta è andata a buon fine allora esco
                             if (response.equalsIgnoreCase("logout ok")) {
-                                System.out.println("Stato login: " + response);
+                                System.out.println("Stato logout: " + response);
                             }
+                            break;
+                        }
                     }
                 }
             } catch (IOException e) {
