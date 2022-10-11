@@ -46,7 +46,8 @@ public class Handler implements Runnable {
         }
         else {
             System.out.println("Gestione della richiesta in corso...");
-            serialize();
+            // Prova per vedere se funziona la serializzazione
+            // serialize();
         }
 
         String request;
@@ -67,7 +68,6 @@ public class Handler implements Runnable {
                             System.out.println("Utenti registrati: ");
                             for (User u: winsomeData.getUsers())
                                 System.out.println(u.getUsername()+" ");
-                            System.out.println("CiaoCiao");
 
                             // Restituisce TRUE se l'utente non è loggato
                             if (arguments.length == 2) {
@@ -221,11 +221,12 @@ public class Handler implements Runnable {
         if (user == null) {
             System.err.println("Errore, utente non trovato.");
             invia(output, "Errore, utente non trovato.");
+            return;
         } else {
             // Mi occupo di rimuovere la connessione dal servizio, controllando che l'utente sia effettivamente loggato
-            if (Main.sessions.get(username) != null) {
+            if (Main.sessions.get(username) != null) { //TODO: var main.sesson.getusername
                 Session temp = Main.sessions.get(username);
-                if (temp.getClientSocket() == clientSocket) {
+                if (temp.getClientSocket().equals(clientSocket)) {
                     // Posso effettivamente rimuovere la connessione dal servizio
                     Main.sessions.remove(username);
                     // Imposto nuovamente la sessione
@@ -494,7 +495,6 @@ public class Handler implements Runnable {
         tags.add(new Tag("Calcio"));
         tags.add(new Tag("Nuoto"));
 
-        System.out.println("Dovrebbe funzionare!");
         List<Post> posts = new ArrayList<>();
         posts.add(new Post("Jacopo", "Sedia", "Questa è una sedia."));
         posts.add(new Post("Jacopo", "Sedia", "Questa è una sedia."));
@@ -503,19 +503,14 @@ public class Handler implements Runnable {
             p.addComment(new Comment("Samuele", "Bella sedia!"));
         }
 
-        System.out.println("Dovrebbe funzionare!");
-
         utenti.add(new User("Samuele", "prova", tags));
         utenti.add(new User("Jacopo", "ciao", tags));
-        System.out.println("Dovrebbe funzionare!");
         for (User u: utenti) {
             u.getBlog().setPosts(posts);
         }
-        System.out.println("Dovrebbe funzionare!");
 
-        System.out.println("ProvaProva");
         String json = gson.toJson(utenti);
-        System.out.println("Ciao: " + json);
+        System.out.println("File JSon: " + json);
         try {
             File serverFolder = new File("WinsomeServer");
             if (!serverFolder.exists()) {
