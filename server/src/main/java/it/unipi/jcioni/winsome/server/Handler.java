@@ -167,8 +167,19 @@ public class Handler implements Runnable {
                                     showFeed();
                                 }
                             }
+                            break;
                         case "showpost":
-                            // Continuare da qui.
+                            if (arguments.length != 1) {
+                                invia(output, "Errore, utilizzare: showpost <idPost>");
+                                break;
+                            }
+                            showPost(arguments[0]);
+                            break;
+                        case "rewin":
+                            if (arguments.length != 1) {
+                                invia(output, "Errore, utilizzare: rewinpost <idPost>");
+                                break;
+                            }
                     }
                 }
             } catch (IOException e) {
@@ -461,6 +472,70 @@ public class Handler implements Runnable {
         out.append("\n");
         // Composto il messaggio, lo inoltro
         invia(output, out.toString());
+    }
+
+    private void showPost(String idPost) {
+        if (!clientLogged()) {
+            invia(output, "Errore, non sei loggato.");
+            return;
+        }
+        Post post = null;
+        for (User u: winsomeData.getUsers()) {
+            for (Post p: u.getBlog().getPosts()) {
+                if (p.getIdPost().equals(idPost)) {
+                    post = p;
+                }
+            }
+        }
+        if(post == null) {
+            invia(output, "Errore, post non trovato.");
+        } else {
+            StringBuilder out = new StringBuilder();
+            out.append("Informazioni sul post ricercato: \n");
+            out.append("- Autore: "+post.getCreator()+"\n");
+            out.append("- Titolo: "+post.getTitle()+"\n");
+            out.append("- Contenuto: "+post.getText()+"\n");
+            out.append("- Voti positivi: "+post.getNumberOfUpVotes()+"\n");
+            out.append("- Voti negativi: "+post.getNumberOfDownVotes()+"\n");
+            out.append("- Commenti: \n");
+            for (Comment c: post.getComments()) {
+                out.append("   * (Autore: "+c.getCreator()+")\n");
+                out.append("     "+c.getValue()+"\n");
+            }
+            invia(output, out.toString());
+        }
+    }
+
+    private void rewinPost(String idPost) {
+        if (!clientLogged()) {
+            invia(output, "Errore, non sei loggato.");
+            return;
+        }
+        User clientUser = null;
+        // Ricerco lo user in sessione
+        for (User u: winsomeData.getUsers()) {
+            if (u.getUsername().equals(session.getUsername())) {
+                clientUser = u;
+            }
+        }
+        if (clientUser == null) {
+            invia(output, "Errore, non è stato possibile fornire il servizio.");
+            return;
+        }
+        List<Post> sessionUserFeed = new ArrayList<>();
+        // Aggiungo tutti i post presenti nel mio blog
+        clientUser.getFollows().stream().forEach(user -> sessionUserFeed.addAll(user.getBlog().getPosts()));
+        // Controllo che il feed non sia vuoto
+        if (sessionUserFeed.size() == 0) {
+            invia(output, "Il feed è vuoto.");
+            return;
+        }
+        // Recupero il post
+        Post rPost = sessionUserFeed.stream()
+                .filter(post -> post.getIdPost().equals(idPost))
+                .findFirst().orElse(null);
+        Post p = new Post(clientUser.getUsername(),rPost.getTitle()+" (Rewin)",rPost.getText());
+        clientUser.getBlog().getPosts().add(p);
     }
 
     private boolean existUser(String user) {
