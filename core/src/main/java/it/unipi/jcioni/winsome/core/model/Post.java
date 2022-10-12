@@ -103,7 +103,8 @@ public class Post {
  */
 
     public boolean addVote(String user, Vote vote) {
-        if (user == null || vote == null || votes.get(user) != null) return false;
+        // Restituisce false se l'utente ha già votato il post
+        if (votes.get(user) != null) return false;
         votes.put(user, vote);
         return true;
     }
