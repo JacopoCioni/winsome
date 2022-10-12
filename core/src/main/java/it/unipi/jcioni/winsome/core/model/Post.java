@@ -2,9 +2,9 @@ package it.unipi.jcioni.winsome.core.model;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedDeque;
 
 public class Post {
-    //private Post rewin;
     public static final int MAX_TITLE_LENGHT = 20;
     public static final int MAX_TEXT_LENGHT = 500;
     private final String idPost = UUID.randomUUID().toString();
@@ -12,32 +12,16 @@ public class Post {
     private String creator;
     private String title;
     private String text;
-    private List<Comment> comments;
+    private ConcurrentLinkedDeque<Comment> comments;
     private ConcurrentHashMap<String, Vote> votes;
 
-    /* Post rewin
-    public Post(String creator, Post rewin, String title, String text) {
-        this.creator = creator;
-        //this.rewin = rewin;
-        this.title = title;
-        this.text = text;
-        this.comments = new ArrayList<>();
-        this.votes = new ConcurrentHashMap<>();
-    }
-     */
-
-    // Post originale
     public Post(String creator, String title, String text) {
         this.creator = creator;
         this.title = title;
         this.text = text;
-        this.comments = new ArrayList<>();
+        this.comments = new ConcurrentLinkedDeque<>();
         this.votes = new ConcurrentHashMap<>();
     }
-
-    //public Post getRewin() {
-    //    return rewin;
-    //}
 
     public String getIdPost() {
         return idPost;
@@ -59,13 +43,8 @@ public class Post {
         return text;
     }
 
-    public List<Comment> getComments() {
+    public ConcurrentLinkedDeque<Comment> getComments() {
         return comments;
-    }
-
-    public void setComments(List<Comment> comments) {
-        this.comments = comments;
-        if (this.comments == null) this.comments = new ArrayList<>();
     }
 
     public Map<String, Vote> getVotes() {
@@ -92,16 +71,6 @@ public class Post {
         return downVotes;
     }
 
-/*    public Post retrieveOriginal() {
-        Post original = this;
-        while (original.getRewin() != null) {
-            original = original.getRewin();
-        }
-        return original;
-    }
-
- */
-
     public boolean addVote(String user, Vote vote) {
         // Restituisce false se l'utente ha già votato il post
         if (votes.get(user) != null) return false;
@@ -109,10 +78,8 @@ public class Post {
         return true;
     }
 
-    public boolean addComment(Comment comment) {
-        if (comment == null) return false;
+    public void addComment(Comment comment) {
         comments.add(comment);
-        return true;
     }
 
     @Override

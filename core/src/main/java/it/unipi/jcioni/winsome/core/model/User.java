@@ -16,7 +16,7 @@ public class User {
     private List<User> follows;
     private List<Tag> tags;
     private Blog blog;
-   // private Wallet wallet = new Wallet();
+    private Wallet wallet = new Wallet();
 
     public User(String username, String password, List<Tag> tags) {
         this.username = username;
@@ -101,9 +101,9 @@ public class User {
         return blog;
     }
 
-   // public Wallet getWallet() {
-    //    return wallet;
-    //}
+    public Wallet getWallet() {
+        return wallet;
+    }
 
     @Override
     public boolean equals(Object o) {

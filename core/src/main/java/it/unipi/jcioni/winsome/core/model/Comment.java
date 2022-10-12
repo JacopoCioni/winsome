@@ -13,10 +13,6 @@ public class Comment {
         return value;
     }
 
-    public void setValue(String value) {
-        this.value = value;
-    }
-
     public String getCreator() {
         return creator;
     }
