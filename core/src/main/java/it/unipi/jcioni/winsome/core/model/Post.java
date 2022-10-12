@@ -1,6 +1,7 @@
 package it.unipi.jcioni.winsome.core.model;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class Post {
     //private Post rewin;
@@ -12,17 +13,18 @@ public class Post {
     private String title;
     private String text;
     private List<Comment> comments;
-    private Map<String, Vote> votes;
+    private ConcurrentHashMap<String, Vote> votes;
 
-    // Post rewin
+    /* Post rewin
     public Post(String creator, Post rewin, String title, String text) {
         this.creator = creator;
         //this.rewin = rewin;
         this.title = title;
         this.text = text;
         this.comments = new ArrayList<>();
-        this.votes = new HashMap<>();
+        this.votes = new ConcurrentHashMap<>();
     }
+     */
 
     // Post originale
     public Post(String creator, String title, String text) {
@@ -30,7 +32,7 @@ public class Post {
         this.title = title;
         this.text = text;
         this.comments = new ArrayList<>();
-        this.votes = new HashMap<>();
+        this.votes = new ConcurrentHashMap<>();
     }
 
     //public Post getRewin() {
@@ -70,11 +72,25 @@ public class Post {
         return votes;
     }
 
-    public void setVotes(Map<String, Vote> votes) {
-        this.votes = votes;
-        if (this.votes == null) this.votes = new HashMap<>();
+    public int getNumberOfUpVotes() {
+        int upVotes = 0;
+        for (Vote vote: votes.values()) {
+            if (vote.getValue() == 1) {
+                upVotes++;
+            }
+        }
+        return upVotes;
     }
 
+    public int getNumberOfDownVotes() {
+        int downVotes = 0;
+        for (Vote vote: votes.values()) {
+            if (vote.getValue() == 1) {
+                downVotes++;
+            }
+        }
+        return downVotes;
+    }
 
 /*    public Post retrieveOriginal() {
         Post original = this;
