@@ -4,7 +4,6 @@ import java.util.concurrent.ConcurrentLinkedDeque;
 
 public class Wallet {
 
-    // ThreadSafe queue, you might have multiple threads wanting to access this collection
     private ConcurrentLinkedDeque<Transaction> transactions = new ConcurrentLinkedDeque<>();
     public ConcurrentLinkedDeque<Transaction> getTransactions() {
         return transactions;
