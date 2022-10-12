@@ -16,4 +16,8 @@ public class Comment {
     public void setValue(String value) {
         this.value = value;
     }
+
+    public String getCreator() {
+        return creator;
+    }
 }
