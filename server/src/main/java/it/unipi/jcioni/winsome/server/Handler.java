@@ -196,6 +196,13 @@ public class Handler implements Runnable {
                             }
                             addComment(arguments[0], arguments[1]);
                             break;
+                        case "wallet":
+                            if (arguments.length != 0) {
+                                invia(output, "Errore, utilizzare: wallet");
+                                break;
+                            }
+                            getWallet();
+                            break;
                     }
                 }
             } catch (IOException e) {
@@ -543,7 +550,7 @@ public class Handler implements Runnable {
         clientUser.getFollows().stream().forEach(user -> sessionUserFeed.addAll(user.getBlog().getPosts()));
         // Controllo che il feed non sia vuoto
         if (sessionUserFeed.size() == 0) {
-            invia(output, "Il feed è vuoto.");
+            invia(output, "Errore, il feed è vuoto.");
             return;
         }
         // Recupero il post
@@ -602,7 +609,7 @@ public class Handler implements Runnable {
         clientUser.getFollows().stream().forEach(user -> sessionUserFeed.addAll(user.getBlog().getPosts()));
         // Controllo che il feed non sia vuoto
         if (sessionUserFeed.size() == 0) {
-            invia(output, "Il feed è vuoto.");
+            invia(output, "Errore, il feed è vuoto.");
             return;
         }
         // Controllo che il post faccia parte del feed
@@ -624,7 +631,99 @@ public class Handler implements Runnable {
     }
 
     private void addComment(String idPost, String comment) {
-        
+        if (!clientLogged()) {
+            invia(output, "Errore, non sei loggato.");
+            return;
+        }
+        // Ricerco il creatore del post da commentare
+        User creatore = winsomeData.getUsers().stream()
+                .filter(user -> user.getBlog().getPosts().stream()
+                        .filter(post -> post.getIdPost().equals(idPost))
+                        .findFirst().orElse(null) != null)
+                .findFirst().orElse(null);
+        if (creatore == null) {
+            invia(output, "Errore, utente non trovato.");
+            return;
+        }
+        // Ricerco il post da commentare
+        Post post = creatore.getBlog().getPosts().stream()
+                .filter(p -> p.getIdPost().equals(idPost))
+                .findFirst().orElse(null);
+        if (post == null) {
+            invia(output, "Errore, post non trovato.");
+            return;
+        }
+        // Controllo che il commento non sia rivolto ad un post creato dall'utente
+        if (session.getUsername().equals(creatore.getUsername())) {
+            invia(output, "Errore, non puoi commentare il tuo post.");
+            return;
+        }
+        // Recupero il feed
+        User clientUser = null;
+        for(User u: winsomeData.getUsers()) {
+            if (u.getUsername().equals(session.getUsername())) {
+                clientUser = u;
+            }
+        }
+        if (clientUser == null) {
+            invia(output, "Errore, non è stato possibile fornire il servizio.");
+            return;
+        }
+        List<Post> sessionUserFeed = new ArrayList<>();
+        // Aggiungo tutti i post presenti nel mio blog
+        clientUser.getFollows().stream().forEach(user -> sessionUserFeed.addAll(user.getBlog().getPosts()));
+        // Controllo che il feed non sia vuoto
+        if (sessionUserFeed.size() == 0) {
+            invia(output, "Errore, il feed è vuoto.");
+            return;
+        }
+        // Controllo che il post faccia parte del feed
+        if (!sessionUserFeed.contains(post)) {
+            invia(output, "Errore, il post non fa parte del tuo feed.");
+            return;
+        }
+        // Controllo che l'utente non abbia già commentato il post
+        for(Comment c: post.getComments()) {
+            if (c.getCreator().equals(session.getUsername())) {
+                invia(output,"Errore, hai già commentato questo post.");
+                return;
+            }
+        }
+        Comment userComment = new Comment(session.getUsername(), comment);
+        post.addComment(userComment);
+        invia(output, "Commento inserito correttamente.");
+    }
+
+    private void getWallet() {
+        if (!clientLogged()) {
+            invia(output, "Errore, non sei loggato.");
+            return;
+        }
+        User clientUser = null;
+        for (User u: winsomeData.getUsers()) {
+            if (u.getUsername().equals(session.getUsername())) {
+                clientUser = u;
+            }
+        }
+        if (clientUser == null) {
+            invia(output, "Errore, non è stato possibile fornire il servizio.");
+            return;
+        }
+        Wallet clientWallet = clientUser.getWallet();
+        StringBuilder out = new StringBuilder();
+        out.append("Analisi dello Wallet (@"+clientUser.getUsername()+"): \n");
+        out.append("- Bilancio: "+clientWallet.balance()+"\n");
+        if (clientWallet.getTransactions().size() != 0) {
+            out.append("- Transazioni:\n");
+            for(Transaction t: clientWallet.getTransactions()) {
+                out.append("    * Valore: "+t.getValue()+"\n");
+                out.append("    * Motivo: "+t.getMsg()+"\n");
+                out.append("    * Data: "+t.getTimestamp()+"\n");
+            }
+        } else {
+            out.append("  Non sono presenti transazioni.\n");
+        }
+        invia(output, out.toString());
     }
 
     private boolean existUser(String user) {
