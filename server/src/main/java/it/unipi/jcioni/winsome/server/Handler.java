@@ -180,6 +180,22 @@ public class Handler implements Runnable {
                                 invia(output, "Errore, utilizzare: rewinpost <idPost>");
                                 break;
                             }
+                            rewinPost(arguments[0]);
+                            break;
+                        case "rate":
+                            if (arguments.length != 2) {
+                                invia(output, "Errore, utilizzare: rate <idPost> <voto>");
+                                break;
+                            }
+                            ratePost(arguments[0], Integer.parseInt(arguments[1]));
+                            break;
+                        case "comment":
+                            if (arguments.length != 2) {
+                                invia(output, "Errore, utilizzare: comment <idPost> <comment>");
+                                break;
+                            }
+                            addComment(arguments[0], arguments[1]);
+                            break;
                     }
                 }
             } catch (IOException e) {
@@ -536,6 +552,79 @@ public class Handler implements Runnable {
                 .findFirst().orElse(null);
         Post p = new Post(clientUser.getUsername(),rPost.getTitle()+" (Rewin)",rPost.getText());
         clientUser.getBlog().getPosts().add(p);
+        invia(output, "Rewin del post "+p.getIdPost()+" effettuato correttamente.");
+    }
+
+    private void ratePost(String idPost, int vote) {
+        if (!clientLogged()) {
+            invia(output, "Errore, non sei loggato.");
+            return;
+        }
+        if (vote != 1 && vote != -1) {
+            invia(output, "Errore, voto non valido.");
+            return;
+        }
+        // Ricerco il creatore del post da votare
+        User creatore = winsomeData.getUsers().stream()
+                .filter(user -> user.getBlog().getPosts().stream()
+                        .filter(post -> post.getIdPost().equals(idPost))
+                        .findFirst().orElse(null) != null)
+                .findFirst().orElse(null);
+        if (creatore == null) {
+            invia(output, "Errore, utente non trovato.");
+            return;
+        }
+        // Ricerco il post da votare
+        Post post = creatore.getBlog().getPosts().stream()
+                .filter(p -> p.getIdPost().equals(idPost))
+                .findFirst().orElse(null);
+        if (post == null) {
+            invia(output, "Errore, post non trovato.");
+            return;
+        }
+        if (session.getUsername().equals(creatore.getUsername())) {
+            invia(output, "Errore, non puoi votare il tuo post.");
+            return;
+        }
+        // Recupero il feed
+        User clientUser = null;
+        for(User u: winsomeData.getUsers()) {
+            if (u.getUsername().equals(session.getUsername())) {
+                clientUser = u;
+            }
+        }
+        if (clientUser == null) {
+            invia(output, "Errore, non è stato possibile fornire il servizio.");
+            return;
+        }
+        List<Post> sessionUserFeed = new ArrayList<>();
+        // Aggiungo tutti i post presenti nel mio blog
+        clientUser.getFollows().stream().forEach(user -> sessionUserFeed.addAll(user.getBlog().getPosts()));
+        // Controllo che il feed non sia vuoto
+        if (sessionUserFeed.size() == 0) {
+            invia(output, "Il feed è vuoto.");
+            return;
+        }
+        // Controllo che il post faccia parte del feed
+        if (!sessionUserFeed.contains(post)) {
+            invia(output, "Errore, il post non fa parte del tuo feed.");
+            return;
+        }
+        boolean result;
+        if (vote == 1) {
+            result = post.addVote(session.getUsername(), Vote.UP);
+        } else {
+            result = post.addVote(session.getUsername(), Vote.DOWN);
+        }
+        if (result) {
+            invia(output, "Voto inserito correttamente.");
+        } else {
+            invia(output, "Errore, hai già votato questo post.");
+        }
+    }
+
+    private void addComment(String idPost, String comment) {
+        
     }
 
     private boolean existUser(String user) {
