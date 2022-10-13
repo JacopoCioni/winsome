@@ -1,11 +1,41 @@
 package it.unipi.jcioni.winsome.server;
 
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
+import java.net.URL;
+import java.net.URLConnection;
 
 public class WinsomeUtils {
+    public static final String address = "https://www.random.org/decimal-fractions/?num=1&dec=20&col=1&format=plain&rnd=new";
+
+    // Generatore di numeri pseudo casuali utilizzando un servizio esterno
+    // Per generare il numero faccio uso del servizio RANDOM.ORG
+    // Recupero i valori utilizzando questo indirizzo: 'address'
+    /*
+        SPIEGAZIONE DELL'INDIRIZZO:
+        * num -> The number of decimal-fraction requested.
+        * dec -> Decimal places (max.20)
+        * col -> Format in n columns
+        * format = plain -> If plain is specified, the server produces
+          as minimalistic document of type plain text (MIME type text/plain) document,
+          which is easy to parse.
+        * rnd = new -> If new is specified, then a new randomization will be created from
+          the truly random bitstream at RANDOM.ORG.
+     */
+    public static double generaRandom() {
+        try {
+            URL url = new URL(address);
+            URLConnection urlConnection = url.openConnection();
+            // Apro lo stream
+            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
+            String result = bufferedReader.readLine();
+            bufferedReader.close();
+            return Double.parseDouble(result);
+        } catch (IOException | NumberFormatException e) {
+            System.err.println("Errore nella generazione del numero casuale.");
+        }
+        // In caso di errore
+        return 0;
+    }
 
     // Legge il contenuto di un file e lo converte in stringa
     public static String readFile(File file) throws IOException {
