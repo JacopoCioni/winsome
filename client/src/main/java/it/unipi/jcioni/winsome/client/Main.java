@@ -21,6 +21,7 @@ public class Main {
     public static void main(String[] args) {
         Scanner read = new Scanner(System.in);
         Socket socket;
+        String username = null;
         while (true) {
             try {
                 socket = new Socket(WinsomeService.SERVER_ADDRESS, WinsomeService.SERVER_TCP_PORT);
@@ -66,21 +67,40 @@ public class Main {
                                     .subList(1, arguments.length)
                                             .toArray(new String[arguments.length - 1]);
                     switch (command) {
+                        case "help": {
+                            System.out.println("- LISTA DEI COMANDI DISPONIBILI:");
+                            System.out.println("  register <username> <password> <tags>  * Effettua la registrazione a Winsome.");
+                            System.out.println("  login <username> <password>            * Effettua il login a Winsome.");
+                            System.out.println("  logout                                 * Effettua la logout da Winsome.");
+                            System.out.println("  listfollowers                          * Mostra la lista degli utenti che ti seguono.");
+                            System.out.println("  listusers                              * Mostra la lista degli utenti con almeno un tag in comune.");
+                            System.out.println("  listfollowing                          * Mostra la degli utenti che si segue.");
+                            System.out.println("  follow <username>                      * Permette di seguire un utente.");
+                            System.out.println("  unfollow <username>                    * Permette di smettere di seguire un utente.");
+                            System.out.println("  blog                                   * Mostra i post nel proprio blog.");
+                            System.out.println("  post <titolo> <contenuto>              * Permette di pubblicare un post.");
+                            System.out.println("  showfeed                               * Mostra i post nel proprio feed.");
+                            System.out.println("  showpost <idPost>                      * Mostra un post specifico.");
+                            System.out.println("  rewin <idPost>                         * Permette di fare il rewin di un post.");
+                            System.out.println("  rate <idPost> <+1/-1>                  * Permette di valutare un post.");
+                            System.out.println("  comment <idPost> <commento>            * Permette di commentare un post.");
+                            System.out.println("  wallet                                 * Mostra il proprio portafoglio.");
+                            System.out.println("  walletbtc                              * Mostra il bilancio convertito in Bitcoin.");
+                            break;
+                        }
                         case "register": {
                             try {
                                 if (arguments.length < 3) throw new ArrayIndexOutOfBoundsException();
-                                String username = arguments[0];
-                                String password = arguments[1];
                                 String tags = "";
                                 for (int i = 2; i < arguments.length; i++) {
                                     tags += " " + arguments[i];
                                 }
                                 tags = tags.trim();
-                                boolean response = stub.register(username, password, tags);
+                                boolean response = stub.register(arguments[0], arguments[1], tags);
                                 if (response) {
-                                    System.out.println("Registrazione dell'utente " + username + " effettuata con successo.");
+                                    System.out.println("Registrazione dell'utente " + arguments[0] + " effettuata con successo.");
                                 } else {
-                                    System.out.println("Registrazione dell'utente " + username + " fallita.");
+                                    System.out.println("Registrazione dell'utente " + arguments[0] + " fallita.");
                                 }
                             } catch (ArrayIndexOutOfBoundsException e) {
                                 System.err.println("Richiesti almeno 3 argomenti, massimo 7.\n<username> <password> [tags]");
@@ -93,7 +113,7 @@ public class Main {
                             String response = ricevi(input);
                             if (response.equalsIgnoreCase("login ok")) {
                                 System.out.println("Stato login: " + response);
-                                String username = arguments[0];
+                                username = arguments[0];
                                 //Registrazione della callback per l'aggiornamento della listafollower
 
                             } else {
@@ -108,15 +128,46 @@ public class Main {
                             // Se sono connesso alla callback e la richiesta è andata a buon fine allora esco
                             if (response.equalsIgnoreCase("logout ok")) {
                                 System.out.println("Stato logout: " + response);
+                                // TODO: Gestione della chiusura della callback
                             }
                             break;
+                        }
+                        case "listfollowers": {
+                            if(username == null) {
+                                System.out.println("Errore, non è stato effettuato il login.");
+                                break;
+                            }
+                            // TODO: è gestita dal client con la callback, da vedere
+                        }
+                        case "listusers":
+                        case "listfollowing":
+                        case "follow":
+                        case "unfollow":
+                        case "blog":
+                        case "post":
+                        case "showfeed":
+                        case "showpost":
+                        case "rewin":
+                        case "rate":
+                        case "comment":
+                        case "wallet":
+                        case "walletbtc": {
+                            invia(output, request);
+                            System.out.println("- Server > "+ricevi(input));
+                        }
+                        default: {
+                            invia(output, request);
+                            System.out.println("- Server > "+ricevi(input));
                         }
                     }
                 }
             } catch (IOException e) {
-                throw new RuntimeException(e);
+                System.err.println("Errore, connessione al server perduta.");
             }
         }
+
+        // Chiusura del client e rimozione della Callback RMI
+
     }
 
     private static void invia (PrintWriter output, String send) {
