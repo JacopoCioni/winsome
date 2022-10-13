@@ -65,108 +65,74 @@ public class Handler implements Runnable {
                     switch (command) {
                         case "login":
                             // Messo qui momentaneamente per vedere gli utenti registrati
+                            // TODO: Da rimuovere
                             System.out.println("Utenti registrati: ");
                             for (User u: winsomeData.getUsers())
                                 System.out.println(u.getUsername()+" ");
-
-                            // Restituisce TRUE se l'utente non è loggato
-                            if (arguments.length == 2) {
-                                login(arguments[0], arguments[1]);
-                            } else {
+                            // ------------------
+                            if (arguments.length != 2) {
                                 // Invio risposta di errore comando al client
                                 invia(output, "Errore, utilizzare: login <username> <password>");
+                                break;
                             }
+                            login(arguments[0], arguments[1]);
                             break;
                         case "logout":
-                            // Controllo che l'utente sia loggato
-                            if(!clientLogged()) {
-                                invia(output, "Errore, non sei loggato.");
-                            } else {
-                                // Effettuo il logout
-                                if (arguments.length == 0) {
-                                    logout(session.getUsername());
-                                } else {
-                                    // Invio risposta di errore comando al client
-                                    invia(output, "Errore, utilizzare: logout <username>");
-                                }
+                            if (arguments.length != 1) {
+                                // Invio risposta di errore comando al client
+                                invia(output, "Errore, utilizzare: logout <username>");
+                                break;
                             }
+                            logout(session.getUsername());
                             break;
                         case "listusers":
                             if (arguments.length != 0) {
                                 invia(output, "Errore, utilizzare: listusers");
-                            } else {
-                                if (!clientLogged()) {
-                                    invia(output, "Errore, non è ancora stato effettuato il login.");
-                                } else {
-                                    listUsers();
-                                }
+                                break;
                             }
+                            listUsers();
                             break;
                         case "listfollowing":
                             if (arguments.length != 0) {
                                 invia(output, "Errore, utilizzare: listfollowing");
-                            } else {
-                                if (!clientLogged()) {
-                                    invia(output, "Errore, non è ancora stato effettuato il login.");
-                                } else {
-                                    listFollowing();
-                                }
+                                break;
                             }
+                            listFollowing();
                             break;
                         case "follow":
                             if (arguments.length != 1) {
                                 invia(output, "Errore, utilizzare: follow <username>");
-                            } else {
-                                if (!clientLogged()) {
-                                    invia(output, "Errore, non è ancora stato effettuato il login.");
-                                } else {
-                                    followUser(arguments[0]);
-                                }
+                                break;
                             }
+                            followUser(arguments[0]);
                             break;
                         case "unfollow":
                             if (arguments.length != 1) {
                                 invia(output, "Errore, utilizzare: unfollow <username>");
-                            } else {
-                                if (!clientLogged()) {
-                                    invia(output, "Errore, non è ancora stato effettuato il login.");
-                                } else {
-                                    unfollowUser(arguments[0]);
-                                }
+                                break;
                             }
+                            unfollowUser(arguments[0]);
                             break;
                         case "blog":
                             if (arguments.length != 0) {
                                 invia(output, "Errore, utilizzare: blog");
-                            } else {
-                                if (!clientLogged()) {
-                                    invia(output, "Errore, non è ancora stato effettuato il login.");
-                                } else {
-                                    viewBlog();
-                                }
+                                break;
                             }
+                            viewBlog();
                             break;
                         case "post":
                             if (arguments.length != 2) {
                                 invia(output, "Errore, utilizzare: post <title> <content>");
-                            } else {
-                                if (!clientLogged()) {
-                                    invia(output, "Errore, non è ancora stato effettuato il login.");
-                                } else {
-                                    createPost(arguments[0], arguments[1]);
-                                }
+                                break;
                             }
+                            createPost(arguments[0], arguments[1]);
                             break;
                         case "showfeed":
                             if (arguments.length != 0) {
                                 invia(output, "Errore, utilizzare: showfeed");
-                            } else {
-                                if(!clientLogged()) {
-                                    invia(output, "Errore, non è ancora stato effettuato il login.");
-                                } else {
-                                    showFeed();
-                                }
+                                break;
                             }
+                            showFeed();
                             break;
                         case "showpost":
                             if (arguments.length != 1) {
@@ -253,6 +219,10 @@ public class Handler implements Runnable {
     }
 
     private void logout (String username) {
+        if(!clientLogged()) {
+            invia(output, "Errore, non sei loggato.");
+            return;
+        }
         System.out.println("User logout " + username + ": START");
         // Verifico prima di tutto che l'utente sia registrato cercandolo nella lista utenti registrati
         User user = winsomeData.getUsers().stream()
@@ -263,27 +233,30 @@ public class Handler implements Runnable {
             System.err.println("Errore, utente non trovato.");
             invia(output, "Errore, utente non trovato.");
             return;
-        } else {
-            // Mi occupo di rimuovere la connessione dal servizio, controllando che l'utente sia effettivamente loggato
-            if (Main.sessions.get(username) != null) { //TODO: var main.sesson.getusername
-                Session temp = Main.sessions.get(username);
-                if (temp.getClientSocket().equals(clientSocket)) {
-                    // Posso effettivamente rimuovere la connessione dal servizio
-                    Main.sessions.remove(username);
-                    // Imposto nuovamente la sessione
-                    session = null;
-                    System.out.println("User logout " + username + ": END");
-                    invia(output, "logout ok");
-                } else {
-                    invia(output, "Errore, non hai effettuato la login.");
-                }
+        }
+        // Mi occupo di rimuovere la connessione dal servizio, controllando che l'utente sia effettivamente loggato
+        if (Main.sessions.get(username) != null) { //TODO: var main.sesson.getusername
+            Session temp = Main.sessions.get(username);
+            if (temp.getClientSocket().equals(clientSocket)) {
+                // Posso effettivamente rimuovere la connessione dal servizio
+                Main.sessions.remove(username);
+                // Imposto nuovamente la sessione
+                session = null;
+                System.out.println("User logout " + username + ": END");
+                invia(output, "logout ok");
             } else {
                 invia(output, "Errore, non hai effettuato la login.");
             }
+        } else {
+            invia(output, "Errore, non hai effettuato la login.");
         }
     }
 
     private void listUsers () {
+        if(!clientLogged()) {
+            invia(output, "Errore, non sei loggato.");
+            return;
+        }
         List<Tag> sessionUserTag = null;
         // Ricerco la lista dei tag dell'utente che si trova attualmente in sessione
         for (User u: winsomeData.getUsers()) {
@@ -328,7 +301,10 @@ public class Handler implements Runnable {
     }
 
     private void listFollowing () {
-        List<User> sessionUserFollowing = new ArrayList<>();
+        if(!clientLogged()) {
+            invia(output, "Errore, non sei loggato.");
+            return;
+        }
         User clientUser = null;
         // Ricerco lo user in sessione
         for (User u: winsomeData.getUsers()) {
@@ -340,6 +316,7 @@ public class Handler implements Runnable {
             invia(output, "Errore, non è stato possibile fornire il servizio.");
             return;
         }
+        List<User> sessionUserFollowing = new ArrayList<>();
         // Ricerco tutti gli utenti che followano lo user in sessione
         for (User f: winsomeData.getUsers()) {
             if (f.getFollows().contains(clientUser)) {
@@ -362,6 +339,10 @@ public class Handler implements Runnable {
     }
 
     private void followUser (String username) {
+        if(!clientLogged()) {
+            invia(output, "Errore, non sei loggato.");
+            return;
+        }
         if (username.equals(session.getUsername())) {
             invia(output, "Errore, non puoi seguire te stesso.");
             return;
@@ -392,6 +373,10 @@ public class Handler implements Runnable {
     }
 
     private void unfollowUser (String username) {
+        if(!clientLogged()) {
+            invia(output, "Errore, non sei loggato.");
+            return;
+        }
         if (username.equals(session.getUsername())) {
             invia(output, "Errore, non puoi unfolloware te stesso.");
             return;
@@ -422,7 +407,10 @@ public class Handler implements Runnable {
     }
 
     private void viewBlog () {
-        List<Post> sessionUserBlog;
+        if(!clientLogged()) {
+            invia(output, "Errore, non sei loggato.");
+            return;
+        }
         User clientUser = null;
         // Ricerco lo user in sessione
         for (User u: winsomeData.getUsers()) {
@@ -434,7 +422,7 @@ public class Handler implements Runnable {
             invia(output, "Errore, non è stato possibile fornire il servizio.");
             return;
         }
-        sessionUserBlog = clientUser.getBlog().getPosts();
+        List<Post> sessionUserBlog = clientUser.getBlog().getPosts();
         if (sessionUserBlog.size() == 0) {
             invia(output, "Il blog è vuoto.");
             return;
@@ -450,6 +438,10 @@ public class Handler implements Runnable {
     }
 
     private void createPost (String title, String text) {
+        if(!clientLogged()) {
+            invia(output, "Errore, non sei loggato.");
+            return;
+        }
         User clientUser = null;
         // Ricerco lo user in sessione
         for (User u: winsomeData.getUsers()) {
@@ -470,6 +462,10 @@ public class Handler implements Runnable {
     }
 
     private void showFeed() {
+        if(!clientLogged()) {
+            invia(output, "Errore, non sei loggato.");
+            return;
+        }
         User clientUser = null;
         // Ricerco lo user in sessione
         for (User u: winsomeData.getUsers()) {
