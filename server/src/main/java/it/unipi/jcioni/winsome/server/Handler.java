@@ -176,10 +176,15 @@ public class Handler implements Runnable {
                             }
                             getWalletInBitcoin();
                             break;
+                        default:
+                            invia(output, "Errore, comando non riconosciuto.");
+                            break;
                     }
+                } else {
+                    break;
                 }
             } catch (IOException e) {
-                throw new RuntimeException(e);
+                break;
             }
         }
     }
