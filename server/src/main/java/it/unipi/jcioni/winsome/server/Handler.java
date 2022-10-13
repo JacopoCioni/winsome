@@ -203,6 +203,13 @@ public class Handler implements Runnable {
                             }
                             getWallet();
                             break;
+                        case "walletbtc":
+                            if (arguments.length != 0) {
+                                invia(output, "Errore, utilizzare: wallet");
+                                break;
+                            }
+                            getWalletInBitcoin();
+                            break;
                     }
                 }
             } catch (IOException e) {
@@ -723,6 +730,33 @@ public class Handler implements Runnable {
         } else {
             out.append("  Non sono presenti transazioni.\n");
         }
+        invia(output, out.toString());
+    }
+
+    private void getWalletInBitcoin() {
+        if (!clientLogged()) {
+            invia(output, "Errore, non sei loggato.");
+            return;
+        }
+        User clientUser = null;
+        for (User u: winsomeData.getUsers()) {
+            if (u.getUsername().equals(session.getUsername())) {
+                clientUser = u;
+            }
+        }
+        if (clientUser == null) {
+            invia(output, "Errore, non è stato possibile fornire il servizio.");
+            return;
+        }
+        Wallet clientWallet = clientUser.getWallet();
+        double tasso = WinsomeUtils.generaRandom();
+        double bitcoinBalance = clientWallet.balance() * tasso;
+        StringBuilder out = new StringBuilder();
+        out.append("Analisi dello Wallet (@"+clientUser.getUsername()+"): \n");
+        out.append("- Bilancio: "+clientWallet.balance()+"\n");
+        out.append("- Tasso di conversione: "+tasso+"\n");
+        out.append("- Bilancio in Bitcoin: "+bitcoinBalance+"\n");
+
         invia(output, out.toString());
     }
 
