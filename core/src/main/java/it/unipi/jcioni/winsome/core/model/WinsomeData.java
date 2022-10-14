@@ -1,4 +1,4 @@
-package it.unipi.jcioni.winsome.core.service;
+package it.unipi.jcioni.winsome.core.model;
 
 import it.unipi.jcioni.winsome.core.model.User;
 

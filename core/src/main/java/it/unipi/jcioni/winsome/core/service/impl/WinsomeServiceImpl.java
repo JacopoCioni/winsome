@@ -1,7 +1,7 @@
 package it.unipi.jcioni.winsome.core.service.impl;
 
 import it.unipi.jcioni.winsome.core.model.*;
-import it.unipi.jcioni.winsome.core.service.WinsomeData;
+import it.unipi.jcioni.winsome.core.model.WinsomeData;
 import it.unipi.jcioni.winsome.core.service.WinsomeService;
 
 import java.rmi.RemoteException;
