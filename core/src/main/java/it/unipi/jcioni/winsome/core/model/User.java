@@ -14,6 +14,7 @@ public class User {
     private String username;
     private String password;
     private List<User> follows;
+    private ArrayList<String> followers;
     private List<Tag> tags;
     private Blog blog;
     private Wallet wallet = new Wallet();
@@ -23,6 +24,7 @@ public class User {
         this.password = password;
         this.tags = tags;
         this.follows = new ArrayList<>();
+        this.followers = new ArrayList<>();
         this.blog = new Blog(null);
     }
 
@@ -68,6 +70,10 @@ public class User {
 
     public List<User> getFollows() {
         return follows;
+    }
+
+    public ArrayList<String> getFollowers() {
+        return followers;
     }
 
     public void setFollows(List<User> follows) {
