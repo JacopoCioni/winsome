@@ -24,16 +24,14 @@ public class WinsomeCallbackImpl extends RemoteObject implements WinsomeCallback
             clients.remove(username);
         }
     }
-    
-    @Override
-    public synchronized void addUpdate(String username, String value) throws RemoteException {
+
+    public static synchronized void addUpdate(String username, String value) throws RemoteException {
         if (clients.containsKey(username)) {
             clients.get(username).addNotifyEvent(value);
         }
     }
 
-    @Override
-    public synchronized void removeUpdate(String username, String value) throws RemoteException {
+    public static synchronized void removeUpdate(String username, String value) throws RemoteException {
         if (clients.containsKey(username)) {
             clients.get(username).removeNotifyEvent(value);
         }
