@@ -55,6 +55,21 @@ public class WinsomeServiceImpl implements WinsomeService {
         return true;
     }
 
+    @Override
+    public ArrayList<String> startFollowers(String username, String password) throws RemoteException {
+        User user = null;
+        for(User u: winsomeData.getUsers()) {
+            if (u.getUsername().equals(username) && u.getPassword().equals(password)) {
+                user = u;
+                break;
+            }
+        }
+        if (user != null) {
+            return user.getFollowers();
+        }
+        return new ArrayList<>();
+    }
+
     /*
     @param username, user username
     @param password, user password
