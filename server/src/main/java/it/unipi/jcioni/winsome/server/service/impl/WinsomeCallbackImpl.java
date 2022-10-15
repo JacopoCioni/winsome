@@ -24,13 +24,13 @@ public class WinsomeCallbackImpl extends RemoteObject implements WinsomeCallback
     }
     // TODO: Da capire come fare aggiungi e rimuovi
 
-    public void addUpdate(String username, String value) throws RemoteException {
+    public synchronized void addUpdate(String username, String value) throws RemoteException {
         if (clients.containsKey(username)) {
             clients.get(username).addNotifyEvent(value);
         }
     }
 
-    public void removeUpdate(String username, String value) throws RemoteException {
+    public synchronized void removeUpdate(String username, String value) throws RemoteException {
         if (clients.containsKey(username)) {
             clients.get(username).removeNotifyEvent(value);
         }
