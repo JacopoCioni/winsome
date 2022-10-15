@@ -4,9 +4,12 @@ import it.unipi.jcioni.winsome.core.model.Session;
 import it.unipi.jcioni.winsome.core.model.WinsomeData;
 import it.unipi.jcioni.winsome.core.service.WinsomeService;
 import it.unipi.jcioni.winsome.core.service.impl.WinsomeServiceImpl;
+import it.unipi.jcioni.winsome.server.service.WinsomeCallback;
+import it.unipi.jcioni.winsome.server.service.impl.WinsomeCallbackImpl;
 
 import java.io.IOException;
 import java.net.*;
+import java.rmi.NoSuchObjectException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
@@ -19,11 +22,16 @@ public class Main {
     private static WinsomeData WINSOME_DATA;
     public static ConcurrentHashMap<String, Session> sessions = new ConcurrentHashMap<>();
     public static ConcurrentLinkedDeque<Socket> sockets = new ConcurrentLinkedDeque<>();
+    private static int serverPort = SERVER_TCP_PORT;
+    private static int rmiPort = SERVER_RMI_PORT;
+    private static int rmiCallbackPort = RMI_CALLBACK_CLIENT_PORT;
     public static void main(String[] args) {
+        /* TODO: Valutare rimozione
         int serverPort = args.length > 0 && args[0] != null && args[0].length() > 0
                 ? Integer.parseInt(args[0]) : SERVER_TCP_PORT;
         int rmiPort = args.length > 0 && args[1] != null && args[1].length() > 0
                 ? Integer.parseInt(args[1]) : SERVER_RMI_PORT;
+         */
         ServerSocket serverSocket = null;
         Socket clientSocket;
         ThreadPoolExecutor executor = (ThreadPoolExecutor) Executors.newCachedThreadPool();
@@ -31,9 +39,10 @@ public class Main {
         // Inizializzazione del social Winsome
         WINSOME_DATA = new WinsomeData();
 
+        /* Creazione di un'istanza dell'oggetto WinsomeService */
+        WinsomeServiceImpl winsomeServ = new WinsomeServiceImpl(WINSOME_DATA);
+        // Inizializzazione RMI register
         try {
-            /* Creazione di un'istanza dell'oggetto WinsomeService */
-            WinsomeServiceImpl winsomeServ = new WinsomeServiceImpl(WINSOME_DATA);
             /* Esportazione dell'Oggetto */
             WinsomeService stub = (WinsomeService) UnicastRemoteObject.exportObject(winsomeServ, 0);
             /* Creazione di un registry sulla porta rmiPort */
@@ -41,24 +50,44 @@ public class Main {
             /*Pubblicazione dello stub nel registry */
             Registry r = LocateRegistry.getRegistry(rmiPort);
             r.rebind(RMI_SERVER_REGISTRY_NAME, stub);
-            System.out.println("RMI pronto sulla porta " + rmiPort);
+            System.out.println("[RMI] - pronto sulla porta: " + rmiPort);
         }
         /* If any communication failures occur... */
         catch (RemoteException e) {
-            System.out.println("Communication error " + e.getMessage());
+            System.err.println("[RMI] - Errore di comunicazione: " + e.getMessage());
             e.printStackTrace();
             return;
         }
+
+        /* Creazione di un'istanza dell'oggetto WinsomeCallback */
+        WinsomeCallbackImpl winsomeCallback = new WinsomeCallbackImpl();
+        // Inizializzazione RMI callback
+        try {
+            /* Esportazione dell'Oggetto */
+            WinsomeCallback stub = (WinsomeCallback) UnicastRemoteObject.exportObject(winsomeCallback, 0);
+            /* Creazione di un registry sulla porta rmiCallbackPort */
+            LocateRegistry.createRegistry(rmiCallbackPort);
+            /*Pubblicazione dello stub nel registry */
+            Registry r = LocateRegistry.getRegistry(rmiCallbackPort);
+            r.rebind(RMI_CALLBACK_CLIENT_REGISTRY_NAME, stub);
+            System.out.println("[RMICallback] - pronto sulla porta: "+rmiCallbackPort);
+        } catch (RemoteException e) {
+            System.err.println("[RMICallback] - Errore di comunicazione: "+e.getMessage());
+            e.printStackTrace();
+            return;
+        }
+
+        // Apertura socket del server
         try {
             serverSocket = new ServerSocket(serverPort);
-            System.out.println("Server pronto sulla porta " + serverPort);
+            System.out.println("[SERV] - Pronto sulla porta: " + serverPort);
         } catch (IOException e) {
             e.printStackTrace();
         }
 
         while (true) {
             try {
-                //bloccante fino a quando non avviene una connessione
+                // bloccante fino a quando non avviene una connessione
                 clientSocket = serverSocket.accept();
                 sockets.add(clientSocket);
                 executor.submit(new Handler(clientSocket, WINSOME_DATA));
@@ -70,7 +99,7 @@ public class Main {
             }
         }
 
-        //Chiusura socket dei client
+        // Chiusura socket dei client
         for (Socket s: sockets) {
             try {
                 s.close();
@@ -78,22 +107,33 @@ public class Main {
                 e.printStackTrace();
             }
         }
-        //Chiusura socket server
+
+        // Chiusura socket server
         try {
             serverSocket.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
-        //Chiusura del pool
+
+        // Chiusura del pool
         executor.shutdown();
         try {
             if (!executor.awaitTermination(3000, TimeUnit.MILLISECONDS))
                 executor.shutdownNow();
         } catch (InterruptedException e) {
             executor.shutdownNow();
-            System.out.println("Il pool è stato chiuso forzatamente.");
+            System.out.println("[SERV] - Il pool è stato chiuso forzatamente.");
         }
-        System.out.println("Il pool è stato chiuso.");
-        System.out.println("Server closed.");
+        System.out.println("[SERV] - Il pool è stato chiuso.");
+
+        // Chiusura del servizio RMI
+        try {
+            UnicastRemoteObject.unexportObject(winsomeServ, false);
+            UnicastRemoteObject.unexportObject(winsomeCallback, false);
+        } catch (NoSuchObjectException e) {
+            e.printStackTrace();
+        }
+        System.out.println("[RMI] - servizio chiuso.");
+        System.out.println("[SERV] - Terminato.");
     }
 }
