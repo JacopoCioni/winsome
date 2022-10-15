@@ -1,6 +1,9 @@
 package it.unipi.jcioni.winsome.client;
 
+import it.unipi.jcioni.winsome.client.service.WinsomeNotifyEvent;
+import it.unipi.jcioni.winsome.client.service.impl.WinsomeNotifyEventImpl;
 import it.unipi.jcioni.winsome.core.service.WinsomeService;
+import it.unipi.jcioni.winsome.server.service.WinsomeCallback;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -12,41 +15,52 @@ import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
+import java.rmi.server.UnicastRemoteObject;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static it.unipi.jcioni.winsome.core.service.WinsomeService.*;
 
 public class Main {
 
     public static List<String> followers = new ArrayList<>();
     public static void main(String[] args) {
-        Scanner read = new Scanner(System.in);
+
         Socket socket;
         String username = null;
+        WinsomeCallback winsomeCallback = null;
+        WinsomeNotifyEvent callbackStub;
+        WinsomeNotifyEvent callbackObj = null;
+
+        Scanner read = new Scanner(System.in);
+
         while (true) {
             try {
-                socket = new Socket(WinsomeService.SERVER_ADDRESS, WinsomeService.SERVER_TCP_PORT);
+                socket = new Socket(SERVER_ADDRESS, WinsomeService.SERVER_TCP_PORT);
             } catch (IOException e) {
-                System.err.println("Impossibile connettersi al server, riprovare più tardi.");
+                System.err.println("[CLI] - Impossibile connettersi al server, riprovare più tardi.");
                 break;
             }
 
-            System.out.println("Connessione TCP stabilita.");
+            System.out.println("[CLI] - Connessione TCP stabilita.");
 
             Registry reg;
             WinsomeService stub;
             try {
-                reg = LocateRegistry.getRegistry(WinsomeService.SERVER_ADDRESS, WinsomeService.SERVER_RMI_PORT);
+                reg = LocateRegistry.getRegistry(SERVER_ADDRESS, WinsomeService.SERVER_RMI_PORT);
                 stub = (WinsomeService) reg.lookup(WinsomeService.RMI_SERVER_REGISTRY_NAME);
             } catch (AccessException e) {
-                System.err.println("Il registro non è raggiungibile.");
+                System.err.println("[CLI] - Il registro non è raggiungibile.");
                 e.printStackTrace();
                 return;
             } catch (NotBoundException | RemoteException e) {
-                System.err.println("Errore RMI");
+                System.err.println("Errore [RMI]: "+e.getLocalizedMessage());
                 e.printStackTrace();
                 return;
             }
-            System.out.println("connessione stabilita");
+
+            System.out.println("[CLI] - Sei collegato al server!");
+
             try {
                 PrintWriter output = new PrintWriter(socket.getOutputStream(), true);
                 BufferedReader input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
@@ -68,7 +82,7 @@ public class Main {
                                             .toArray(new String[arguments.length - 1]);
                     switch (command) {
                         case "help": {
-                            System.out.println("- LISTA DEI COMANDI DISPONIBILI:");
+                            System.out.println("[CLI] - LISTA DEI COMANDI DISPONIBILI:");
                             System.out.println("  register <username> <password> <tags>  * Effettua la registrazione a Winsome.");
                             System.out.println("  login <username> <password>            * Effettua il login a Winsome.");
                             System.out.println("  logout                                 * Effettua la logout da Winsome.");
@@ -86,6 +100,7 @@ public class Main {
                             System.out.println("  comment <idPost> <commento>            * Permette di commentare un post.");
                             System.out.println("  wallet                                 * Mostra il proprio portafoglio.");
                             System.out.println("  walletbtc                              * Mostra il bilancio convertito in Bitcoin.");
+                            System.out.println("  exit                                   * Permette di uscire dalla piattaforma Winsome.");
                             break;
                         }
                         case "register": {
@@ -98,12 +113,12 @@ public class Main {
                                 tags = tags.trim();
                                 boolean response = stub.register(arguments[0], arguments[1], tags);
                                 if (response) {
-                                    System.out.println("Registrazione dell'utente " + arguments[0] + " effettuata con successo.");
+                                    System.out.println("[SERV] - Registrazione dell'utente " + arguments[0] + " effettuata con successo.");
                                 } else {
-                                    System.out.println("Registrazione dell'utente " + arguments[0] + " fallita.");
+                                    System.err.println("[SERV] - Registrazione dell'utente " + arguments[0] + " fallita.");
                                 }
                             } catch (ArrayIndexOutOfBoundsException e) {
-                                System.err.println("Richiesti almeno 3 argomenti, massimo 7.\n<username> <password> [tags]");
+                                System.err.println("[SERV] - Richiesti almeno 3 argomenti, massimo 7 : <username> <password> [tags]");
                             } catch (RemoteException ignored) {
                             }
                             break;
@@ -112,13 +127,29 @@ public class Main {
                             invia(output, request);
                             String response = ricevi(input);
                             if (response.equalsIgnoreCase("login ok")) {
-                                System.out.println("Stato login: " + response);
                                 username = arguments[0];
-                                //Registrazione della callback per l'aggiornamento della listafollower
+                                // Registrazione della callback per l'aggiornamento della listafollower
+                                try {
+                                    Registry callbackReg = LocateRegistry.getRegistry(SERVER_ADDRESS, RMI_CALLBACK_CLIENT_PORT);
+                                    winsomeCallback = (WinsomeCallback) callbackReg.lookup(RMI_CALLBACK_CLIENT_REGISTRY_NAME);
+                                    callbackObj = new WinsomeNotifyEventImpl();
+                                    callbackStub = (WinsomeNotifyEvent) UnicastRemoteObject.exportObject(callbackObj, 0);
+                                } catch (Exception e) {
+                                    System.err.println("[RMICallback] - Errore: "+e.getLocalizedMessage());
+                                    break;
+                                }
+                                try {
+                                    winsomeCallback.registerForCallback(username, callbackStub);
+                                } catch (RemoteException e) {
+                                    e.printStackTrace();
+                                }
 
+                                // Inizializzazione lista dei followers
+                                followers = stub.startFollowers(username, arguments[1]);
+                                System.out.println("[SERV] - Stato login: " + response);
                             } else {
                                 // ci sarà la risposta del server per capire come mai non è andato a buon fine
-                                System.out.println("Errore: " + response);
+                                System.err.println("[SERV] - Errore: " + response);
                             }
                             break;
                         }
@@ -126,18 +157,62 @@ public class Main {
                             invia(output, request);
                             String response = ricevi(input);
                             // Se sono connesso alla callback e la richiesta è andata a buon fine allora esco
-                            if (response.equalsIgnoreCase("logout ok")) {
-                                System.out.println("Stato logout: " + response);
-                                // TODO: Gestione della chiusura della callback
+                            if (winsomeCallback!= null && response.equalsIgnoreCase("logout ok")) {
+                                System.out.println("[SERV] - Stato logout: " + response);
+                                winsomeCallback.unregisterForCallback(username);
+                                UnicastRemoteObject.unexportObject(callbackObj, false);
+                                callbackObj = null;
+                                username = null;
+                            } else {
+                                System.err.println("[SERV] - Errore: " + response);
                             }
                             break;
                         }
                         case "listfollowers": {
-                            if(username == null) {
-                                System.out.println("Errore, non è stato effettuato il login.");
+                            // Faccio i controlli dal momento in cui è gestita lato client
+                            if (arguments.length != 0) {
+                                System.err.println("[CLI] - Errore, utilizzare listfollowers.");
                                 break;
                             }
-                            // TODO: è gestita dal client con la callback, da vedere
+                            if(username == null) {
+                                System.err.println("[CLI] - Errore, non è stato effettuato il login.");
+                                break;
+                            }
+                            if (followers.size() == 0) {
+                                System.out.println("[CLI] - Non hai nessun follower");
+                                break;
+                            }
+                            // Superati i controlli posto stampare la lista dei followers.
+                            System.out.println("[CLI] - Lista dei followers: ");
+                            for (String s: followers) {
+                                System.out.println("* "+s);
+                            }
+                            break;
+                        }
+                        case "exit": {
+                            if (arguments.length != 0) {
+                                System.err.println("[CLI] - Errore, utilizzare exit.");
+                                break;
+                            }
+                            // Chiusura del client
+                            socket.close();
+                            output.close();
+                            input.close();
+                            try {
+                                if (winsomeCallback != null && username != null) {
+                                    // Rimuovo il mio interesse solo se sono loggato
+                                    winsomeCallback.unregisterForCallback(username);
+                                }
+                                if (callbackObj != null) {
+                                    UnicastRemoteObject.unexportObject(callbackObj, false);
+                                }
+                            } catch (RemoteException e) {
+                                e.printStackTrace();
+                            }
+                            read.close();
+                            // Gestione dello wallet update e sua chiusura
+                            System.out.println("[CLI] - Terminazione del servizio avvenuta con successo.");
+                            System.exit(0);
                         }
                         case "listusers":
                         case "listfollowing":
@@ -153,20 +228,18 @@ public class Main {
                         case "wallet":
                         case "walletbtc": {
                             invia(output, request);
-                            System.out.println("- Server > "+ricevi(input));
+                            System.out.println("[SERV] - "+ricevi(input));
                         }
                         default: {
                             invia(output, request);
-                            System.out.println("- Server > "+ricevi(input));
+                            System.out.println("[SERV] - "+ricevi(input));
                         }
                     }
                 }
             } catch (IOException e) {
-                System.err.println("Errore, connessione al server perduta.");
+                System.err.println("[CLI] - Errore, connessione al server perduta.");
             }
         }
-
-        // Chiusura del client e rimozione della Callback RMI
 
     }
 
