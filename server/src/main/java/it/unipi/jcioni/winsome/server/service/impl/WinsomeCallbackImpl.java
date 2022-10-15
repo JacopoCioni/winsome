@@ -11,25 +11,28 @@ public class WinsomeCallbackImpl extends RemoteObject implements WinsomeCallback
 
     private static final HashMap<String, WinsomeNotifyEvent> clients = new HashMap<>();
 
+    @Override
     public synchronized void registerForCallback(String username, WinsomeNotifyEvent clientInterface) throws RemoteException {
         if (!clients.containsKey(username)) {
             clients.put(username, clientInterface);
         }
     }
 
+    @Override
     public synchronized void unregisterForCallback(String username) throws RemoteException {
         if (clients.containsKey(username)) {
             clients.remove(username);
         }
     }
-    // TODO: Da capire come fare aggiungi e rimuovi
-
+    
+    @Override
     public synchronized void addUpdate(String username, String value) throws RemoteException {
         if (clients.containsKey(username)) {
             clients.get(username).addNotifyEvent(value);
         }
     }
 
+    @Override
     public synchronized void removeUpdate(String username, String value) throws RemoteException {
         if (clients.containsKey(username)) {
             clients.get(username).removeNotifyEvent(value);
