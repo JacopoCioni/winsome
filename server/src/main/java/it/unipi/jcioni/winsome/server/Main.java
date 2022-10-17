@@ -3,8 +3,8 @@ package it.unipi.jcioni.winsome.server;
 import it.unipi.jcioni.winsome.core.model.Session;
 import it.unipi.jcioni.winsome.core.model.WinsomeData;
 import it.unipi.jcioni.winsome.core.service.WinsomeService;
-import it.unipi.jcioni.winsome.core.service.impl.WinsomeServiceImpl;
-import it.unipi.jcioni.winsome.server.service.WinsomeCallback;
+import it.unipi.jcioni.winsome.server.service.impl.WinsomeServiceImpl;
+import it.unipi.jcioni.winsome.core.service.WinsomeCallback;
 import it.unipi.jcioni.winsome.server.service.impl.WinsomeCallbackImpl;
 
 import java.io.IOException;
