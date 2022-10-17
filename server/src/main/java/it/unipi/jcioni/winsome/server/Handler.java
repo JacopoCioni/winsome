@@ -5,7 +5,6 @@ import com.google.gson.GsonBuilder;
 import it.unipi.jcioni.winsome.core.exception.InvalidOperationException;
 import it.unipi.jcioni.winsome.core.model.*;
 import it.unipi.jcioni.winsome.core.model.WinsomeData;
-import it.unipi.jcioni.winsome.server.service.WinsomeCallback;
 import it.unipi.jcioni.winsome.server.service.impl.WinsomeCallbackImpl;
 
 import java.io.*;
@@ -79,9 +78,13 @@ public class Handler implements Runnable {
                             login(arguments[0], arguments[1]);
                             break;
                         case "logout":
-                            if (arguments.length != 1) {
+                            if (arguments.length != 0) {
                                 // Invio risposta di errore comando al client
                                 invia(output, "[SERV] - Errore, utilizzare: logout <username>");
+                                break;
+                            }
+                            if (session == null) {
+                                logout(null);
                                 break;
                             }
                             logout(session.getUsername());
@@ -209,17 +212,13 @@ public class Handler implements Runnable {
         // Controllo che l'utente di cui voglio fare l'accesso non sia già loggato
         Session temp = Main.sessions.get(username);
         if (temp != null) {
-            if (temp.getClientSocket() == clientSocket) {
-                invia(output, "[SERV] - Hai già effettuato il login.");
-            }
-            else {
+            if (temp.getClientSocket() != clientSocket) {
                 invia(output, "[SERV] - L'utente è attualmente collegato in un'altra sessione.");
+                return;
             }
-            return;
-        } else {
-            Main.sessions.put(username, new Session(clientSocket, username));
-            session = new Session(clientSocket, username);
         }
+        Main.sessions.put(username, new Session(clientSocket, username));
+        session = new Session(clientSocket, username);
         System.out.println("[SERV] - User login: " + username + ": END");
         invia(output, "login ok");
     }
@@ -299,9 +298,8 @@ public class Handler implements Runnable {
         StringBuilder out = new StringBuilder();
         out.append("[SERV] - Lista degli utenti con Tag in comune:\n");
         for (User u: sameTag) {
-            out.append("->Utente: ").append(u.getUsername()).append("\n");
+            out.append("* ").append(u.getUsername()).append("\n");
         }
-        out.append("\n");
         // Composto il messaggio, lo inoltro
         invia(output, out.toString());
     }
@@ -321,7 +319,7 @@ public class Handler implements Runnable {
         if (clientUser == null) {
             invia(output, "[SERV] - Errore, non è stato possibile fornire il servizio.");
             return;
-        }
+        }/*
         List<User> sessionUserFollowing = new ArrayList<>();
         // Ricerco tutti gli utenti che followano lo user in sessione
         for (User f: winsomeData.getUsers()) {
@@ -333,13 +331,13 @@ public class Handler implements Runnable {
             invia(output, "[SERV] - Non sei seguito da nessun utente.");
             return;
         }
+        */
         // Invio la risposta
         StringBuilder out = new StringBuilder();
-        out.append("Lista degli utente che seguono lo user in sessione:\n");
-        for (User user: sessionUserFollowing) {
+        out.append("Lista degli utente che segue lo user in sessione:\n");
+        for (User user: clientUser.getFollows()) {
             out.append("->Utente: ").append(user.getUsername()).append("\n");
         }
-        out.append("\n");
         // Composto il messaggio, lo inoltro
         invia(output, out.toString());
     }
@@ -368,19 +366,15 @@ public class Handler implements Runnable {
                         f.getUsername().equals(session.getUsername()))
                 .findFirst().orElse(null);
         // Aggiungo il follow
+        clientUser.addFollows(follow);
+        follow.addFollowers(clientUser.getUsername());
+        invia(output, "[SERV] - Hai cominciato a seguire l'utente: "+username);
         try {
-            clientUser.addFollows(follow);
-            invia(output, "[SERV] - Hai cominciato a seguire l'utente: "+username);
-            try {
-                // Chi sto seguendo verrrà notificato che ho incominciato a seguirlo
-                WinsomeCallbackImpl.addUpdate(username, session.getUsername());
-            } catch (RemoteException e) {
-                e.printStackTrace();
-                System.err.println("[RMICallback] - Errore notifica callback.");
-            }
-        } catch (InvalidOperationException e) {
+            // Chi sto seguendo verrrà notificato che ho incominciato a seguirlo
+            WinsomeCallbackImpl.addUpdate(username, session.getUsername());
+        } catch (RemoteException e) {
             e.printStackTrace();
-            invia(output, "[SERV] - Errore, non è stato possibile eseguire l'operazione.");
+            System.err.println("[RMICallback] - Errore notifica callback.");
         }
     }
 
@@ -408,19 +402,15 @@ public class Handler implements Runnable {
                         f.getUsername().equals(session.getUsername()))
                 .findFirst().orElse(null);
         // Rimuovo il follow
+        clientUser.removeFollows(follow);
+        follow.removeFollowers(clientUser.getUsername());
+        invia(output, "[SERV] - Hai smesso di seguire l'utente: "+username);
         try {
-            clientUser.removeFollows(follow);
-            invia(output, "[SERV] - Hai smesso di seguire l'utente: "+username);
-            try {
-                // Chi sto smettendo di seguire verrrà notificato che ho smesso di seguirlo
-                WinsomeCallbackImpl.removeUpdate(username, session.getUsername());
-            } catch (RemoteException e) {
-                e.printStackTrace();
-                System.err.println("[RMICallback] - Errore notifica callback.");
-            }
-        } catch (InvalidOperationException e) {
+            // Chi sto smettendo di seguire verrrà notificato che ho smesso di seguirlo
+            WinsomeCallbackImpl.removeUpdate(username, session.getUsername());
+        } catch (RemoteException e) {
             e.printStackTrace();
-            invia(output, "[SERV] - Errore, non è stato possibile eseguire l'operazione.");
+            System.err.println("[RMICallback] - Errore notifica callback.");
         }
     }
 
@@ -450,7 +440,6 @@ public class Handler implements Runnable {
         for (Post p: sessionUserBlog) {
             out.append("-> PostId: "+p.getIdPost()+"\n");
         }
-        out.append("\n");
         // Composto il messaggio, lo inoltro
         invia(output, out.toString());
     }
@@ -514,7 +503,6 @@ public class Handler implements Runnable {
         for (Post p: sessionUserFeed) {
             out.append("-> Post: "+p.getIdPost()+" - Autore: "+p.getCreator()+" - Titolo: "+p.getTitle()+"\n");
         }
-        out.append("\n");
         // Composto il messaggio, lo inoltro
         invia(output, out.toString());
     }
