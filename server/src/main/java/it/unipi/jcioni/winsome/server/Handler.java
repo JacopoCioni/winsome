@@ -367,7 +367,12 @@ public class Handler implements Runnable {
                         f.getUsername().equals(session.getUsername()))
                 .findFirst().orElse(null);
         // Aggiungo il follow
-        clientUser.addFollows(follow);
+        boolean result;
+        result = clientUser.addFollows(follow);
+        if (!result) {
+            invia(output, "[SERV] - Errore: stai già seguendo l'utente '"+username+"'");
+            return;
+        }
         follow.addFollowers(clientUser.getUsername());
         invia(output, "[SERV] - Hai cominciato a seguire l'utente: "+username);
         try {
@@ -403,7 +408,12 @@ public class Handler implements Runnable {
                         f.getUsername().equals(session.getUsername()))
                 .findFirst().orElse(null);
         // Rimuovo il follow
-        clientUser.removeFollows(follow);
+        boolean result;
+        result = clientUser.removeFollows(follow);
+        if (!result) {
+            invia(output, "[SERV] - Errore: non segui l'utente '"+username+"'");
+            return;
+        }
         follow.removeFollowers(clientUser.getUsername());
         invia(output, "[SERV] - Hai smesso di seguire l'utente: "+username);
         try {

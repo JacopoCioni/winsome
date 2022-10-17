@@ -81,19 +81,14 @@ public class User {
         if (this.follows == null) this.follows = new ArrayList<>();
     }
 
-    public void addFollows(User following) {
+    public boolean addFollows(User following) {
         for (User u: follows) {
             if (u.equals(following)) {
                 System.err.println("[SERV] - Stai già seguendo questo utente.");
-                return;
+                return false;
             }
         }
-        /*
-        if (follows.stream().filter(user -> user.equals(following)).collect(Collectors.toList()).size() > 0) {
-            throw new InvalidOperationException();
-        }
-        */
-        follows.add(following);
+        return follows.add(following);
     }
 
     public void addFollowers(String follower) {
@@ -105,11 +100,12 @@ public class User {
         followers.add(follower);
     }
 
-    public void removeFollows(User followed) {
+    public boolean removeFollows(User followed) {
         boolean result = follows.remove(followed);
         if (!result) {
             System.err.println("[SERV] - Errore, non stavi seguendo questo utente.");
         }
+        return result;
         /*
         if (!follows.remove(followed)) {
             throw new InvalidOperationException();
