@@ -1,7 +1,7 @@
 package it.unipi.jcioni.winsome.server.service.impl;
 
-import it.unipi.jcioni.winsome.client.service.WinsomeNotifyEvent;
-import it.unipi.jcioni.winsome.server.service.WinsomeCallback;
+import it.unipi.jcioni.winsome.core.service.WinsomeNotifyEvent;
+import it.unipi.jcioni.winsome.core.service.WinsomeCallback;
 
 import java.rmi.RemoteException;
 import java.rmi.server.RemoteObject;
