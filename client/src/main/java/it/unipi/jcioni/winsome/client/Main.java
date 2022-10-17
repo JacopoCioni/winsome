@@ -1,9 +1,9 @@
 package it.unipi.jcioni.winsome.client;
 
-import it.unipi.jcioni.winsome.client.service.WinsomeNotifyEvent;
+import it.unipi.jcioni.winsome.core.service.WinsomeNotifyEvent;
 import it.unipi.jcioni.winsome.client.service.impl.WinsomeNotifyEventImpl;
 import it.unipi.jcioni.winsome.core.service.WinsomeService;
-import it.unipi.jcioni.winsome.server.service.WinsomeCallback;
+import it.unipi.jcioni.winsome.core.service.WinsomeCallback;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -149,7 +149,7 @@ public class Main {
                                 System.out.println("[SERV] - Stato login: " + response);
                             } else {
                                 // ci sarà la risposta del server per capire come mai non è andato a buon fine
-                                System.err.println("[SERV] - Errore: " + response);
+                                System.err.println("Errore: " + response);
                             }
                             break;
                         }
@@ -163,9 +163,9 @@ public class Main {
                                 UnicastRemoteObject.unexportObject(callbackObj, false);
                                 callbackObj = null;
                                 username = null;
-                            } else {
-                                System.err.println("[SERV] - Errore: " + response);
+                                break;
                             }
+                            System.err.println("Errore: " + response);
                             break;
                         }
                         case "listfollowers": {
@@ -228,11 +228,12 @@ public class Main {
                         case "wallet":
                         case "walletbtc": {
                             invia(output, request);
-                            System.out.println("[SERV] - "+ricevi(input));
+                            System.out.println(ricevi(input));
+                            break;
                         }
                         default: {
                             invia(output, request);
-                            System.out.println("[SERV] - "+ricevi(input));
+                            System.out.println(ricevi(input));
                         }
                     }
                 }
