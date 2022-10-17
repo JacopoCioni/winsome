@@ -1,4 +1,4 @@
-package it.unipi.jcioni.winsome.core.service.impl;
+package it.unipi.jcioni.winsome.server.service.impl;
 
 import it.unipi.jcioni.winsome.core.model.*;
 import it.unipi.jcioni.winsome.core.model.WinsomeData;
@@ -27,19 +27,23 @@ public class WinsomeServiceImpl implements WinsomeService {
      */
     @Override
     public boolean register(String username, String password, String tags) throws RemoteException {
-        System.out.println("User registration " + username + " START");
+        System.out.println("Registrazione utente: " + username + " START");
         String[] array = tags.split("\\s+");
         if (username == null) {
-            System.out.println("Error, there is no username.");
+            System.err.println("Errore: non hai inserito l'username.");
             return false;
         } else if (password == null) {
-            System.out.println("Error, there is no password.");
+            System.err.println("Errore: non è stata inserita la password.");
             return false;
         } else if (array.length == 0) {
-            System.out.println("Error, there are no tags.");
+            System.err.println("Errore: non sono stati inseriti i tag.");
             return false;
         } else if (array.length > 5) {
-            System.out.println("Error, there are to many tags.");
+            System.err.println("Errore: ci sono troppi tag.");
+            return false;
+        }
+        else if (array.length < 3) {
+            System.err.println("Errore: non ci sono abbastanza tag.");
             return false;
         }
         for (User u: winsomeData.getUsers()) {
@@ -51,7 +55,7 @@ public class WinsomeServiceImpl implements WinsomeService {
         User newUser = new User(username, password,
                 Arrays.stream(array).map(Tag::new).collect(Collectors.toList()));
         winsomeData.getUsers().add(newUser);
-        System.out.println("User registration " + username + " END");
+        System.out.println("Registrazione utente: " + username + " END");
         return true;
     }
 
