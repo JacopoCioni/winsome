@@ -1,4 +1,4 @@
-package it.unipi.jcioni.winsome.client.service;
+package it.unipi.jcioni.winsome.core.service;
 
 import java.rmi.Remote;
 import java.rmi.RemoteException;
