@@ -81,16 +81,46 @@ public class User {
         if (this.follows == null) this.follows = new ArrayList<>();
     }
 
-    public void addFollows(User following) throws InvalidOperationException {
+    public void addFollows(User following) {
+        for (User u: follows) {
+            if (u.equals(following)) {
+                System.err.println("[SERV] - Stai già seguendo questo utente.");
+                return;
+            }
+        }
+        /*
         if (follows.stream().filter(user -> user.equals(following)).collect(Collectors.toList()).size() > 0) {
             throw new InvalidOperationException();
         }
+        */
         follows.add(following);
     }
 
-    public void removeFollows(User followed) throws InvalidOperationException {
+    public void addFollowers(String follower) {
+        for (String s: followers) {
+            if (s.equals(follower)) {
+                return;
+            }
+        }
+        followers.add(follower);
+    }
+
+    public void removeFollows(User followed) {
+        boolean result = follows.remove(followed);
+        if (!result) {
+            System.err.println("[SERV] - Errore, non stavi seguendo questo utente.");
+        }
+        /*
         if (!follows.remove(followed)) {
             throw new InvalidOperationException();
+        }
+         */
+    }
+
+    public void removeFollowers(String exFollower) {
+        boolean result = followers.remove(exFollower);
+        if (!result) {
+            System.err.println("[SERV] - Errore nella rimozione del follower.");
         }
     }
 
