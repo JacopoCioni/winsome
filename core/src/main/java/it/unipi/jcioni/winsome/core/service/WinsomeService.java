@@ -18,6 +18,7 @@ public interface WinsomeService extends Remote {
     int RMI_CALLBACK_CLIENT_PORT = 6970;
     String RMI_CALLBACK_CLIENT_REGISTRY_NAME = "winsome-server-callback";
     String SERVER_ADDRESS = "localhost";
+    int MULTICAST_PORT = 6799;
 
     boolean register(String username, String password, String tags) throws RemoteException;
     ArrayList<String> startFollowers(String username, String password) throws RemoteException;
