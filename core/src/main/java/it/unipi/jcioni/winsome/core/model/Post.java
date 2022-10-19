@@ -12,6 +12,7 @@ public class Post {
     private String creator;
     private String title;
     private String text;
+    private int iterazioniRewards;
     private ConcurrentLinkedDeque<Comment> comments;
     private ConcurrentHashMap<String, Vote> votes;
 
@@ -21,6 +22,7 @@ public class Post {
         this.text = text;
         this.comments = new ConcurrentLinkedDeque<>();
         this.votes = new ConcurrentHashMap<>();
+        this.iterazioniRewards = 0;
     }
 
     public String getIdPost() {
@@ -47,7 +49,7 @@ public class Post {
         return comments;
     }
 
-    public Map<String, Vote> getVotes() {
+    public ConcurrentHashMap<String, Vote> getVotes() {
         return votes;
     }
 
@@ -71,11 +73,29 @@ public class Post {
         return downVotes;
     }
 
+    public int getNumberOfUserComments(String creator) {
+        int value = 0;
+        for (Comment c: comments) {
+            if (c.getCreator().equals(creator)) {
+                value++;
+            }
+        }
+        return value;
+    }
+
     public boolean addVote(String user, Vote vote) {
         // Restituisce false se l'utente ha già votato il post
         if (votes.get(user) != null) return false;
         votes.put(user, vote);
         return true;
+    }
+
+    public void addIterazioni() {
+        iterazioniRewards++;
+    }
+
+    public int getIterazioniRewards() {
+        return iterazioniRewards;
     }
 
     public void addComment(Comment comment) {
