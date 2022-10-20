@@ -168,6 +168,10 @@ public class WinsomeRewards implements Runnable{
         }
     }
 
+    public void stop() {
+        exit = true;
+    }
+
     private double round(double in, int precision) {
         double multi = Math.pow(10, precision);
         return Math.round(in*multi)/multi;
