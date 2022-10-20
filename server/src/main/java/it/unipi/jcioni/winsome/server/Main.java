@@ -26,18 +26,17 @@ public class Main {
     private static int rmiPort = SERVER_RMI_PORT;
     private static int rmiCallbackPort = RMI_CALLBACK_CLIENT_PORT;
     public static void main(String[] args) {
-        /* TODO: Valutare rimozione
-        int serverPort = args.length > 0 && args[0] != null && args[0].length() > 0
-                ? Integer.parseInt(args[0]) : SERVER_TCP_PORT;
-        int rmiPort = args.length > 0 && args[1] != null && args[1].length() > 0
-                ? Integer.parseInt(args[1]) : SERVER_RMI_PORT;
-         */
         ServerSocket serverSocket = null;
         Socket clientSocket;
         ThreadPoolExecutor executor = (ThreadPoolExecutor) Executors.newCachedThreadPool();
 
         // Inizializzazione del social Winsome
         WINSOME_DATA = new WinsomeData();
+
+        // Avvio WinsomeRewards
+        WinsomeRewards winsomeRewards = new WinsomeRewards(WINSOME_DATA);
+        Thread rewardsExecutor = new Thread(winsomeRewards);
+        rewardsExecutor.start();
 
         /* Creazione di un'istanza dell'oggetto WinsomeService */
         WinsomeServiceImpl winsomeServ = new WinsomeServiceImpl(WINSOME_DATA);
@@ -114,6 +113,10 @@ public class Main {
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+        // Chiusura WinsomeRewards
+        winsomeRewards.stop();
+        rewardsExecutor.interrupt();
 
         // Chiusura del pool
         executor.shutdown();

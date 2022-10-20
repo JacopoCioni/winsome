@@ -9,6 +9,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.net.InetAddress;
 import java.net.Socket;
 import java.rmi.AccessException;
 import java.rmi.NotBoundException;
@@ -24,6 +25,8 @@ import static it.unipi.jcioni.winsome.core.service.WinsomeService.*;
 public class Main {
 
     public static List<String> followers = new ArrayList<>();
+    private static String multicastAddress = MULTICAST_ADDRESS;
+    private static int multicastPort = MULTICAST_PORT;
     public static void main(String[] args) {
 
         Socket socket;
@@ -31,8 +34,13 @@ public class Main {
         WinsomeCallback winsomeCallback = null;
         WinsomeNotifyEvent callbackStub;
         WinsomeNotifyEvent callbackObj = null;
+        WinsomeWalletUpdate winsomeWalletUpdate;
 
         Scanner read = new Scanner(System.in);
+
+        winsomeWalletUpdate = new WinsomeWalletUpdate(multicastAddress, multicastPort);
+        Thread walletExecutor = new Thread(winsomeWalletUpdate);
+        walletExecutor.start();
 
         while (true) {
             try {
@@ -211,6 +219,7 @@ public class Main {
                             }
                             read.close();
                             // Gestione dello wallet update e sua chiusura
+                            winsomeWalletUpdate.stop();
                             System.out.println("[CLI] - Terminazione del servizio avvenuta con successo.");
                             System.exit(0);
                         }
