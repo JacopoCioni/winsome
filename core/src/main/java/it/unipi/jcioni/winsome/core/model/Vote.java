@@ -12,6 +12,7 @@ public enum Vote {
         this.voteTime = System.currentTimeMillis();
     }
 
+
     public int getValue() {
         return value;
     }
