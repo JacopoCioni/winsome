@@ -49,8 +49,33 @@ public class Post {
         return comments;
     }
 
+    public ConcurrentLinkedDeque<Comment> getComments(long timeCheck) {
+        ConcurrentLinkedDeque<Comment> temp = new ConcurrentLinkedDeque<>();
+        for (Comment c: comments) {
+            if (c.getCommentTime() >= timeCheck) {
+                temp.add(c);
+            }
+        }
+        return temp;
+    }
+
     public ConcurrentHashMap<String, Vote> getVotes() {
         return votes;
+    }
+
+    public ConcurrentHashMap<String, Vote> getVotes(long timeCheck) {
+        ConcurrentHashMap<String, Vote> temp = new ConcurrentHashMap<>();
+        for (Vote v: votes.values()) {
+            if (v.getVoteTime() >= timeCheck) {
+                // Ricerco l'autore del voto
+                for (String i: votes.keySet()) {
+                    if (votes.get(i).equals(v)) {
+                        temp.put(i, v);
+                    }
+                }
+            }
+        }
+        return temp;
     }
 
     public int getNumberOfUpVotes() {
