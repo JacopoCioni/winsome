@@ -5,6 +5,7 @@ import java.net.URL;
 import java.net.URLConnection;
 
 public class WinsomeUtils {
+    // TODO: Inserire in file di properties/ file yaml
     public static final String address = "https://www.random.org/decimal-fractions/?num=1&dec=20&col=1&format=plain&rnd=new";
 
     // Generatore di numeri pseudo casuali utilizzando un servizio esterno
