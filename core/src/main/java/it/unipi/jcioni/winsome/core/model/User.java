@@ -25,7 +25,7 @@ public class User {
         this.tags = tags;
         this.follows = new ArrayList<>();
         this.followers = new ArrayList<>();
-        this.blog = new Blog(null);
+        this.blog = new Blog();
     }
 
     public String getFirstname() {

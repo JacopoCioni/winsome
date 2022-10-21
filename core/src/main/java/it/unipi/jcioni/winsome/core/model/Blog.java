@@ -2,19 +2,15 @@ package it.unipi.jcioni.winsome.core.model;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ConcurrentLinkedDeque;
 
 public class Blog {
-    private List<Post> posts;
-    public Blog(List<Post> posts) {
-        this.posts = posts;
+    private ConcurrentLinkedDeque posts;
+    public Blog() {
+        this.posts = new ConcurrentLinkedDeque<>();
     }
 
-    public List<Post> getPosts() {
+    public ConcurrentLinkedDeque<Post> getPosts() {
         return posts;
-    }
-
-    public void setPosts(List<Post> posts) {
-        this.posts = posts;
-        if (this.posts == null) this.posts = new ArrayList<>();
     }
 }
