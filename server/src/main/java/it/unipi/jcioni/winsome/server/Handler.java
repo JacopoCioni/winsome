@@ -2,7 +2,6 @@ package it.unipi.jcioni.winsome.server;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import it.unipi.jcioni.winsome.core.exception.InvalidOperationException;
 import it.unipi.jcioni.winsome.core.model.*;
 import it.unipi.jcioni.winsome.core.model.WinsomeData;
 import it.unipi.jcioni.winsome.server.service.impl.WinsomeCallbackImpl;
@@ -11,14 +10,16 @@ import java.io.*;
 import java.net.Socket;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.stream.Collectors;
 
 public class Handler implements Runnable {
     private final Socket clientSocket;
-    private PrintWriter output = null;
+    //private PrintWriter output = null;
+    //private BufferedReader input = null;
     private BufferedReader input = null;
+    private PrintWriter output = null;
     private WinsomeData winsomeData;
     private Session session;
     private final Gson gson;
@@ -35,162 +36,176 @@ public class Handler implements Runnable {
 
     public void run() {
         try {
-            output = new PrintWriter(clientSocket.getOutputStream(), true);
+            // Input stream di bytes
+            InputStream inputStream = clientSocket.getInputStream();
+            input = new BufferedReader(new InputStreamReader(inputStream));
+            // Output stream di bytes
+            OutputStream outputStream = clientSocket.getOutputStream();
+            output = new PrintWriter(outputStream, true);
+            /*
             input = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+            output = new PrintWriter(clientSocket.getOutputStream(), true);
+             */
+            if (output == null || input == null) {
+                System.err.println("[SERV] - Errore: input ed output vuoti, impossibile stabilire la connessione.");
+                return;
+            }
+            else {
+                System.out.println("[SERV] - Gestione della richiesta in corso...");
+                // Prova per vedere se funziona la serializzazione
+                // serialize();
+            }
 
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        if (output == null || input == null) {
-            System.err.println("[SERV] - Errore: input ed output vuoti, mpossibile stabilire la connessione.");
-            return;
-        }
-        else {
-            System.out.println("[SERV] - Gestione della richiesta in corso...");
-            // Prova per vedere se funziona la serializzazione
-            // serialize();
-        }
+            String request;
+            while (true) {
+                try {
+                    request = ricevi(input);
+                    // Sarebbe meglio farla come nel clientMain
+                    if (request != null) {
+                        String[] temp = request.split(" ");
+                        String command  = temp[0];
+                        String[] arguments = new String[temp.length-1];
+                        System.arraycopy(temp, 1, arguments, 0, temp.length-1);
 
-        String request;
-        while (true) {
-            try {
-                request = ricevi(input);
-                // Sarebbe meglio farla come nel clientMain
-                if (request != null) {
-                    String[] temp = request.split(" ");
-                    String command  = temp[0];
-                    String[] arguments = new String[temp.length-1];
-                    System.arraycopy(temp, 1, arguments, 0, temp.length-1);
-
-                    // Gestione della richiesta.
-                    switch (command) {
-                        case "login":
-                            // Messo qui momentaneamente per vedere gli utenti registrati
-                            // TODO: Da rimuovere
-                            System.out.println("[SERV] - Utenti registrati: ");
-                            for (User u: winsomeData.getUsers())
-                                System.out.println(u.getUsername()+" ");
-                            // ------------------
-                            if (arguments.length != 2) {
-                                // Invio risposta di errore comando al client
-                                invia(output, "[SERV] - Errore, utilizzare: login <username> <password>");
+                        // Gestione della richiesta.
+                        switch (command) {
+                            case "login":
+                                // Messo qui momentaneamente per vedere gli utenti registrati
+                                // TODO: Da rimuovere
+                                System.out.println("[SERV] - Utenti registrati: ");
+                                for (User u: winsomeData.getUsers())
+                                    System.out.println(u.getUsername()+" ");
+                                // ------------------
+                                if (arguments.length != 2) {
+                                    // Invio risposta di errore comando al client
+                                    invia(output, "[SERV] - Errore, utilizzare: login <username> <password>");
+                                    break;
+                                }
+                                login(arguments[0], arguments[1]);
                                 break;
-                            }
-                            login(arguments[0], arguments[1]);
-                            break;
-                        case "logout":
-                            if (arguments.length != 0) {
-                                // Invio risposta di errore comando al client
-                                invia(output, "[SERV] - Errore, utilizzare: logout <username>");
+                            case "logout":
+                                if (arguments.length != 0) {
+                                    // Invio risposta di errore comando al client
+                                    invia(output, "[SERV] - Errore, utilizzare: logout <username>");
+                                    break;
+                                }
+                                if (session == null) {
+                                    logout(null);
+                                    break;
+                                }
+                                logout(session.getUsername());
                                 break;
-                            }
-                            if (session == null) {
-                                logout(null);
+                            case "listusers":
+                                if (arguments.length != 0) {
+                                    invia(output, "[SERV] - Errore, utilizzare: listusers");
+                                    break;
+                                }
+                                listUsers();
                                 break;
-                            }
-                            logout(session.getUsername());
-                            break;
-                        case "listusers":
-                            if (arguments.length != 0) {
-                                invia(output, "[SERV] - Errore, utilizzare: listusers");
+                            case "listfollowing":
+                                if (arguments.length != 0) {
+                                    invia(output, "[SERV] - Errore, utilizzare: listfollowing");
+                                    break;
+                                }
+                                listFollowing();
                                 break;
-                            }
-                            listUsers();
-                            break;
-                        case "listfollowing":
-                            if (arguments.length != 0) {
-                                invia(output, "[SERV] - Errore, utilizzare: listfollowing");
+                            case "follow":
+                                if (arguments.length != 1) {
+                                    invia(output, "[SERV] - Errore, utilizzare: follow <username>");
+                                    break;
+                                }
+                                followUser(arguments[0]);
                                 break;
-                            }
-                            listFollowing();
-                            break;
-                        case "follow":
-                            if (arguments.length != 1) {
-                                invia(output, "[SERV] - Errore, utilizzare: follow <username>");
+                            case "unfollow":
+                                if (arguments.length != 1) {
+                                    invia(output, "[SERV] - Errore, utilizzare: unfollow <username>");
+                                    break;
+                                }
+                                unfollowUser(arguments[0]);
                                 break;
-                            }
-                            followUser(arguments[0]);
-                            break;
-                        case "unfollow":
-                            if (arguments.length != 1) {
-                                invia(output, "[SERV] - Errore, utilizzare: unfollow <username>");
+                            case "blog":
+                                if (arguments.length != 0) {
+                                    invia(output, "[SERV] - Errore, utilizzare: blog");
+                                    break;
+                                }
+                                viewBlog();
                                 break;
-                            }
-                            unfollowUser(arguments[0]);
-                            break;
-                        case "blog":
-                            if (arguments.length != 0) {
-                                invia(output, "[SERV] - Errore, utilizzare: blog");
+                            case "post":
+                                if (arguments.length != 2) {
+                                    invia(output, "[SERV] - Errore, utilizzare: post <title> <content>");
+                                    break;
+                                }
+                                createPost(arguments[0], arguments[1]);
                                 break;
-                            }
-                            viewBlog();
-                            break;
-                        case "post":
-                            if (arguments.length != 2) {
-                                invia(output, "[SERV] - Errore, utilizzare: post <title> <content>");
+                            case "delete":
+                                if (arguments.length != 1) {
+                                    invia(output, "[SERV] - Errore, utilizzare: delete <idPost>");
+                                    break;
+                                }
+                                deletePost(arguments[0]);
                                 break;
-                            }
-                            createPost(arguments[0], arguments[1]);
-                            break;
-                        case "showfeed":
-                            if (arguments.length != 0) {
-                                invia(output, "[SERV] - Errore, utilizzare: showfeed");
+                            case "showfeed":
+                                if (arguments.length != 0) {
+                                    invia(output, "[SERV] - Errore, utilizzare: showfeed");
+                                    break;
+                                }
+                                showFeed();
                                 break;
-                            }
-                            showFeed();
-                            break;
-                        case "showpost":
-                            if (arguments.length != 1) {
-                                invia(output, "[SERV] - Errore, utilizzare: showpost <idPost>");
+                            case "showpost":
+                                if (arguments.length != 1) {
+                                    invia(output, "[SERV] - Errore, utilizzare: showpost <idPost>");
+                                    break;
+                                }
+                                showPost(arguments[0]);
                                 break;
-                            }
-                            showPost(arguments[0]);
-                            break;
-                        case "rewin":
-                            if (arguments.length != 1) {
-                                invia(output, "[SERV] - Errore, utilizzare: rewinpost <idPost>");
+                            case "rewin":
+                                if (arguments.length != 1) {
+                                    invia(output, "[SERV] - Errore, utilizzare: rewinpost <idPost>");
+                                    break;
+                                }
+                                rewinPost(arguments[0]);
                                 break;
-                            }
-                            rewinPost(arguments[0]);
-                            break;
-                        case "rate":
-                            if (arguments.length != 2) {
-                                invia(output, "[SERV] - Errore, utilizzare: rate <idPost> <voto>");
+                            case "rate":
+                                if (arguments.length != 2) {
+                                    invia(output, "[SERV] - Errore, utilizzare: rate <idPost> <voto>");
+                                    break;
+                                }
+                                ratePost(arguments[0], Integer.parseInt(arguments[1]));
                                 break;
-                            }
-                            ratePost(arguments[0], Integer.parseInt(arguments[1]));
-                            break;
-                        case "comment":
-                            if (arguments.length != 2) {
-                                invia(output, "[SERV] - Errore, utilizzare: comment <idPost> <comment>");
+                            case "comment":
+                                if (arguments.length != 2) {
+                                    invia(output, "[SERV] - Errore, utilizzare: comment <idPost> <comment>");
+                                    break;
+                                }
+                                addComment(arguments[0], arguments[1]);
                                 break;
-                            }
-                            addComment(arguments[0], arguments[1]);
-                            break;
-                        case "wallet":
-                            if (arguments.length != 0) {
-                                invia(output, "[SERV] - Errore, utilizzare: wallet");
+                            case "wallet":
+                                if (arguments.length != 0) {
+                                    invia(output, "[SERV] - Errore, utilizzare: wallet");
+                                    break;
+                                }
+                                getWallet();
                                 break;
-                            }
-                            getWallet();
-                            break;
-                        case "walletbtc":
-                            if (arguments.length != 0) {
-                                invia(output, "[SERV] - Errore, utilizzare: wallet");
+                            case "walletbtc":
+                                if (arguments.length != 0) {
+                                    invia(output, "[SERV] - Errore, utilizzare: wallet");
+                                    break;
+                                }
+                                getWalletInBitcoin();
                                 break;
-                            }
-                            getWalletInBitcoin();
-                            break;
-                        default:
-                            invia(output, "[SERV] - Errore, comando non riconosciuto.");
-                            break;
+                            default:
+                                invia(output, "[SERV] - Errore, comando non riconosciuto.");
+                                break;
+                        }
+                    } else {
+                        break;
                     }
-                } else {
+                } catch (IOException e) {
                     break;
                 }
-            } catch (IOException e) {
-                break;
             }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
@@ -297,9 +312,9 @@ public class Handler implements Runnable {
         }
         // A questo punto mi occupo di inoltrare la lista di utenti trovata
         StringBuilder out = new StringBuilder();
-        out.append("[SERV] - Lista degli utenti con Tag in comune:\n");
+        out.append("[SERV] - Lista degli utenti con Tag in comune:$");
         for (User u: usersWithSameTag) {
-            out.append("* ").append(u.getUsername()).append("\n");
+            out.append("* Utente: ").append(u.getUsername()).append("$");
         }
         // Composto il messaggio, lo inoltro
         invia(output, out.toString());
@@ -320,24 +335,12 @@ public class Handler implements Runnable {
         if (clientUser == null) {
             invia(output, "[SERV] - Errore, non è stato possibile fornire il servizio.");
             return;
-        }/*
-        List<User> sessionUserFollowing = new ArrayList<>();
-        // Ricerco tutti gli utenti che followano lo user in sessione
-        for (User f: winsomeData.getUsers()) {
-            if (f.getFollows().contains(clientUser)) {
-                sessionUserFollowing.add(f);
-            }
         }
-        if (sessionUserFollowing.size() == 0) {
-            invia(output, "[SERV] - Non sei seguito da nessun utente.");
-            return;
-        }
-        */
         // Invio la risposta
         StringBuilder out = new StringBuilder();
-        out.append("Lista degli utente che segue lo user in sessione:\n");
+        out.append("Lista degli utente che segue lo user in sessione:$");
         for (User user: clientUser.getFollows()) {
-            out.append("->Utente: ").append(user.getUsername()).append("\n");
+            out.append("* Utente: ").append(user.getUsername()).append("$");
         }
         // Composto il messaggio, lo inoltro
         invia(output, out.toString());
@@ -441,15 +444,15 @@ public class Handler implements Runnable {
             invia(output, "[SERV] - Errore, non è stato possibile fornire il servizio.");
             return;
         }
-        List<Post> sessionUserBlog = clientUser.getBlog().getPosts();
+        ConcurrentLinkedDeque<Post> sessionUserBlog = clientUser.getBlog().getPosts();
         if (sessionUserBlog.size() == 0) {
             invia(output, "[SERV] - Il blog è vuoto.");
             return;
         }
         StringBuilder out = new StringBuilder();
-        out.append("[SERV] - Lista dei post presenti nel blog: \n");
+        out.append("[SERV] - Lista dei post presenti nel blog:$");
         for (Post p: sessionUserBlog) {
-            out.append("-> PostId: "+p.getIdPost()+"\n");
+            out.append("* PostId: "+p.getIdPost()+"$");
         }
         // Composto il messaggio, lo inoltro
         invia(output, out.toString());
@@ -478,6 +481,40 @@ public class Handler implements Runnable {
         Post newPost = new Post(session.getUsername(), title, text);
         clientUser.getBlog().getPosts().add(newPost);
         invia(output, "[SERV] - Il post con idPost '"+newPost.getIdPost()+"' è stato creato correttamente.");
+    }
+
+    public void deletePost(String idPost) {
+        if(!clientLogged()) {
+            invia(output, "[SERV] - Errore, non sei loggato.");
+            return;
+        }
+        User clientUser = null;
+        // Ricerco lo user in sessione
+        for (User u: winsomeData.getUsers()) {
+            if (u.getUsername().equals(session.getUsername())) {
+                clientUser = u;
+            }
+        }
+        if (clientUser == null) {
+            invia(output, "[SERV] - Errore, non è stato possibile fornire il servizio.");
+            return;
+        }
+
+        // Ricerco il post da eliminare
+        Post post = clientUser.getBlog().getPosts().stream()
+                .filter(p -> p.getIdPost().equals(idPost))
+                .findFirst().orElse(null);
+        if (post == null) {
+            invia(output, "[SERV] - Errore, post non trovato.");
+            return;
+        }
+        for (User creator: winsomeData.getUsers()) {
+            if(creator.getBlog().getPosts().contains(post)) {
+                creator.getBlog().getPosts().remove(post);
+                invia(output, "[SERV] - Post: "+idPost+" eliminato correttamente.");
+                break;
+            }
+        }
     }
 
     private void showFeed() {
@@ -510,9 +547,11 @@ public class Handler implements Runnable {
                 .collect(Collectors.toList());
 
         StringBuilder out = new StringBuilder();
-        out.append("[SERV] - Lista dei post presenti nel feed: \n");
+        out.append("[SERV] - Lista dei post presenti nel feed:$");
         for (Post p: sessionUserFeed) {
-            out.append("-> Post: "+p.getIdPost()+" - Autore: "+p.getCreator()+" - Titolo: "+p.getTitle()+"\n");
+            out.append("* Post: "+p.getIdPost()+"$");
+            out.append(" |-Autore: "+p.getCreator()+"$");
+            out.append(" |-Titolo: "+p.getTitle()+"$");
         }
         // Composto il messaggio, lo inoltro
         invia(output, out.toString());
@@ -535,16 +574,17 @@ public class Handler implements Runnable {
             invia(output, "[SERV] - Errore, post non trovato.");
         } else {
             StringBuilder out = new StringBuilder();
-            out.append("[SERV] - Informazioni sul post ricercato: \n");
-            out.append("- Autore: "+post.getCreator()+"\n");
-            out.append("- Titolo: "+post.getTitle()+"\n");
-            out.append("- Contenuto: "+post.getText()+"\n");
-            out.append("- Voti positivi: "+post.getNumberOfUpVotes()+"\n");
-            out.append("- Voti negativi: "+post.getNumberOfDownVotes()+"\n");
-            out.append("- Commenti: \n");
+            out.append("[SERV] - Informazioni sul post ricercato:$");
+            out.append("* Autore: "+post.getCreator()+"$");
+            out.append("* Titolo: "+post.getTitle()+"$");
+            out.append("* Contenuto: "+post.getText()+"$");
+            out.append("* Voti positivi: "+post.getNumberOfUpVotes()+"$");
+            out.append("* Voti negativi: "+post.getNumberOfDownVotes()+"$");
+            out.append("* Commenti: $");
             for (Comment c: post.getComments()) {
-                out.append("   * (Autore: "+c.getCreator()+")\n");
-                out.append("     "+c.getValue()+"\n");
+                out.append("---------------------------------------------$");
+                out.append(" |-Autore: "+c.getCreator()+"$");
+                out.append(" |-Msg: "+c.getValue()+"$");
             }
             invia(output, out.toString());
         }
@@ -732,17 +772,18 @@ public class Handler implements Runnable {
         }
         Wallet clientWallet = clientUser.getWallet();
         StringBuilder out = new StringBuilder();
-        out.append("[SERV] - Analisi dello Wallet (@"+clientUser.getUsername()+"): \n");
-        out.append("- Bilancio: "+clientWallet.balance()+"\n");
+        out.append("[SERV] - Analisi dello Wallet (@"+clientUser.getUsername()+"):$");
+        out.append("* Bilancio: "+clientWallet.balance()+"$");
         if (clientWallet.getTransactions().size() != 0) {
-            out.append("- Transazioni:\n");
+            out.append("* Transazioni:$");
             for(Transaction t: clientWallet.getTransactions()) {
-                out.append("    * Valore: "+t.getValue()+"\n");
-                out.append("    * Motivo: "+t.getMsg()+"\n");
-                out.append("    * Data: "+t.getTimestamp()+"\n");
+                out.append("---------------------------------------------$");
+                out.append(" |-Valore: "+t.getValue()+"$");
+                out.append(" |-Motivo: "+t.getMsg()+"$");
+                out.append(" |-Data: "+t.getTimestamp()+"$");
             }
         } else {
-            out.append("  *Non sono presenti transazioni.\n");
+            out.append(" |-Non sono presenti transazioni.$");
         }
         invia(output, out.toString());
     }
@@ -766,10 +807,10 @@ public class Handler implements Runnable {
         double tasso = WinsomeUtils.generaRandom();
         double bitcoinBalance = clientWallet.balance() * tasso;
         StringBuilder out = new StringBuilder();
-        out.append("[SERV] - Analisi dello Wallet (@"+clientUser.getUsername()+"): \n");
-        out.append("- Bilancio: "+clientWallet.balance()+"\n");
-        out.append("- Tasso di conversione: "+tasso+"\n");
-        out.append("- Bilancio in Bitcoin: "+bitcoinBalance+"\n");
+        out.append("[SERV] - Analisi dello Wallet (@"+clientUser.getUsername()+"):$");
+        out.append("|-Bilancio: "+clientWallet.balance()+"$");
+        out.append("|-Tasso di conversione: "+tasso+"$");
+        out.append("|-Bilancio in Bitcoin: "+bitcoinBalance+"$");
 
         invia(output, out.toString());
     }
@@ -783,16 +824,6 @@ public class Handler implements Runnable {
             }
         }
         return result;
-    }
-
-    private List<User> usersByTag (Tag tag) {
-        List<User> temp = new ArrayList<>();
-        for (User u: winsomeData.getUsers()) {
-            if(u.getTags().contains(tag)) {
-                temp.add(u);
-            }
-        }
-        return temp;
     }
 
     // Ritorna true se l'utente è loggato.
@@ -827,7 +858,7 @@ public class Handler implements Runnable {
         utenti.add(new User("Samuele", "prova", tags));
         utenti.add(new User("Jacopo", "ciao", tags));
         for (User u: utenti) {
-            u.getBlog().setPosts(posts);
+           // u.getBlog().setPosts(posts);
         }
 
         String json = gson.toJson(utenti);
@@ -848,27 +879,14 @@ public class Handler implements Runnable {
     }
 
     private static void invia (PrintWriter output, String send) {
-        int bytes = send.getBytes().length;
-        output.println(bytes);
-        output.print(send);
+        output.println(send);
         output.flush();
     }
 
     private static String ricevi (BufferedReader input) throws IOException {
-        StringBuilder string = new StringBuilder();
-        String data = input.readLine();
-        if (data == null) throw new IOException();
-        int j;
-        try {
-            j = Integer.parseInt(data);
-        } catch (NumberFormatException e) {
-            return data;
-        }
-        int i=0;
-        while (i < j) {
-            string.append((char) input.read());
-            i++;
-        }
-        return string.toString();
+        String text = input.readLine();
+        if (text == null) throw new IOException();
+        text = text.replace('$', '\n');
+        return text;
     }
 }
