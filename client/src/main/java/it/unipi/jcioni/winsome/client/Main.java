@@ -5,10 +5,7 @@ import it.unipi.jcioni.winsome.client.service.impl.WinsomeNotifyEventImpl;
 import it.unipi.jcioni.winsome.core.service.WinsomeService;
 import it.unipi.jcioni.winsome.core.service.WinsomeCallback;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import java.io.*;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.rmi.AccessException;
@@ -70,8 +67,18 @@ public class Main {
             System.out.println("[CLI] - Sei collegato al server!");
 
             try {
+                /*
                 PrintWriter output = new PrintWriter(socket.getOutputStream(), true);
                 BufferedReader input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+                 */
+                // Input stream di bytes
+                InputStream inputStream = socket.getInputStream();
+                BufferedReader input = new BufferedReader(new InputStreamReader(inputStream));
+                // Output stream di bytes
+                OutputStream outputStream = socket.getOutputStream();
+                PrintWriter output = new PrintWriter(outputStream, true);
+
+
                 String command;
                 String request;
                 while (true) {
@@ -254,27 +261,14 @@ public class Main {
     }
 
     private static void invia (PrintWriter output, String send) {
-        int bytes = send.getBytes().length;
-        output.println(bytes);
-        output.print(send);
+        output.println(send);
         output.flush();
     }
 
     private static String ricevi (BufferedReader input) throws IOException {
-        StringBuilder string = new StringBuilder();
-        String data = input.readLine();
-        if (data == null) throw new IOException();
-        int j;
-        try {
-            j = Integer.parseInt(data);
-        } catch (NumberFormatException e) {
-            return data;
-        }
-        int i=0;
-        while (i < j) {
-            string.append((char) input.read());
-            i++;
-        }
-        return string.toString();
+        String text = input.readLine();
+        if (text == null) throw new IOException();
+        text = text.replace('$', '\n');
+        return text;
     }
 }
