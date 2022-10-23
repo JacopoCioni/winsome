@@ -10,6 +10,7 @@ import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedDeque;
@@ -43,7 +44,7 @@ public class WinsomeRewards implements Runnable{
 
             DatagramPacket pacchetto;
             byte[] buffer;
-            ConcurrentLinkedDeque<Post> posts = null;
+            ConcurrentLinkedDeque<Post> posts = new ConcurrentLinkedDeque<>();
 
             while(!exit) {
                 // Ottengo tutti i post pubblicati sulla piattaforma.
@@ -62,7 +63,7 @@ public class WinsomeRewards implements Runnable{
 
 
                     if (saldo != 0) {
-                        String out = String.format("%.3f", round(saldo,3));
+                        String out = String.format("%.3f", WinsomeUtils.round(saldo,3));
                         buffer = out.getBytes(StandardCharsets.UTF_8);
 
                         // Invio la lunghezza della stringa
@@ -110,7 +111,7 @@ public class WinsomeRewards implements Runnable{
 
         // Calcolo del secondo logaritmo
         // Recupero gli autori di tutti i commenti
-        ConcurrentLinkedDeque<String> commentsCreator = null;
+        ConcurrentLinkedDeque<String> commentsCreator = new ConcurrentLinkedDeque<>();
         for (Comment c: p.getComments(timeCheck)) {
             if (!commentsCreator.contains(c.getCreator())) {
                 commentsCreator.add(c.getCreator());
@@ -170,11 +171,6 @@ public class WinsomeRewards implements Runnable{
 
     public void stop() {
         exit = true;
-    }
-
-    private double round(double in, int precision) {
-        double multi = Math.pow(10, precision);
-        return Math.round(in*multi)/multi;
     }
 
 }
