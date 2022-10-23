@@ -1,12 +1,12 @@
 package it.unipi.jcioni.winsome.server;
 
-import it.unipi.jcioni.winsome.core.model.Session;
-import it.unipi.jcioni.winsome.core.model.WinsomeData;
+import it.unipi.jcioni.winsome.core.model.*;
 import it.unipi.jcioni.winsome.core.service.WinsomeService;
 import it.unipi.jcioni.winsome.server.service.impl.WinsomeServiceImpl;
 import it.unipi.jcioni.winsome.core.service.WinsomeCallback;
 import it.unipi.jcioni.winsome.server.service.impl.WinsomeCallbackImpl;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.*;
 import java.rmi.NoSuchObjectException;
@@ -25,13 +25,36 @@ public class Main {
     private static int serverPort = SERVER_TCP_PORT;
     private static int rmiPort = SERVER_RMI_PORT;
     private static int rmiCallbackPort = RMI_CALLBACK_CLIENT_PORT;
+
+
     public static void main(String[] args) {
         ServerSocket serverSocket = null;
         Socket clientSocket;
         ThreadPoolExecutor executor = (ThreadPoolExecutor) Executors.newCachedThreadPool();
 
-        // Inizializzazione del social Winsome
-        WINSOME_DATA = new WinsomeData();
+        // Controllo che i file siano sul disco
+        try {
+            File serverFolder = new File("WinsomeServer");
+            if (!serverFolder.exists()) {
+                serverFolder.mkdir();
+            }
+            File userFile = new File("WinsomeServer"+ File.separator+"Users.json");
+            if (!userFile.exists()) {
+                userFile.createNewFile();
+            }
+        } catch (IOException e){
+            e.printStackTrace();
+        }
+
+        // Leggo i dati che ci siano oppure no
+        try {
+            String winsomeJson = WinsomeUtils.readFile(new File("WinsomeServer"+ File.separator+"Users.json"));
+            User[] winsomeUsers = WinsomeUtils.gson.fromJson(winsomeJson, User[].class);
+            // Inizializzazione del social Winsome
+            WINSOME_DATA = new WinsomeData(winsomeUsers);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
         // Avvio WinsomeRewards
         WinsomeRewards winsomeRewards = new WinsomeRewards(WINSOME_DATA);
@@ -75,6 +98,9 @@ public class Main {
             e.printStackTrace();
             return;
         }
+
+        //Avvio Thread di backup
+        new WinsomeSave(WINSOME_DATA);
 
         // Apertura socket del server
         try {
@@ -139,4 +165,40 @@ public class Main {
         System.out.println("[RMI] - servizio chiuso.");
         System.out.println("[SERV] - Terminato.");
     }
+
+    /* TODO: Da rimuovere
+    public static void serialize() {
+        // Questa è una prova della serializzazione, di fatto non deve funzionare così
+        ConcurrentLinkedDeque<User> utenti = new ConcurrentLinkedDeque<>();
+
+        List<Tag> tags  = new ArrayList<>();
+        tags.add(new Tag("Tennis"));
+        tags.add(new Tag("Calcio"));
+        tags.add(new Tag("Nuoto"));
+
+        ConcurrentLinkedDeque<Post> posts = new ConcurrentLinkedDeque<>();
+        posts.add(new Post("Jacopo", "Sedia", "Questa è una sedia."));
+        posts.add(new Post("Jacopo", "Sedia", "Questa è una sedia."));
+        for (Post p: posts) {
+            p.addVote("Samuele", Vote.UP);
+            p.addComment(new Comment("Samuele", "Bella sedia!"));
+        }
+
+        utenti.add(new User("Samuele", "prova", tags));
+        utenti.add(new User("Jacopo", "ciao", tags));
+        for (User u: utenti) {
+            // u.getBlog().setPosts(posts);
+        }
+
+        String json = WinsomeUtils.gson.toJson(utenti);
+        System.out.println("File JSon: " + json);
+        try {
+            WinsomeUtils.writeFile(json, "WinsomeServer"+ File.separator+"Users.json");
+        } catch (IOException e){
+            e.printStackTrace();
+        }
+    }
+
+     */
+
 }
