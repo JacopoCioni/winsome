@@ -1,7 +1,5 @@
 package it.unipi.jcioni.winsome.server;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import it.unipi.jcioni.winsome.core.model.*;
 import it.unipi.jcioni.winsome.core.model.WinsomeData;
 import it.unipi.jcioni.winsome.server.service.impl.WinsomeCallbackImpl;
@@ -16,22 +14,15 @@ import java.util.stream.Collectors;
 
 public class Handler implements Runnable {
     private final Socket clientSocket;
-    //private PrintWriter output = null;
-    //private BufferedReader input = null;
     private BufferedReader input = null;
     private PrintWriter output = null;
     private WinsomeData winsomeData;
     private Session session;
-    private final Gson gson;
 
     public Handler(Socket clientSocket, WinsomeData winsomeData) {
         this.clientSocket = clientSocket;
         this.winsomeData = winsomeData;
         this.session = null;
-        gson = new GsonBuilder()
-                .setPrettyPrinting()
-                .serializeNulls()
-                .create();
     }
 
     public void run() {
@@ -42,10 +33,6 @@ public class Handler implements Runnable {
             // Output stream di bytes
             OutputStream outputStream = clientSocket.getOutputStream();
             output = new PrintWriter(outputStream, true);
-            /*
-            input = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-            output = new PrintWriter(clientSocket.getOutputStream(), true);
-             */
             if (output == null || input == null) {
                 System.err.println("[SERV] - Errore: input ed output vuoti, impossibile stabilire la connessione.");
                 return;
@@ -834,47 +821,6 @@ public class Handler implements Runnable {
         } else {
             // non è loggato
             return false;
-        }
-    }
-
-    // Prende il contenuto della lista di utenti e la salva su disco come file .json
-    public void serialize() {
-        // Questa è una prova della serializzazione, di fatto non deve funzionare così
-        List<User> utenti = new ArrayList<>();
-
-        List<Tag> tags  = new ArrayList<>();
-        tags.add(new Tag("Tennis"));
-        tags.add(new Tag("Calcio"));
-        tags.add(new Tag("Nuoto"));
-
-        List<Post> posts = new ArrayList<>();
-        posts.add(new Post("Jacopo", "Sedia", "Questa è una sedia."));
-        posts.add(new Post("Jacopo", "Sedia", "Questa è una sedia."));
-        for (Post p: posts) {
-            p.addVote("Samuele", Vote.UP);
-            p.addComment(new Comment("Samuele", "Bella sedia!"));
-        }
-
-        utenti.add(new User("Samuele", "prova", tags));
-        utenti.add(new User("Jacopo", "ciao", tags));
-        for (User u: utenti) {
-           // u.getBlog().setPosts(posts);
-        }
-
-        String json = gson.toJson(utenti);
-        System.out.println("File JSon: " + json);
-        try {
-            File serverFolder = new File("WinsomeServer");
-            if (!serverFolder.exists()) {
-                serverFolder.mkdir();
-            }
-            File userFile = new File("WinsomeServer"+ File.separator+"Users.json");
-            if (!userFile.exists()) {
-                userFile.createNewFile();
-            }
-            WinsomeUtils.writeFile(json, "WinsomeServer"+ File.separator+"Users.json");
-        } catch (IOException e){
-            e.printStackTrace();
         }
     }
 
