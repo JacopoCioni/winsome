@@ -1,11 +1,8 @@
 package it.unipi.jcioni.winsome.core.model;
 
-import it.unipi.jcioni.winsome.core.exception.InvalidOperationException;
-
-
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
+
 
 public class User {
     private String firstname;
@@ -76,11 +73,6 @@ public class User {
         return followers;
     }
 
-    public void setFollows(List<User> follows) {
-        this.follows = follows;
-        if (this.follows == null) this.follows = new ArrayList<>();
-    }
-
     public boolean addFollows(User following) {
         for (User u: follows) {
             if (u.equals(following)) {
@@ -106,11 +98,6 @@ public class User {
             System.err.println("[SERV] - Errore, non stavi seguendo questo utente.");
         }
         return result;
-        /*
-        if (!follows.remove(followed)) {
-            throw new InvalidOperationException();
-        }
-         */
     }
 
     public void removeFollowers(String exFollower) {
@@ -122,11 +109,6 @@ public class User {
 
     public List<Tag> getTags() {
         return tags;
-    }
-
-    public void setTags(List<Tag> tags) {
-        this.tags = tags;
-        if (this.tags == null) this.tags = new ArrayList<>();
     }
 
     public Blog getBlog() {
