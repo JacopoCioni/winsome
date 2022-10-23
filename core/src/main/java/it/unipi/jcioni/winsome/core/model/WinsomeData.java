@@ -2,6 +2,8 @@ package it.unipi.jcioni.winsome.core.model;
 
 import it.unipi.jcioni.winsome.core.model.User;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
 /*
@@ -12,8 +14,15 @@ public class WinsomeData {
     // Lista degli utenti registrati al servizio
     ConcurrentLinkedDeque<User> users;
 
-    public WinsomeData () {
-        users = new ConcurrentLinkedDeque<>();
+    public WinsomeData (User[] winsomeUsers) {
+        if (winsomeUsers == null) {
+            users = new ConcurrentLinkedDeque<>();
+        } else {
+            users = new ConcurrentLinkedDeque<>();
+            for (User u: winsomeUsers) {
+                users.add(u);
+            }
+        }
     }
 
     public ConcurrentLinkedDeque<User> getUsers() {
