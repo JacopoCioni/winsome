@@ -1,6 +1,7 @@
 package it.unipi.jcioni.winsome.core.model;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 
@@ -10,8 +11,14 @@ public class User {
     private String email;
     private String username;
     private String password;
-    private List<User> follows;
-    private ArrayList<String> followers;
+    /*
+    // Key: Utente seguito <User> (unicità), Value: utente che segue <String>
+    private HashMap<User, String> follows;
+    // Key: Utente che mi segue <String> (unicità), Value: utente seguito <String>
+    private HashMap<String, String> followers;
+
+     */
+    private Interactions interactions;
     private List<Tag> tags;
     private Blog blog;
     private Wallet wallet = new Wallet();
@@ -20,9 +27,12 @@ public class User {
         this.username = username;
         this.password = password;
         this.tags = tags;
-        this.follows = new ArrayList<>();
-        this.followers = new ArrayList<>();
+        /*
+        this.follows = new HashMap<>();
+        this.followers = new HashMap<>();
+         */
         this.blog = new Blog();
+        this.interactions = new Interactions();
     }
 
     public String getFirstname() {
@@ -64,36 +74,37 @@ public class User {
     public void setPassword(String password) {
         this.password = password;
     }
-
-    public List<User> getFollows() {
+/*
+    public HashMap<User, String> getFollows() {
         return follows;
     }
 
-    public ArrayList<String> getFollowers() {
+    public HashMap<String, String> getFollowers() {
         return followers;
     }
 
-    public boolean addFollows(User following) {
-        for (User u: follows) {
+    public boolean addFollows(String mainUser, User following) {
+        for (User u: follows.keySet()) {
             if (u.equals(following)) {
                 System.err.println("[SERV] - Stai già seguendo questo utente.");
                 return false;
             }
         }
-        return follows.add(following);
+        follows.put(following, mainUser);
+        return true;
     }
 
-    public void addFollowers(String follower) {
-        for (String s: followers) {
+    public void addFollowers(String mainUser, String follower) {
+        for (String s: followers.keySet()) {
             if (s.equals(follower)) {
                 return;
             }
         }
-        followers.add(follower);
+        followers.put(follower, mainUser);
     }
 
-    public boolean removeFollows(User followed) {
-        boolean result = follows.remove(followed);
+    public boolean removeFollows(String mainUser, User followed) {
+        boolean result = follows.remove(followed, mainUser);
         if (!result) {
             System.err.println("[SERV] - Errore, non stavi seguendo questo utente.");
         }
@@ -101,14 +112,20 @@ public class User {
     }
 
     public void removeFollowers(String exFollower) {
-        boolean result = followers.remove(exFollower);
-        if (!result) {
+        try{
+            followers.remove(exFollower);
+        } catch (Exception e) {
             System.err.println("[SERV] - Errore nella rimozione del follower.");
         }
-    }
 
+    }
+*/
     public List<Tag> getTags() {
         return tags;
+    }
+
+    public Interactions getInteractions() {
+        return interactions;
     }
 
     public Blog getBlog() {
