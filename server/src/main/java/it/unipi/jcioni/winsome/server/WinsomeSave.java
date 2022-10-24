@@ -1,5 +1,6 @@
 package it.unipi.jcioni.winsome.server;
 
+import it.unipi.jcioni.winsome.core.model.Post;
 import it.unipi.jcioni.winsome.core.model.User;
 import it.unipi.jcioni.winsome.core.model.WinsomeData;
 
@@ -31,9 +32,23 @@ public class WinsomeSave implements Runnable{
         while (true) {
             // Autosave ogni minuto
             Thread.sleep(60000L);
+            // Lista di utenti
             ConcurrentLinkedDeque<User> users = winsomeData.getUsers();
-            String json = WinsomeUtils.gson.toJson(users);
-            WinsomeUtils.writeFile(json, "WinsomeServer"+ File.separator+"Users.json");
+            // Lista di TUTTI i post della piattaforma
+            ConcurrentLinkedDeque<Post> allPosts = new ConcurrentLinkedDeque<>();
+            // Aggiungo tutti i post di tutti gli utenti a questa lista
+            for (User u: users) {
+                if (u.getBlog() != null) {
+                    allPosts.addAll(u.getBlog().getPosts());
+                }
+            }
+            //Scrivo gli utenti su file
+            String jsonUsers = WinsomeUtils.gson.toJson(users);
+            WinsomeUtils.writeFile(jsonUsers, "WinsomeServer"+ File.separator+"Users.json");
+            //Scrivo i post su file
+            String jsonPosts = WinsomeUtils.gson.toJson(allPosts);
+            WinsomeUtils.writeFile(jsonPosts, "WinsomeServer"+ File.separator+"Posts.json");
+
             System.out.println("[SERV] - Backup eseguito.");
         }
     }
