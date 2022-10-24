@@ -1,0 +1,50 @@
+[
+  {
+    "firstname": null,
+    "lastname": null,
+    "email": null,
+    "username": "jacopo",
+    "password": "prova",
+    "follows": [],
+    "followers": [],
+    "tags": [
+      {
+        "value": "tennis"
+      },
+      {
+        "value": "calcio"
+      },
+      {
+        "value": "moda"
+      }
+    ],
+    "blog": {},
+    "wallet": {
+      "transactions": []
+    }
+  },
+  {
+    "firstname": null,
+    "lastname": null,
+    "email": null,
+    "username": "chiara",
+    "password": "prova",
+    "follows": [],
+    "followers": [],
+    "tags": [
+      {
+        "value": "moda"
+      },
+      {
+        "value": "cinema"
+      },
+      {
+        "value": "sport"
+      }
+    ],
+    "blog": {},
+    "wallet": {
+      "transactions": []
+    }
+  }
+]

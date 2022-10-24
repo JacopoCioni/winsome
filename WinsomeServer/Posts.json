@@ -1,0 +1,32 @@
+[
+  {
+    "idPost": "18edfd20-7398-41c8-a47e-c81360a89ece",
+    "timestamp": "Oct 24, 2022, 3:15:05 AM",
+    "creator": "jacopo",
+    "title": "jacopo",
+    "text": "bellissimo",
+    "iterazioniRewards": 34,
+    "comments": [],
+    "votes": {}
+  },
+  {
+    "idPost": "399f4af8-947e-473c-9777-67f3c91c63fe",
+    "timestamp": "Oct 24, 2022, 3:15:11 AM",
+    "creator": "jacopo",
+    "title": "chiara",
+    "text": "bellissima",
+    "iterazioniRewards": 34,
+    "comments": [],
+    "votes": {}
+  },
+  {
+    "idPost": "3e8596b6-6a8d-4bba-8e06-03a98cfc9e5e",
+    "timestamp": "Oct 24, 2022, 3:15:20 AM",
+    "creator": "jacopo",
+    "title": "teatro",
+    "text": "mercoledi",
+    "iterazioniRewards": 31,
+    "comments": [],
+    "votes": {}
+  }
+]
