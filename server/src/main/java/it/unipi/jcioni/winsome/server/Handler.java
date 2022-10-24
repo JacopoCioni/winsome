@@ -301,7 +301,7 @@ public class Handler implements Runnable {
         StringBuilder out = new StringBuilder();
         out.append("[SERV] - Lista degli utenti con Tag in comune:$");
         for (User u: usersWithSameTag) {
-            out.append("* Utente: ").append(u.getUsername()).append("$");
+            out.append("|-Utente: ").append(u.getUsername()).append("$");
         }
         // Composto il messaggio, lo inoltro
         invia(output, out.toString());
@@ -326,8 +326,8 @@ public class Handler implements Runnable {
         // Invio la risposta
         StringBuilder out = new StringBuilder();
         out.append("Lista degli utente che segue lo user in sessione:$");
-        for (User user: clientUser.getFollows()) {
-            out.append("* Utente: ").append(user.getUsername()).append("$");
+        for (String user: clientUser.getInteractions().getFollows().keySet()) {
+            out.append("|-Utente: ").append(user).append("$");
         }
         // Composto il messaggio, lo inoltro
         invia(output, out.toString());
@@ -358,12 +358,12 @@ public class Handler implements Runnable {
                 .findFirst().orElse(null);
         // Aggiungo il follow
         boolean result;
-        result = clientUser.addFollows(follow);
+        result = clientUser.getInteractions().addFollows(clientUser.getUsername(), username);
         if (!result) {
             invia(output, "[SERV] - Errore: stai già seguendo l'utente '"+username+"'");
             return;
         }
-        follow.addFollowers(clientUser.getUsername());
+        follow.getInteractions().addFollowers(username, clientUser.getUsername());
         invia(output, "[SERV] - Hai cominciato a seguire l'utente: "+username);
         try {
             // Chi sto seguendo verrrà notificato che ho incominciato a seguirlo
@@ -399,12 +399,12 @@ public class Handler implements Runnable {
                 .findFirst().orElse(null);
         // Rimuovo il follow
         boolean result;
-        result = clientUser.removeFollows(follow);
+        result = clientUser.getInteractions().removeFollows(clientUser.getUsername(), username);
         if (!result) {
             invia(output, "[SERV] - Errore: non segui l'utente '"+username+"'");
             return;
         }
-        follow.removeFollowers(clientUser.getUsername());
+        follow.getInteractions().removeFollowers(clientUser.getUsername());
         invia(output, "[SERV] - Hai smesso di seguire l'utente: "+username);
         try {
             // Chi sto smettendo di seguire verrrà notificato che ho smesso di seguirlo
@@ -439,7 +439,10 @@ public class Handler implements Runnable {
         StringBuilder out = new StringBuilder();
         out.append("[SERV] - Lista dei post presenti nel blog:$");
         for (Post p: sessionUserBlog) {
-            out.append("* PostId: "+p.getIdPost()+"$");
+            out.append("---------------------------------------------$");
+            out.append("|-PostId: "+p.getIdPost()+"$");
+            out.append("|-Titolo: "+p.getTitle()+"$");
+            out.append("|-Data di pubblicazione: "+p.getTimestamp()+"$");
         }
         // Composto il messaggio, lo inoltro
         invia(output, out.toString());
@@ -521,8 +524,16 @@ public class Handler implements Runnable {
             return;
         }
         List<Post> sessionUserFeed = new ArrayList<>();
-        // Aggiungo tutti i post presenti nel mio blog
-        clientUser.getFollows().stream().forEach(user -> sessionUserFeed.addAll(user.getBlog().getPosts()));
+        // Aggiungo tutti i post presenti nel blog di chi seguo nel mio feed
+        for (String key: clientUser.getInteractions().getFollows().keySet()) {
+            for (User user: winsomeData.getUsers()) {
+                if (key.equals(user.getUsername())) {
+                    sessionUserFeed.addAll(user.getBlog().getPosts());
+                    break;
+                }
+            }
+        }
+        // clientUser.getInteractions().getFollows().keySet().stream().forEach(user -> sessionUserFeed.addAll(user.getBlog().getPosts()));
         // Controllo che il feed non sia vuoto
         if (sessionUserFeed.size() == 0) {
             invia(output, "[SERV] - Il feed è vuoto.");
@@ -536,9 +547,12 @@ public class Handler implements Runnable {
         StringBuilder out = new StringBuilder();
         out.append("[SERV] - Lista dei post presenti nel feed:$");
         for (Post p: sessionUserFeed) {
+            out.append("---------------------------------------------$");
             out.append("* Post: "+p.getIdPost()+"$");
             out.append(" |-Autore: "+p.getCreator()+"$");
             out.append(" |-Titolo: "+p.getTitle()+"$");
+            out.append(" |-Data di pubblicazione: "+p.getTimestamp()+"$");
+
         }
         // Composto il messaggio, lo inoltro
         invia(output, out.toString());
@@ -562,16 +576,18 @@ public class Handler implements Runnable {
         } else {
             StringBuilder out = new StringBuilder();
             out.append("[SERV] - Informazioni sul post ricercato:$");
-            out.append("* Autore: "+post.getCreator()+"$");
-            out.append("* Titolo: "+post.getTitle()+"$");
-            out.append("* Contenuto: "+post.getText()+"$");
-            out.append("* Voti positivi: "+post.getNumberOfUpVotes()+"$");
-            out.append("* Voti negativi: "+post.getNumberOfDownVotes()+"$");
-            out.append("* Commenti: $");
+            out.append("|-Autore: "+post.getCreator()+"$");
+            out.append("|-Titolo: "+post.getTitle()+"$");
+            out.append("|-Data di pubblicazione: "+post.getTimestamp()+"$");
+            out.append("|-Contenuto: "+post.getText()+"$");
+            out.append("|-Voti positivi: "+post.getNumberOfUpVotes()+"$");
+            out.append("|-Voti negativi: "+post.getNumberOfDownVotes()+"$");
+            out.append("|-Commenti: $");
             for (Comment c: post.getComments()) {
                 out.append("---------------------------------------------$");
                 out.append(" |-Autore: "+c.getCreator()+"$");
                 out.append(" |-Msg: "+c.getValue()+"$");
+                out.append(" |-Data di pubblicazione: "+c.getCommentTime()+"$");
             }
             invia(output, out.toString());
         }
@@ -594,8 +610,16 @@ public class Handler implements Runnable {
             return;
         }
         List<Post> sessionUserFeed = new ArrayList<>();
-        // Aggiungo tutti i post presenti nel mio blog
-        clientUser.getFollows().stream().forEach(user -> sessionUserFeed.addAll(user.getBlog().getPosts()));
+        // Aggiungo tutti i post presenti nel blog di chi seguo nel mio feed
+        for (String key: clientUser.getInteractions().getFollows().keySet()) {
+            for (User user: winsomeData.getUsers()) {
+                if (key.equals(user.getUsername())) {
+                    sessionUserFeed.addAll(user.getBlog().getPosts());
+                    break;
+                }
+            }
+        }
+        // clientUser.getInteractions().getFollows().keySet().stream().forEach(user -> sessionUserFeed.addAll(user.getBlog().getPosts()));
         // Controllo che il feed non sia vuoto
         if (sessionUserFeed.size() == 0) {
             invia(output, "[SERV] - Errore, il feed è vuoto.");
@@ -653,8 +677,16 @@ public class Handler implements Runnable {
             return;
         }
         List<Post> sessionUserFeed = new ArrayList<>();
-        // Aggiungo tutti i post presenti nel mio blog
-        clientUser.getFollows().stream().forEach(user -> sessionUserFeed.addAll(user.getBlog().getPosts()));
+        // Aggiungo tutti i post presenti nel blog di chi seguo nel mio feed
+        for (String key: clientUser.getInteractions().getFollows().keySet()) {
+            for (User user: winsomeData.getUsers()) {
+                if (key.equals(user.getUsername())) {
+                    sessionUserFeed.addAll(user.getBlog().getPosts());
+                    break;
+                }
+            }
+        }
+        // clientUser.getInteractions().getFollows().keySet().stream().forEach(user -> sessionUserFeed.addAll(user.getBlog().getPosts()));
         // Controllo che il feed non sia vuoto
         if (sessionUserFeed.size() == 0) {
             invia(output, "[SERV] - Errore, il feed è vuoto.");
@@ -718,8 +750,16 @@ public class Handler implements Runnable {
             return;
         }
         List<Post> sessionUserFeed = new ArrayList<>();
-        // Aggiungo tutti i post presenti nel mio blog
-        clientUser.getFollows().stream().forEach(user -> sessionUserFeed.addAll(user.getBlog().getPosts()));
+        // Aggiungo tutti i post presenti nel blog di chi seguo nel mio feed
+        for (String key: clientUser.getInteractions().getFollows().keySet()) {
+            for (User user: winsomeData.getUsers()) {
+                if (key.equals(user.getUsername())) {
+                    sessionUserFeed.addAll(user.getBlog().getPosts());
+                    break;
+                }
+            }
+        }
+        // clientUser.getInteractions().getFollows().keySet().stream().forEach(user -> sessionUserFeed.addAll(user.getBlog().getPosts()));
         // Controllo che il feed non sia vuoto
         if (sessionUserFeed.size() == 0) {
             invia(output, "[SERV] - Errore, il feed è vuoto.");
