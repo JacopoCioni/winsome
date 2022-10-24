@@ -10,7 +10,6 @@ import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedDeque;
@@ -49,8 +48,10 @@ public class WinsomeRewards implements Runnable{
             while(!exit) {
                 // Ottengo tutti i post pubblicati sulla piattaforma.
                 for(User user: winsomeData.getUsers()) {
-                    for (Post post: user.getBlog().getPosts()) {
-                        posts.add(post);
+                    if (user.getBlog() != null) {
+                        for (Post post: user.getBlog().getPosts()) {
+                            posts.add(post);
+                        }
                     }
                 }
                 if (posts.size() != 0) {
