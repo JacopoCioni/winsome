@@ -1,5 +1,6 @@
 package it.unipi.jcioni.winsome.server;
 
+import com.google.gson.reflect.TypeToken;
 import it.unipi.jcioni.winsome.core.model.*;
 import it.unipi.jcioni.winsome.core.service.WinsomeService;
 import it.unipi.jcioni.winsome.server.service.impl.WinsomeServiceImpl;
@@ -8,6 +9,7 @@ import it.unipi.jcioni.winsome.server.service.impl.WinsomeCallbackImpl;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.net.*;
 import java.rmi.NoSuchObjectException;
 import java.rmi.RemoteException;
@@ -42,16 +44,29 @@ public class Main {
             if (!userFile.exists()) {
                 userFile.createNewFile();
             }
+            File postFile = new File("WinsomeServer"+ File.separator+"Posts.json");
+            if (!postFile.exists()) {
+                postFile.createNewFile();
+            }
         } catch (IOException e){
             e.printStackTrace();
         }
 
         // Leggo i dati che ci siano oppure no
         try {
-            String winsomeJson = WinsomeUtils.readFile(new File("WinsomeServer"+ File.separator+"Users.json"));
-            User[] winsomeUsers = WinsomeUtils.gson.fromJson(winsomeJson, User[].class);
+            String winsomeUserJson = WinsomeUtils.readFile(new File("WinsomeServer"+ File.separator+"Users.json"));
+            Type typeUserObject = new TypeToken<ConcurrentLinkedDeque<User>>(){}.getType();
+            ConcurrentLinkedDeque<User> winsomeUsers = WinsomeUtils.gson.fromJson(winsomeUserJson, typeUserObject);
+
+            String winsomePostJson = WinsomeUtils.readFile(new File("WinsomeServer"+ File.separator+"Posts.json"));
+            Type typePostObject = new TypeToken<ConcurrentLinkedDeque<Post>>(){}.getType();
+            ConcurrentLinkedDeque<Post> winsomePosts = WinsomeUtils.gson.fromJson(winsomePostJson, typePostObject);
+            for (Post p: winsomePosts) {
+                System.out.println(p.getTitle());
+            }
             // Inizializzazione del social Winsome
             WINSOME_DATA = new WinsomeData(winsomeUsers);
+            WINSOME_DATA.setUsersPosts(winsomePosts);
         } catch (IOException e) {
             e.printStackTrace();
         }
