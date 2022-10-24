@@ -14,13 +14,23 @@ public class WinsomeData {
     // Lista degli utenti registrati al servizio
     ConcurrentLinkedDeque<User> users;
 
-    public WinsomeData (User[] winsomeUsers) {
+    public WinsomeData (ConcurrentLinkedDeque<User> winsomeUsers) {
         if (winsomeUsers == null) {
             users = new ConcurrentLinkedDeque<>();
         } else {
             users = new ConcurrentLinkedDeque<>();
             for (User u: winsomeUsers) {
                 users.add(u);
+            }
+        }
+    }
+
+    public void setUsersPosts(ConcurrentLinkedDeque<Post> allPosts) {
+        for (User u: users) {
+            for (Post p: allPosts) {
+                if (u.getUsername().equals(p.getCreator())) {
+                    u.getBlog().getPosts().add(p);
+                }
             }
         }
     }
