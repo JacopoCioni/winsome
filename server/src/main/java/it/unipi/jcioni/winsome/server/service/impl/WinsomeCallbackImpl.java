@@ -27,7 +27,7 @@ public class WinsomeCallbackImpl extends RemoteObject implements WinsomeCallback
 
     public static synchronized void addUpdate(String username, String value) throws RemoteException {
         if (clients.containsKey(username)) {
-            clients.get(username).addNotifyEvent(value);
+            clients.get(username).addNotifyEvent(username, value);
         }
     }
 
