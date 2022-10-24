@@ -1,9 +1,6 @@
 package it.unipi.jcioni.winsome.core.model;
 
-import it.unipi.jcioni.winsome.core.model.User;
-
-import java.util.Arrays;
-import java.util.List;
+import java.util.HashMap;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
 /*
@@ -30,6 +27,26 @@ public class WinsomeData {
             for (Post p: allPosts) {
                 if (u.getUsername().equals(p.getCreator())) {
                     u.getBlog().getPosts().add(p);
+                }
+            }
+        }
+    }
+
+    public void setUsersFollows(HashMap<String, String> allFollows) {
+        for (User u: users) {
+            for (String key: allFollows.keySet()) {
+                if (!key.equals(u) && allFollows.get(key).equals(u.getUsername())) {
+                    u.getInteractions().getFollows().put(key, allFollows.get(key));
+                }
+            }
+        }
+    }
+
+    public void setUsersFollowers(HashMap<String, String> allFollowers) {
+        for (User u: users) {
+            for (String key: allFollowers.keySet()) {
+                if (!key.equals(u.getUsername()) && allFollowers.get(key).equals(u.getUsername())) {
+                    u.getInteractions().getFollowers().put(key, allFollowers.get(key));
                 }
             }
         }
