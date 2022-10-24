@@ -8,9 +8,17 @@ import java.rmi.server.RemoteObject;
 
 public class WinsomeNotifyEventImpl extends RemoteObject implements WinsomeNotifyEvent {
 
-    public void addNotifyEvent(String value) throws RemoteException {
-        if (value != null && !Main.followers.contains(value)) {
-            Main.followers.add(value);
+    // Value è la chiave e mainUser è il valore
+    public void addNotifyEvent(String mainUser, String value) throws RemoteException {
+        boolean result = false;
+        for (String s: Main.followers.keySet()) {
+            if (s.equals(value)) {
+                result = true;
+                break;
+            }
+        }
+        if (value != null && !result) {
+            Main.followers.put(value, mainUser);
             System.out.println("[RMI] - L'utente '"+value+"' ha iniziato a seguirti.");
             return;
         }
@@ -18,7 +26,14 @@ public class WinsomeNotifyEventImpl extends RemoteObject implements WinsomeNotif
     }
 
     public void removeNotifyEvent(String value) throws RemoteException {
-        if (value != null && Main.followers.contains(value)) {
+        boolean result = false;
+        for (String s: Main.followers.keySet()) {
+            if (s.equals(value)) {
+                result = true;
+                break;
+            }
+        }
+        if (value != null && result) {
             Main.followers.remove(value);
             System.out.println("[RMI] - L'utente '"+value+"' non ti segue più.");
             return;
