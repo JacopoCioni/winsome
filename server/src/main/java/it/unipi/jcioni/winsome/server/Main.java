@@ -16,6 +16,7 @@ import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
+import java.util.HashMap;
 import java.util.concurrent.*;
 
 import static it.unipi.jcioni.winsome.core.service.WinsomeService.*;
@@ -48,6 +49,14 @@ public class Main {
             if (!postFile.exists()) {
                 postFile.createNewFile();
             }
+            File followsFile = new File("WinsomeServer"+ File.separator+"Follows.json");
+            if (!followsFile.exists()) {
+                followsFile.createNewFile();
+            }
+            File followersFile = new File("WinsomeServer"+ File.separator+"Followers.json");
+            if (!followersFile.exists()) {
+                followersFile.createNewFile();
+            }
         } catch (IOException e){
             e.printStackTrace();
         }
@@ -61,12 +70,26 @@ public class Main {
             String winsomePostJson = WinsomeUtils.readFile(new File("WinsomeServer"+ File.separator+"Posts.json"));
             Type typePostObject = new TypeToken<ConcurrentLinkedDeque<Post>>(){}.getType();
             ConcurrentLinkedDeque<Post> winsomePosts = WinsomeUtils.gson.fromJson(winsomePostJson, typePostObject);
-            for (Post p: winsomePosts) {
-                System.out.println(p.getTitle());
-            }
+
+            String winsomeFollowsJson = WinsomeUtils.readFile(new File("WinsomeServer"+ File.separator+"Follows.json"));
+            Type typeFollowsObject = new TypeToken<HashMap<String, String>>(){}.getType();
+            HashMap<String, String> winsomeFollows = WinsomeUtils.gson.fromJson(winsomeFollowsJson, typeFollowsObject);
+
+            String winsomeFollowersJson = WinsomeUtils.readFile(new File("WinsomeServer"+ File.separator+"Followers.json"));
+            Type typeFollowersObject = new TypeToken<HashMap<String, String>>(){}.getType();
+            HashMap<String, String> winsomeFollowers = WinsomeUtils.gson.fromJson(winsomeFollowersJson, typeFollowersObject);
+
+
             // Inizializzazione del social Winsome
+            // Caricamento di tutti gli Utenti - costruzione di WINSOME_DATA
             WINSOME_DATA = new WinsomeData(winsomeUsers);
+            // Caricamento di tutti i Post degli utenti
             WINSOME_DATA.setUsersPosts(winsomePosts);
+            // Caricamento di tutti i Follows degli utenti
+            WINSOME_DATA.setUsersFollows(winsomeFollows);
+            // Caricamento di tutti i Followers degli utenti
+            WINSOME_DATA.setUsersFollowers(winsomeFollowers);
+
         } catch (IOException e) {
             e.printStackTrace();
         }
