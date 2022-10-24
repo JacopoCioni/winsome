@@ -697,9 +697,9 @@ public class Handler implements Runnable {
         }
         boolean result;
         if (vote == 1) {
-            result = post.addVote(session.getUsername(), Vote.UP);
+            result = post.addVote(session.getUsername(), new Vote(1));
         } else {
-            result = post.addVote(session.getUsername(), Vote.DOWN);
+            result = post.addVote(session.getUsername(), new Vote(-1));
         }
         if (result) {
             invia(output, "[SERV] - Voto inserito correttamente.");

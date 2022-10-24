@@ -55,7 +55,7 @@ public class WinsomeRewards implements Runnable{
                     }
                 }
                 if (posts.size() != 0) {
-                    double guadagno = 0;
+                    double guadagno;
                     double saldo = 0;
                     for (Post p: posts) {
                         guadagno = calculateRew(p);
@@ -81,7 +81,7 @@ public class WinsomeRewards implements Runnable{
                 }
                 // Aspetto prima di fare il prossimo controllo sui rewards
                 try {
-                    Thread.sleep(10000);
+                    Thread.sleep(60000L);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -139,7 +139,7 @@ public class WinsomeRewards implements Runnable{
         String reason = "Ricompensa curatore per il post: "+idPost;
         // Aggiungo votatori (solo positivi) e commentatori al Set di curatori
         for(String user: votes.keySet()) {
-            if (votes.get(user).equals(Vote.UP)) {
+            if (votes.get(user).equals(1)) {
                 curatori.add(user);
             }
         }

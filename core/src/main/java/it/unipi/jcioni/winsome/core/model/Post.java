@@ -91,7 +91,7 @@ public class Post {
     public int getNumberOfDownVotes() {
         int downVotes = 0;
         for (Vote vote: votes.values()) {
-            if (vote.getValue() == 1) {
+            if (vote.getValue() == -1) {
                 downVotes++;
             }
         }

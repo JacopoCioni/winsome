@@ -1,13 +1,11 @@
 package it.unipi.jcioni.winsome.core.model;
 
-public enum Vote {
-    UP(1),
-    DOWN(-1);
+public class Vote {
 
     private final int value;
     private final long voteTime;
 
-    private Vote(int value) {
+    public Vote(int value) {
         this.value = value;
         this.voteTime = System.currentTimeMillis();
     }
