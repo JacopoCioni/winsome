@@ -67,10 +67,6 @@ public class Main {
             System.out.println("[CLI] - Sei collegato al server!");
 
             try {
-                /*
-                PrintWriter output = new PrintWriter(socket.getOutputStream(), true);
-                BufferedReader input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-                 */
                 // Input stream di bytes
                 InputStream inputStream = socket.getInputStream();
                 BufferedReader input = new BufferedReader(new InputStreamReader(inputStream));
@@ -98,28 +94,32 @@ public class Main {
                     switch (command) {
                         case "help": {
                             System.out.println("[CLI] - LISTA DEI COMANDI DISPONIBILI:");
-                            System.out.println("  register <username> <password> <tags>  * Effettua la registrazione a Winsome.");
-                            System.out.println("  login <username> <password>            * Effettua il login a Winsome.");
-                            System.out.println("  logout                                 * Effettua la logout da Winsome.");
-                            System.out.println("  listfollowers                          * Mostra la lista degli utenti che ti seguono.");
-                            System.out.println("  listusers                              * Mostra la lista degli utenti con almeno un tag in comune.");
-                            System.out.println("  listfollowing                          * Mostra la degli utenti che si segue.");
-                            System.out.println("  follow <username>                      * Permette di seguire un utente.");
-                            System.out.println("  unfollow <username>                    * Permette di smettere di seguire un utente.");
-                            System.out.println("  blog                                   * Mostra i post nel proprio blog.");
-                            System.out.println("  post <titolo> <contenuto>              * Permette di pubblicare un post.");
-                            System.out.println("  showfeed                               * Mostra i post nel proprio feed.");
-                            System.out.println("  showpost <idPost>                      * Mostra un post specifico.");
-                            System.out.println("  rewin <idPost>                         * Permette di fare il rewin di un post.");
-                            System.out.println("  rate <idPost> <+1/-1>                  * Permette di valutare un post.");
-                            System.out.println("  comment <idPost> <commento>            * Permette di commentare un post.");
-                            System.out.println("  wallet                                 * Mostra il proprio portafoglio.");
-                            System.out.println("  walletbtc                              * Mostra il bilancio convertito in Bitcoin.");
-                            System.out.println("  exit                                   * Permette di uscire dalla piattaforma Winsome.");
+                            System.out.println(" |-register <username> <password> <tags>  * Effettua la registrazione a Winsome.");
+                            System.out.println(" |-login <username> <password>            * Effettua il login a Winsome.");
+                            System.out.println(" |-logout                                 * Effettua la logout da Winsome.");
+                            System.out.println(" |-listfollowers                          * Mostra la lista degli utenti che ti seguono.");
+                            System.out.println(" |-listusers                              * Mostra la lista degli utenti con almeno un tag in comune.");
+                            System.out.println(" |-listfollowing                          * Mostra la degli utenti che si segue.");
+                            System.out.println(" |-follow <username>                      * Permette di seguire un utente.");
+                            System.out.println(" |-unfollow <username>                    * Permette di smettere di seguire un utente.");
+                            System.out.println(" |-blog                                   * Mostra i post nel proprio blog.");
+                            System.out.println(" |-post <titolo> <contenuto>              * Permette di pubblicare un post.");
+                            System.out.println(" |-showfeed                               * Mostra i post nel proprio feed.");
+                            System.out.println(" |-showpost <idPost>                      * Mostra un post specifico.");
+                            System.out.println(" |-rewin <idPost>                         * Permette di fare il rewin di un post.");
+                            System.out.println(" |-rate <idPost> <+1/-1>                  * Permette di valutare un post.");
+                            System.out.println(" |-comment <idPost> <commento>            * Permette di commentare un post.");
+                            System.out.println(" |-wallet                                 * Mostra il proprio portafoglio.");
+                            System.out.println(" |-walletbtc                              * Mostra il bilancio convertito in Bitcoin.");
+                            System.out.println(" |-exit                                   * Permette di uscire dalla piattaforma Winsome.");
                             break;
                         }
                         case "register": {
                             try {
+                                if (username != null) {
+                                    System.out.println("[SERV] - Errore: sei attualmente loggato.");
+                                    break;
+                                }
                                 if (arguments.length < 3) throw new ArrayIndexOutOfBoundsException();
                                 String tags = "";
                                 for (int i = 2; i < arguments.length; i++) {
