@@ -21,7 +21,8 @@ import static it.unipi.jcioni.winsome.core.service.WinsomeService.*;
 
 public class Main {
 
-    public static List<String> followers = new ArrayList<>();
+    // Key: Utente che mi segue <String>, Value: utente seguito <String>
+    public static HashMap<String, String> followers = new HashMap<>();
     private static String multicastAddress = MULTICAST_ADDRESS;
     private static int multicastPort = MULTICAST_PORT;
     public static void main(String[] args) {
@@ -199,7 +200,7 @@ public class Main {
                             }
                             // Superati i controlli posto stampare la lista dei followers.
                             System.out.println("[CLI] - Lista dei followers: ");
-                            for (String s: followers) {
+                            for (String s: followers.keySet()) {
                                 System.out.println("* "+s);
                             }
                             break;
