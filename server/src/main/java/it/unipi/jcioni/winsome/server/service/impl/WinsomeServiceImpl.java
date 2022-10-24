@@ -5,15 +5,12 @@ import it.unipi.jcioni.winsome.core.model.WinsomeData;
 import it.unipi.jcioni.winsome.core.service.WinsomeService;
 
 import java.rmi.RemoteException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.stream.Collectors;
 
 public class WinsomeServiceImpl implements WinsomeService {
-    // Questa lista deve essere eliminata totalmente
-    private List<User> users = new ArrayList<>();
+
     // WinsomeData mi servirà per accedere alla lista degli utenti che è condivisa da tutto il servizio
     private WinsomeData winsomeData;
 

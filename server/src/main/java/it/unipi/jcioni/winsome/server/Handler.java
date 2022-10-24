@@ -39,15 +39,12 @@ public class Handler implements Runnable {
             }
             else {
                 System.out.println("[SERV] - Gestione della richiesta in corso...");
-                // Prova per vedere se funziona la serializzazione
-                // serialize();
             }
 
             String request;
             while (true) {
                 try {
                     request = ricevi(input);
-                    // Sarebbe meglio farla come nel clientMain
                     if (request != null) {
                         String[] temp = request.split(" ");
                         String command  = temp[0];
@@ -55,6 +52,7 @@ public class Handler implements Runnable {
                         System.arraycopy(temp, 1, arguments, 0, temp.length-1);
 
                         // Gestione della richiesta.
+
                         switch (command) {
                             case "login":
                                 // Messo qui momentaneamente per vedere gli utenti registrati
@@ -243,7 +241,7 @@ public class Handler implements Runnable {
             return;
         }
         // Mi occupo di rimuovere la connessione dal servizio, controllando che l'utente sia effettivamente loggato
-        if (Main.sessions.get(username) != null) { //TODO: var main.sesson.getusername
+        if (Main.sessions.get(username) != null) {
             Session temp = Main.sessions.get(username);
             if (temp.getClientSocket().equals(clientSocket)) {
                 // Posso effettivamente rimuovere la connessione dal servizio

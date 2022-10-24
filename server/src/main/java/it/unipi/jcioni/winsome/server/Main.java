@@ -203,40 +203,4 @@ public class Main {
         System.out.println("[RMI] - servizio chiuso.");
         System.out.println("[SERV] - Terminato.");
     }
-
-    /* TODO: Da rimuovere
-    public static void serialize() {
-        // Questa è una prova della serializzazione, di fatto non deve funzionare così
-        ConcurrentLinkedDeque<User> utenti = new ConcurrentLinkedDeque<>();
-
-        List<Tag> tags  = new ArrayList<>();
-        tags.add(new Tag("Tennis"));
-        tags.add(new Tag("Calcio"));
-        tags.add(new Tag("Nuoto"));
-
-        ConcurrentLinkedDeque<Post> posts = new ConcurrentLinkedDeque<>();
-        posts.add(new Post("Jacopo", "Sedia", "Questa è una sedia."));
-        posts.add(new Post("Jacopo", "Sedia", "Questa è una sedia."));
-        for (Post p: posts) {
-            p.addVote("Samuele", Vote.UP);
-            p.addComment(new Comment("Samuele", "Bella sedia!"));
-        }
-
-        utenti.add(new User("Samuele", "prova", tags));
-        utenti.add(new User("Jacopo", "ciao", tags));
-        for (User u: utenti) {
-            // u.getBlog().setPosts(posts);
-        }
-
-        String json = WinsomeUtils.gson.toJson(utenti);
-        System.out.println("File JSon: " + json);
-        try {
-            WinsomeUtils.writeFile(json, "WinsomeServer"+ File.separator+"Users.json");
-        } catch (IOException e){
-            e.printStackTrace();
-        }
-    }
-
-     */
-
 }
