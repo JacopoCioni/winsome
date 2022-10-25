@@ -323,9 +323,13 @@ public class Handler implements Runnable {
         }
         // Invio la risposta
         StringBuilder out = new StringBuilder();
-        out.append("Lista degli utente che segue lo user in sessione:$");
+        out.append("Lista degli utenti che segue lo user in sessione:$");
         for (String user: clientUser.getInteractions().getFollows().keySet()) {
-            out.append("|-Utente: ").append(user).append("$");
+            if (user.equals(session.getUsername())) {
+                for(String listusers: clientUser.getInteractions().getFollows().get(user)) {
+                    out.append("|-Utente: ").append(listusers).append("$");
+                }
+            }
         }
         // Composto il messaggio, lo inoltro
         invia(output, out.toString());
@@ -402,7 +406,7 @@ public class Handler implements Runnable {
             invia(output, "[SERV] - Errore: non segui l'utente '"+username+"'");
             return;
         }
-        follow.getInteractions().removeFollowers(clientUser.getUsername());
+        follow.getInteractions().removeFollowers(username, clientUser.getUsername());
         invia(output, "[SERV] - Hai smesso di seguire l'utente: "+username);
         try {
             // Chi sto smettendo di seguire verrrà notificato che ho smesso di seguirlo
@@ -524,10 +528,14 @@ public class Handler implements Runnable {
         List<Post> sessionUserFeed = new ArrayList<>();
         // Aggiungo tutti i post presenti nel blog di chi seguo nel mio feed
         for (String key: clientUser.getInteractions().getFollows().keySet()) {
-            for (User user: winsomeData.getUsers()) {
-                if (key.equals(user.getUsername())) {
-                    sessionUserFeed.addAll(user.getBlog().getPosts());
-                    break;
+            if (key.equals(clientUser.getUsername())) {
+                for (String keyUsers: clientUser.getInteractions().getFollows().get(key)) {
+                    for (User user: winsomeData.getUsers()) {
+                        if (keyUsers.equals(user.getUsername())) {
+                            sessionUserFeed.addAll(user.getBlog().getPosts());
+                            break;
+                        }
+                    }
                 }
             }
         }
@@ -610,10 +618,14 @@ public class Handler implements Runnable {
         List<Post> sessionUserFeed = new ArrayList<>();
         // Aggiungo tutti i post presenti nel blog di chi seguo nel mio feed
         for (String key: clientUser.getInteractions().getFollows().keySet()) {
-            for (User user: winsomeData.getUsers()) {
-                if (key.equals(user.getUsername())) {
-                    sessionUserFeed.addAll(user.getBlog().getPosts());
-                    break;
+            if (key.equals(clientUser.getUsername())) {
+                for (String keyUsers: clientUser.getInteractions().getFollows().get(key)) {
+                    for (User user: winsomeData.getUsers()) {
+                        if (keyUsers.equals(user.getUsername())) {
+                            sessionUserFeed.addAll(user.getBlog().getPosts());
+                            break;
+                        }
+                    }
                 }
             }
         }
@@ -677,10 +689,14 @@ public class Handler implements Runnable {
         List<Post> sessionUserFeed = new ArrayList<>();
         // Aggiungo tutti i post presenti nel blog di chi seguo nel mio feed
         for (String key: clientUser.getInteractions().getFollows().keySet()) {
-            for (User user: winsomeData.getUsers()) {
-                if (key.equals(user.getUsername())) {
-                    sessionUserFeed.addAll(user.getBlog().getPosts());
-                    break;
+            if (key.equals(clientUser.getUsername())) {
+                for (String keyUsers: clientUser.getInteractions().getFollows().get(key)) {
+                    for (User user: winsomeData.getUsers()) {
+                        if (keyUsers.equals(user.getUsername())) {
+                            sessionUserFeed.addAll(user.getBlog().getPosts());
+                            break;
+                        }
+                    }
                 }
             }
         }
@@ -750,10 +766,14 @@ public class Handler implements Runnable {
         List<Post> sessionUserFeed = new ArrayList<>();
         // Aggiungo tutti i post presenti nel blog di chi seguo nel mio feed
         for (String key: clientUser.getInteractions().getFollows().keySet()) {
-            for (User user: winsomeData.getUsers()) {
-                if (key.equals(user.getUsername())) {
-                    sessionUserFeed.addAll(user.getBlog().getPosts());
-                    break;
+            if (key.equals(clientUser.getUsername())) {
+                for (String keyUsers: clientUser.getInteractions().getFollows().get(key)) {
+                    for (User user: winsomeData.getUsers()) {
+                        if (keyUsers.equals(user.getUsername())) {
+                            sessionUserFeed.addAll(user.getBlog().getPosts());
+                            break;
+                        }
+                    }
                 }
             }
         }

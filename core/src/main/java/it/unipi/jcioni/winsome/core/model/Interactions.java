@@ -1,60 +1,92 @@
 package it.unipi.jcioni.winsome.core.model;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 public class Interactions {
 
-    // Key: Utente seguito <String> (unicità), Value: utente che segue <String>
-    private transient HashMap<String, String> follows;
-    // Key: Utente che mi segue <String> (unicità), Value: utente seguito <String>
-    private transient HashMap<String, String> followers;
+    // Key: Utente in sessione <String> (unicità), Value: lista<String> di utenti che segue
+    private transient HashMap<String, List<String>> follows;
+    // Key: Utente in sessione <String> (unicità), Value: lista<String> di utenti che lo seguono
+    private transient HashMap<String, List<String>> followers;
 
     public Interactions () {
         this.follows = new HashMap<>();
         this.followers = new HashMap<>();
     }
 
-    public HashMap<String, String> getFollows() {
+
+
+    public HashMap<String, List<String>> getFollows() {
         return follows;
     }
 
-    public HashMap<String, String> getFollowers() {
+    public HashMap<String, List<String>> getFollowers() {
         return followers;
     }
 
     public boolean addFollows(String mainUser, String following) {
         for (String u: follows.keySet()) {
-            if (u.equals(following)) {
-                System.err.println("[SERV] - Stai già seguendo questo utente.");
-                return false;
+            if (u.equals(mainUser)) {
+                for (String f: follows.get(u)) {
+                    if (f.equals(following)) {
+                        System.err.println("[SERV] - Stai già seguendo questo utente.");
+                        return false;
+                    }
+                }
+                follows.get(u).add(following);
+                return true;
             }
         }
-        follows.put(following, mainUser);
+        // Altrimenti non ho mai aggiunto mainUsers a questa lista e quindi lo aggiungo.
+        follows.put(mainUser, new ArrayList<>());
+        // Dopo aggiungo l'utente seguito da mainUsers alla lista;
+        follows.get(mainUser).add(following);
         return true;
     }
 
     public void addFollowers(String mainUser, String follower) {
-        for (String s: followers.keySet()) {
-            if (s.equals(follower)) {
+        for (String u: followers.keySet()) {
+            if (u.equals(mainUser)) {
+                for (String f: follows.get(u)) {
+                    if (f.equals(follower)) {
+                        return;
+                    }
+                }
+                followers.get(u).add(follower);
                 return;
             }
         }
-        followers.put(follower, mainUser);
+        // Altrimenti non ho mai aggiunto mainUsers a questa lista e quindi lo aggiungo.
+        followers.put(mainUser, new ArrayList<>());
+        //Dopo aggiungo l'utente che segue mainUser alla lista
+        followers.get(mainUser).add(follower);
     }
 
     public boolean removeFollows(String mainUser, String followed) {
-        boolean result = follows.remove(followed, mainUser);
-        if (!result) {
-            System.err.println("[SERV] - Errore, non stavi seguendo questo utente.");
+        for (String u: follows.keySet()) {
+            if (u.equals(mainUser)) {
+                if (!follows.get(u).contains(followed)) {
+                    System.err.println("[SERV] - Errore, non stavi seguendo questo utente.");
+                    return false;
+                }
+                follows.get(u).remove(followed);
+                return true;
+            }
         }
-        return result;
+        return false;
     }
 
-    public void removeFollowers(String exFollower) {
-        try{
-            followers.remove(exFollower);
-        } catch (Exception e) {
-            System.err.println("[SERV] - Errore nella rimozione del follower.");
+    public void removeFollowers(String mainUser, String exFollower) {
+        for (String u: followers.keySet()) {
+            if (u.equals(mainUser)) {
+                if (!followers.get(u).contains(exFollower)) {
+                    return;
+                }
+                followers.get(u).remove(exFollower);
+                return;
+            }
         }
     }
 }

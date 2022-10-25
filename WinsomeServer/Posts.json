@@ -1,0 +1,28 @@
+[
+  {
+    "idPost": "94a30f66-048b-455a-b1ac-d112fe6aa9a1",
+    "timestamp": "Oct 25, 2022, 3:39:21 AM",
+    "creator": "jacopo",
+    "title": "bicia",
+    "text": "bellissima",
+    "iterazioniRewards": 30,
+    "comments": [
+      {
+        "value": "bella",
+        "creator": "chiara",
+        "commentTime": 1666662897925
+      }
+    ],
+    "votes": {}
+  },
+  {
+    "idPost": "0826fe8e-a8b3-4198-9bbc-d5c982599cb3",
+    "timestamp": "Oct 25, 2022, 3:47:00 AM",
+    "creator": "chiara",
+    "title": "chloe",
+    "text": "stupenda",
+    "iterazioniRewards": 12,
+    "comments": [],
+    "votes": {}
+  }
+]

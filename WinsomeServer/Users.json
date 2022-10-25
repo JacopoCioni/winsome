@@ -1,0 +1,124 @@
+[
+  {
+    "username": "jacopo",
+    "password": "prova",
+    "interactions": {},
+    "tags": [
+      {
+        "value": "a"
+      },
+      {
+        "value": "b"
+      },
+      {
+        "value": "c"
+      }
+    ],
+    "blog": {},
+    "wallet": {
+      "transactions": [
+        {
+          "value": 0.016731138841102125,
+          "msg": "Ricompensa autore per il post: 94a30f66-048b-455a-b1ac-d112fe6aa9a1",
+          "timestamp": "Oct 25, 2022, 3:55:03 AM"
+        },
+        {
+          "value": 0.01617343421306539,
+          "msg": "Ricompensa autore per il post: 94a30f66-048b-455a-b1ac-d112fe6aa9a1",
+          "timestamp": "Oct 25, 2022, 3:55:03 AM"
+        }
+      ]
+    }
+  },
+  {
+    "username": "chiara",
+    "password": "prova",
+    "interactions": {},
+    "tags": [
+      {
+        "value": "a"
+      },
+      {
+        "value": "b"
+      },
+      {
+        "value": "c"
+      }
+    ],
+    "blog": {},
+    "wallet": {
+      "transactions": [
+        {
+          "value": 0.007170488074758054,
+          "msg": "Ricompensa curatore per il post: 94a30f66-048b-455a-b1ac-d112fe6aa9a1",
+          "timestamp": "Oct 25, 2022, 3:55:03 AM"
+        },
+        {
+          "value": 0.006931471805599452,
+          "msg": "Ricompensa curatore per il post: 94a30f66-048b-455a-b1ac-d112fe6aa9a1",
+          "timestamp": "Oct 25, 2022, 3:55:03 AM"
+        }
+      ]
+    }
+  },
+  {
+    "username": "gianni",
+    "password": "prova",
+    "interactions": {},
+    "tags": [
+      {
+        "value": "a"
+      },
+      {
+        "value": "b"
+      },
+      {
+        "value": "c"
+      }
+    ],
+    "blog": {},
+    "wallet": {
+      "transactions": []
+    }
+  },
+  {
+    "username": "pietro",
+    "password": "prova",
+    "interactions": {},
+    "tags": [
+      {
+        "value": "a"
+      },
+      {
+        "value": "b"
+      },
+      {
+        "value": "c"
+      }
+    ],
+    "blog": {},
+    "wallet": {
+      "transactions": []
+    }
+  },
+  {
+    "username": "pippo",
+    "password": "prova",
+    "interactions": {},
+    "tags": [
+      {
+        "value": "a"
+      },
+      {
+        "value": "b"
+      },
+      {
+        "value": "c"
+      }
+    ],
+    "blog": {},
+    "wallet": {
+      "transactions": []
+    }
+  }
+]

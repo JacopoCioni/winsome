@@ -3,6 +3,7 @@ package it.unipi.jcioni.winsome.core.service;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.HashMap;
+import java.util.List;
 
 
 public interface WinsomeService extends Remote {
@@ -16,5 +17,5 @@ public interface WinsomeService extends Remote {
     String MULTICAST_ADDRESS = "224.0.0.1";
 
     boolean register(String username, String password, String tags) throws RemoteException;
-    HashMap<String, String> startFollowers(String username, String password) throws RemoteException;
+    HashMap<String, List<String>> startFollowers(String username, String password) throws RemoteException;
 }

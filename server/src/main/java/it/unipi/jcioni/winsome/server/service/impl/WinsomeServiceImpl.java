@@ -7,6 +7,7 @@ import it.unipi.jcioni.winsome.core.service.WinsomeService;
 import java.rmi.RemoteException;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.stream.Collectors;
 
 public class WinsomeServiceImpl implements WinsomeService {
@@ -58,7 +59,7 @@ public class WinsomeServiceImpl implements WinsomeService {
     }
 
     @Override
-    public HashMap<String, String> startFollowers(String username, String password) throws RemoteException {
+    public HashMap<String, List<String>> startFollowers(String username, String password) throws RemoteException {
         User user = null;
         for (User u : winsomeData.getUsers()) {
             if (u.getUsername().equals(username) && u.getPassword().equals(password)) {

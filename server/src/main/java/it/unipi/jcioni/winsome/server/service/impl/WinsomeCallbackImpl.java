@@ -33,7 +33,7 @@ public class WinsomeCallbackImpl extends RemoteObject implements WinsomeCallback
 
     public static synchronized void removeUpdate(String username, String value) throws RemoteException {
         if (clients.containsKey(username)) {
-            clients.get(username).removeNotifyEvent(value);
+            clients.get(username).removeNotifyEvent(username, value);
         }
     }
 

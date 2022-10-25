@@ -17,6 +17,7 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.HashMap;
+import java.util.List;
 import java.util.concurrent.*;
 
 import static it.unipi.jcioni.winsome.core.service.WinsomeService.*;
@@ -72,12 +73,12 @@ public class Main {
             ConcurrentLinkedDeque<Post> winsomePosts = WinsomeUtils.gson.fromJson(winsomePostJson, typePostObject);
 
             String winsomeFollowsJson = WinsomeUtils.readFile(new File("WinsomeServer"+ File.separator+"Follows.json"));
-            Type typeFollowsObject = new TypeToken<HashMap<String, String>>(){}.getType();
-            HashMap<String, String> winsomeFollows = WinsomeUtils.gson.fromJson(winsomeFollowsJson, typeFollowsObject);
+            Type typeFollowsObject = new TypeToken<HashMap<String, List<String>>>(){}.getType();
+            HashMap<String, List<String>> winsomeFollows = WinsomeUtils.gson.fromJson(winsomeFollowsJson, typeFollowsObject);
 
             String winsomeFollowersJson = WinsomeUtils.readFile(new File("WinsomeServer"+ File.separator+"Followers.json"));
-            Type typeFollowersObject = new TypeToken<HashMap<String, String>>(){}.getType();
-            HashMap<String, String> winsomeFollowers = WinsomeUtils.gson.fromJson(winsomeFollowersJson, typeFollowersObject);
+            Type typeFollowersObject = new TypeToken<HashMap<String, List<String>>>(){}.getType();
+            HashMap<String, List<String>> winsomeFollowers = WinsomeUtils.gson.fromJson(winsomeFollowersJson, typeFollowersObject);
 
 
             // Inizializzazione del social Winsome

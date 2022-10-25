@@ -7,6 +7,7 @@ import it.unipi.jcioni.winsome.core.model.WinsomeData;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
 public class WinsomeSave implements Runnable{
@@ -39,9 +40,9 @@ public class WinsomeSave implements Runnable{
             // Lista di TUTTI i post della piattaforma
             ConcurrentLinkedDeque<Post> allPosts = new ConcurrentLinkedDeque<>();
             // HashMap di TUTTI i follows della piattaforma
-            HashMap<String, String> allFollows = new HashMap<>();
+            HashMap<String, List<String>> allFollows = new HashMap<>();
             // HashMap di TUTTI i followers della piattaforma
-            HashMap<String, String> allFollowers = new HashMap<>();
+            HashMap<String, List<String>> allFollowers = new HashMap<>();
 
             // Scorro tutti gli utenti della piattaforma
             for (User u: users) {
@@ -51,6 +52,7 @@ public class WinsomeSave implements Runnable{
                 }
                 if (u.getInteractions() != null) {
                     // Aggiungo tutti i follows di tutti gli utenti della piattaforma
+                    // Operazione ridondante ma viene fatta la replace ogni volta e non dovrebbero esserci problemi
                     allFollows.putAll(u.getInteractions().getFollows());
                     // Aggiungo tutti i followers di tutti gli utenti della piattaforma
                     allFollowers.putAll(u.getInteractions().getFollowers());

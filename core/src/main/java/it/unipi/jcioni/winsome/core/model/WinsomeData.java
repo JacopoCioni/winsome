@@ -1,6 +1,7 @@
 package it.unipi.jcioni.winsome.core.model;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
 /*
@@ -32,22 +33,18 @@ public class WinsomeData {
         }
     }
 
-    public void setUsersFollows(HashMap<String, String> allFollows) {
+    public void setUsersFollows(HashMap<String, List<String>> allFollows) {
         for (User u: users) {
-            for (String key: allFollows.keySet()) {
-                if (!key.equals(u) && allFollows.get(key).equals(u.getUsername())) {
-                    u.getInteractions().getFollows().put(key, allFollows.get(key));
-                }
+            for (String s: allFollows.keySet()) {
+                u.getInteractions().getFollows().put(s, allFollows.get(s));
             }
         }
     }
 
-    public void setUsersFollowers(HashMap<String, String> allFollowers) {
+    public void setUsersFollowers(HashMap<String, List<String>> allFollowers) {
         for (User u: users) {
-            for (String key: allFollowers.keySet()) {
-                if (!key.equals(u.getUsername()) && allFollowers.get(key).equals(u.getUsername())) {
-                    u.getInteractions().getFollowers().put(key, allFollowers.get(key));
-                }
+            for (String s: allFollowers.keySet()) {
+                u.getInteractions().getFollowers().put(s, allFollowers.get(s));
             }
         }
     }

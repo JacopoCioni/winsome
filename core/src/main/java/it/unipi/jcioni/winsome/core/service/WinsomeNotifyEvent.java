@@ -5,5 +5,5 @@ import java.rmi.RemoteException;
 
 public interface WinsomeNotifyEvent extends Remote {
     void addNotifyEvent (String mainUser, String value) throws RemoteException;
-    void removeNotifyEvent (String value) throws RemoteException;
+    void removeNotifyEvent (String mainUser, String value) throws RemoteException;
 }

@@ -1,0 +1,13 @@
+{
+  "jacopo": [
+    "chiara",
+    "pietro",
+    "gianni"
+  ],
+  "pippo": [
+    "jacopo"
+  ],
+  "chiara": [
+    "jacopo"
+  ]
+}

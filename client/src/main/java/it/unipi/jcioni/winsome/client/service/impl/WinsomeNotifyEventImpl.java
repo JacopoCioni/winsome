@@ -8,33 +8,43 @@ import java.rmi.server.RemoteObject;
 
 public class WinsomeNotifyEventImpl extends RemoteObject implements WinsomeNotifyEvent {
 
-    // Value è la chiave e mainUser è il valore
+    //MainUser è l'utente in sessione, value è il valore da aggiungere alla lista
     public void addNotifyEvent(String mainUser, String value) throws RemoteException {
         boolean result = false;
+        // Controllo se è già presente
         for (String s: Main.followers.keySet()) {
-            if (s.equals(value)) {
-                result = true;
-                break;
+            if (s.equals(mainUser)) {
+                for (String f: Main.followers.get(s)) {
+                    if (f.equals(value)) {
+                        result = true;
+                        break;
+                    }
+                }
             }
         }
         if (value != null && !result) {
-            Main.followers.put(value, mainUser);
+            Main.followers.get(mainUser).add(value);
             System.out.println("[RMI] - L'utente '"+value+"' ha iniziato a seguirti.");
             return;
         }
         System.out.println("[RMI] - Errore nella ricezione della notifica.");
     }
 
-    public void removeNotifyEvent(String value) throws RemoteException {
+    public void removeNotifyEvent(String mainUser, String value) throws RemoteException {
         boolean result = false;
+        // Controllo se è presente
         for (String s: Main.followers.keySet()) {
-            if (s.equals(value)) {
-                result = true;
-                break;
+            if (s.equals(mainUser)) {
+                for (String f: Main.followers.get(s)) {
+                    if (f.equals(value)) {
+                        result = true;
+                        break;
+                    }
+                }
             }
         }
         if (value != null && result) {
-            Main.followers.remove(value);
+            Main.followers.get(mainUser).remove(value);
             System.out.println("[RMI] - L'utente '"+value+"' non ti segue più.");
             return;
         }
