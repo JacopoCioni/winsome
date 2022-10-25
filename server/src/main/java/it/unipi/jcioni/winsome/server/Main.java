@@ -20,28 +20,37 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.*;
 
-import static it.unipi.jcioni.winsome.core.service.WinsomeService.*;
-
 public class Main {
     private static WinsomeData WINSOME_DATA;
     public static ConcurrentHashMap<String, Session> sessions = new ConcurrentHashMap<>();
     public static ConcurrentLinkedDeque<Socket> sockets = new ConcurrentLinkedDeque<>();
-    private static int serverPort = SERVER_TCP_PORT;
-    private static int rmiPort = SERVER_RMI_PORT;
-    private static int rmiCallbackPort = RMI_CALLBACK_CLIENT_PORT;
+    private static int serverPort;
+    private static int rmiPort;
+    private static int rmiCallbackPort;
+    private static String rmiServerRegistryName;
+    private static String rmiCallbackClientRegistryName;
 
+    public static WinsomeConfig winsomeConfig;
 
     public static void main(String[] args) {
         ServerSocket serverSocket = null;
         Socket clientSocket;
         ThreadPoolExecutor executor = (ThreadPoolExecutor) Executors.newCachedThreadPool();
 
+        File serverFolder = new File("WinsomeServer");
+        if (!serverFolder.exists()) {
+            serverFolder.mkdir();
+        }
+
+        try {
+            winsomeConfig = new WinsomeConfig(true);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return;
+        }
+
         // Controllo che i file siano sul disco
         try {
-            File serverFolder = new File("WinsomeServer");
-            if (!serverFolder.exists()) {
-                serverFolder.mkdir();
-            }
             File userFile = new File("WinsomeServer"+ File.separator+"Users.json");
             if (!userFile.exists()) {
                 userFile.createNewFile();
@@ -80,6 +89,16 @@ public class Main {
             Type typeFollowersObject = new TypeToken<HashMap<String, List<String>>>(){}.getType();
             HashMap<String, List<String>> winsomeFollowers = WinsomeUtils.gson.fromJson(winsomeFollowersJson, typeFollowersObject);
 
+            try {
+                //Inizializzazione delle variabili dal file di properties
+                serverPort = Integer.parseInt(winsomeConfig.getProperties("SERVER_TCP_PORT"));
+                rmiPort = Integer.parseInt(winsomeConfig.getProperties("SERVER_RMI_PORT"));
+                rmiCallbackPort = Integer.parseInt(winsomeConfig.getProperties("RMI_CALLBACK_CLIENT_PORT"));
+                rmiServerRegistryName = winsomeConfig.getProperties("RMI_SERVER_REGISTRY_NAME");
+                rmiCallbackClientRegistryName = winsomeConfig.getProperties("RMI_CALLBACK_CLIENT_REGISTRY_NAME");
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
 
             // Inizializzazione del social Winsome
             // Caricamento di tutti gli Utenti - costruzione di WINSOME_DATA
@@ -96,7 +115,7 @@ public class Main {
         }
 
         // Avvio WinsomeRewards
-        WinsomeRewards winsomeRewards = new WinsomeRewards(WINSOME_DATA);
+        WinsomeRewards winsomeRewards = new WinsomeRewards(WINSOME_DATA, winsomeConfig);
         Thread rewardsExecutor = new Thread(winsomeRewards);
         rewardsExecutor.start();
 
@@ -110,7 +129,7 @@ public class Main {
             LocateRegistry.createRegistry(rmiPort);
             /*Pubblicazione dello stub nel registry */
             Registry r = LocateRegistry.getRegistry(rmiPort);
-            r.rebind(RMI_SERVER_REGISTRY_NAME, stub);
+            r.rebind(rmiServerRegistryName, stub);
             System.out.println("[RMI] - pronto sulla porta: " + rmiPort);
         }
         /* If any communication failures occur... */
@@ -130,7 +149,7 @@ public class Main {
             LocateRegistry.createRegistry(rmiCallbackPort);
             /*Pubblicazione dello stub nel registry */
             Registry r = LocateRegistry.getRegistry(rmiCallbackPort);
-            r.rebind(RMI_CALLBACK_CLIENT_REGISTRY_NAME, stub);
+            r.rebind(rmiCallbackClientRegistryName, stub);
             System.out.println("[RMICallback] - pronto sulla porta: "+rmiCallbackPort);
         } catch (RemoteException e) {
             System.err.println("[RMICallback] - Errore di comunicazione: "+e.getMessage());

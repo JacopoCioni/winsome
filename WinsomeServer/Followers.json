@@ -1,13 +1,8 @@
 {
-  "gianni": [
-    "jacopo"
-  ],
-  "pietro": [
-    "jacopo"
-  ],
   "jacopo": [
     "chiara",
-    "pippo"
+    "pietro",
+    "gianni"
   ],
   "chiara": [
     "jacopo"

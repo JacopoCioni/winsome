@@ -1,27 +1,71 @@
 [
   {
-    "idPost": "94a30f66-048b-455a-b1ac-d112fe6aa9a1",
-    "timestamp": "Oct 25, 2022, 3:39:21 AM",
+    "idPost": "085955ec-ed5c-41dc-83bf-c98d1fdf343d",
+    "timestamp": "Oct 25, 2022, 10:22:02 PM",
     "creator": "jacopo",
-    "title": "bicia",
-    "text": "bellissima",
-    "iterazioniRewards": 30,
+    "title": "celeste",
+    "text": "superBella",
+    "iterazioniRewards": 37,
     "comments": [
       {
         "value": "bella",
         "creator": "chiara",
-        "commentTime": 1666662897925
+        "commentTime": 1666730156050
       }
     ],
+    "votes": {
+      "gianni": {
+        "value": 1,
+        "voteTime": 1666730461070
+      },
+      "pietro": {
+        "value": 1,
+        "voteTime": 1666729601845
+      },
+      "chiara": {
+        "value": 1,
+        "voteTime": 1666730193635
+      }
+    }
+  },
+  {
+    "idPost": "1ebcafb1-788c-4933-903b-f82b61038e3e",
+    "timestamp": "Oct 25, 2022, 10:22:25 PM",
+    "creator": "jacopo",
+    "title": "bicia",
+    "text": "stupenda",
+    "iterazioniRewards": 36,
+    "comments": [],
     "votes": {}
   },
   {
-    "idPost": "0826fe8e-a8b3-4198-9bbc-d5c982599cb3",
-    "timestamp": "Oct 25, 2022, 3:47:00 AM",
+    "idPost": "3f3ad35b-13fe-4c42-a648-b9f44310a975",
+    "timestamp": "Oct 25, 2022, 11:00:09 PM",
+    "creator": "jacopo",
+    "title": "materia",
+    "text": "difficile",
+    "iterazioniRewards": 4,
+    "comments": [
+      {
+        "value": "ciao",
+        "creator": "chiara",
+        "commentTime": 1666731927760
+      }
+    ],
+    "votes": {
+      "chiara": {
+        "value": 1,
+        "voteTime": 1666731709359
+      }
+    }
+  },
+  {
+    "idPost": "7388f61d-7177-498c-b425-952485a2a145",
+    "timestamp": "Oct 25, 2022, 10:23:20 PM",
     "creator": "chiara",
     "title": "chloe",
-    "text": "stupenda",
-    "iterazioniRewards": 12,
+    "text": "gattina:)",
+    "iterazioniRewards": 33,
     "comments": [],
     "votes": {}
   }

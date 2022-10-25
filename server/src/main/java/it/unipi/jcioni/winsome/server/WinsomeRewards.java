@@ -14,21 +14,24 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
-import static it.unipi.jcioni.winsome.core.service.WinsomeService.MULTICAST_ADDRESS;
-import static it.unipi.jcioni.winsome.core.service.WinsomeService.MULTICAST_PORT;
-
 public class WinsomeRewards implements Runnable{
 
     private WinsomeData winsomeData;
-    private static int multicastPort = MULTICAST_PORT;
-    private static String multicastAddress = MULTICAST_ADDRESS;
+    private WinsomeConfig config;
+    private static int multicastPort;
+    private static String multicastAddress;
+    private static int rewardsTimeout;
     public long timeCheck = 0;
     // Mi serve per mantenere il calcolo delle ricompense fino a quando il server non si interrompe
     private volatile boolean exit = false;
 
     // Costruttore, devo passargli la struttura dati condivisa
-    public WinsomeRewards (WinsomeData winsomeData) {
+    public WinsomeRewards (WinsomeData winsomeData, WinsomeConfig winsomeConfig) {
         this.winsomeData = winsomeData;
+        this.config = winsomeConfig;
+        multicastPort = Integer.parseInt(config.getProperties("MULTICAST_PORT"));
+        multicastAddress = config.getProperties("MULTICAST_ADDRESS");
+        rewardsTimeout = Integer.parseInt(config.getProperties("REWARDS_TIMEOUT"));
     }
 
     public void run() {
@@ -50,7 +53,9 @@ public class WinsomeRewards implements Runnable{
                 for(User user: winsomeData.getUsers()) {
                     if (user.getBlog() != null) {
                         for (Post post: user.getBlog().getPosts()) {
-                            posts.add(post);
+                            if(!posts.contains(post)) {
+                                posts.add(post);
+                            }
                         }
                     }
                 }
@@ -81,7 +86,7 @@ public class WinsomeRewards implements Runnable{
                 }
                 // Aspetto prima di fare il prossimo controllo sui rewards
                 try {
-                    Thread.sleep(60000L);
+                    Thread.sleep(rewardsTimeout);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }

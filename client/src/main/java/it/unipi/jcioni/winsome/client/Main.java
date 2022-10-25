@@ -1,5 +1,6 @@
 package it.unipi.jcioni.winsome.client;
 
+import it.unipi.jcioni.winsome.core.model.WinsomeConfig;
 import it.unipi.jcioni.winsome.core.service.WinsomeNotifyEvent;
 import it.unipi.jcioni.winsome.client.service.impl.WinsomeNotifyEventImpl;
 import it.unipi.jcioni.winsome.core.service.WinsomeService;
@@ -23,9 +24,37 @@ public class Main {
 
     // Key: Utente che mi segue <String>, Value: utente seguito <String>
     public static HashMap<String, List<String>> followers = new HashMap<>();
-    private static String multicastAddress = MULTICAST_ADDRESS;
-    private static int multicastPort = MULTICAST_PORT;
+    public static WinsomeConfig winsomeConfig;
+    private static int serverPort;
+    private static int rmiPort;
+    private static int rmiCallbackPort;
+    private static String rmiServerRegistryName;
+    private static String rmiCallbackClientRegistryName;
+    private static String serverAddress;
+    private static String multicastAddress;
+    private static int multicastPort;
     public static void main(String[] args) {
+
+        try {
+            winsomeConfig = new WinsomeConfig(false);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return;
+        }
+
+        try {
+            //Inizializzazione delle variabili dal file di properties
+            serverPort = Integer.parseInt(winsomeConfig.getProperties("SERVER_TCP_PORT"));
+            rmiPort = Integer.parseInt(winsomeConfig.getProperties("SERVER_RMI_PORT"));
+            rmiCallbackPort = Integer.parseInt(winsomeConfig.getProperties("RMI_CALLBACK_CLIENT_PORT"));
+            rmiServerRegistryName = winsomeConfig.getProperties("RMI_SERVER_REGISTRY_NAME");
+            rmiCallbackClientRegistryName = winsomeConfig.getProperties("RMI_CALLBACK_CLIENT_REGISTRY_NAME");
+            serverAddress = winsomeConfig.getProperties("SERVER_ADDRESS");
+            multicastPort = Integer.parseInt(winsomeConfig.getProperties("MULTICAST_PORT"));
+            multicastAddress = winsomeConfig.getProperties("MULTICAST_ADDRESS");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         Socket socket;
         String username = null;
@@ -42,7 +71,7 @@ public class Main {
 
         while (true) {
             try {
-                socket = new Socket(SERVER_ADDRESS, WinsomeService.SERVER_TCP_PORT);
+                socket = new Socket(serverAddress, serverPort);
             } catch (IOException e) {
                 System.err.println("[CLI] - Impossibile connettersi al server, riprovare più tardi.");
                 break;
@@ -53,8 +82,8 @@ public class Main {
             Registry reg;
             WinsomeService stub;
             try {
-                reg = LocateRegistry.getRegistry(SERVER_ADDRESS, WinsomeService.SERVER_RMI_PORT);
-                stub = (WinsomeService) reg.lookup(WinsomeService.RMI_SERVER_REGISTRY_NAME);
+                reg = LocateRegistry.getRegistry(serverAddress, rmiPort);
+                stub = (WinsomeService) reg.lookup(rmiServerRegistryName);
             } catch (AccessException e) {
                 System.err.println("[CLI] - Il registro non è raggiungibile.");
                 e.printStackTrace();
@@ -146,8 +175,8 @@ public class Main {
                                 username = arguments[0];
                                 // Registrazione della callback per l'aggiornamento della listafollower
                                 try {
-                                    Registry callbackReg = LocateRegistry.getRegistry(SERVER_ADDRESS, RMI_CALLBACK_CLIENT_PORT);
-                                    winsomeCallback = (WinsomeCallback) callbackReg.lookup(RMI_CALLBACK_CLIENT_REGISTRY_NAME);
+                                    Registry callbackReg = LocateRegistry.getRegistry(serverAddress, rmiCallbackPort);
+                                    winsomeCallback = (WinsomeCallback) callbackReg.lookup(rmiCallbackClientRegistryName);
                                     callbackObj = new WinsomeNotifyEventImpl();
                                     callbackStub = (WinsomeNotifyEvent) UnicastRemoteObject.exportObject(callbackObj, 0);
                                 } catch (Exception e) {
