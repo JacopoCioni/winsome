@@ -54,15 +54,14 @@ public class WinsomeUtils {
         return Math.round(in*multi)/multi;
     }
 
-    // TODO: Sistemare i metodi di invio e ricezione in server/Handler* e client/Main*
     //Metodi per invio e ricezione di streams di dati
     // INVIO
-    private static void invia (PrintWriter output, String send) {
+    public static void invia (PrintWriter output, String send) {
         output.println(send);
         output.flush();
     }
     // RICEVI
-    private static String ricevi (BufferedReader input) throws IOException {
+    public static String ricevi (BufferedReader input) throws IOException {
         String text = input.readLine();
         if (text == null) throw new IOException();
         text = text.replace('$', '\n');

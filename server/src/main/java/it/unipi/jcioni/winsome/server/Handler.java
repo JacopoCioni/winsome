@@ -44,7 +44,7 @@ public class Handler implements Runnable {
             String request;
             while (true) {
                 try {
-                    request = ricevi(input);
+                    request = WinsomeUtils.ricevi(input);
                     if (request != null) {
                         String[] temp = request.split(" ");
                         String command  = temp[0];
@@ -63,7 +63,7 @@ public class Handler implements Runnable {
                                 // ------------------
                                 if (arguments.length != 2) {
                                     // Invio risposta di errore comando al client
-                                    invia(output, "[SERV] - Errore, utilizzare: login <username> <password>");
+                                    WinsomeUtils.invia(output, "[SERV] - Errore, utilizzare: login <username> <password>");
                                     break;
                                 }
                                 login(arguments[0], arguments[1]);
@@ -71,7 +71,7 @@ public class Handler implements Runnable {
                             case "logout":
                                 if (arguments.length != 0) {
                                     // Invio risposta di errore comando al client
-                                    invia(output, "[SERV] - Errore, utilizzare: logout <username>");
+                                    WinsomeUtils.invia(output, "[SERV] - Errore, utilizzare: logout <username>");
                                     break;
                                 }
                                 if (session == null) {
@@ -82,104 +82,104 @@ public class Handler implements Runnable {
                                 break;
                             case "listusers":
                                 if (arguments.length != 0) {
-                                    invia(output, "[SERV] - Errore, utilizzare: listusers");
+                                    WinsomeUtils.invia(output, "[SERV] - Errore, utilizzare: listusers");
                                     break;
                                 }
                                 listUsers();
                                 break;
                             case "listfollowing":
                                 if (arguments.length != 0) {
-                                    invia(output, "[SERV] - Errore, utilizzare: listfollowing");
+                                    WinsomeUtils.invia(output, "[SERV] - Errore, utilizzare: listfollowing");
                                     break;
                                 }
                                 listFollowing();
                                 break;
                             case "follow":
                                 if (arguments.length != 1) {
-                                    invia(output, "[SERV] - Errore, utilizzare: follow <username>");
+                                    WinsomeUtils.invia(output, "[SERV] - Errore, utilizzare: follow <username>");
                                     break;
                                 }
                                 followUser(arguments[0]);
                                 break;
                             case "unfollow":
                                 if (arguments.length != 1) {
-                                    invia(output, "[SERV] - Errore, utilizzare: unfollow <username>");
+                                    WinsomeUtils.invia(output, "[SERV] - Errore, utilizzare: unfollow <username>");
                                     break;
                                 }
                                 unfollowUser(arguments[0]);
                                 break;
                             case "blog":
                                 if (arguments.length != 0) {
-                                    invia(output, "[SERV] - Errore, utilizzare: blog");
+                                    WinsomeUtils.invia(output, "[SERV] - Errore, utilizzare: blog");
                                     break;
                                 }
                                 viewBlog();
                                 break;
                             case "post":
                                 if (arguments.length != 2) {
-                                    invia(output, "[SERV] - Errore, utilizzare: post <title> <content>");
+                                    WinsomeUtils.invia(output, "[SERV] - Errore, utilizzare: post <title> <content>");
                                     break;
                                 }
                                 createPost(arguments[0], arguments[1]);
                                 break;
                             case "delete":
                                 if (arguments.length != 1) {
-                                    invia(output, "[SERV] - Errore, utilizzare: delete <idPost>");
+                                    WinsomeUtils.invia(output, "[SERV] - Errore, utilizzare: delete <idPost>");
                                     break;
                                 }
                                 deletePost(arguments[0]);
                                 break;
                             case "showfeed":
                                 if (arguments.length != 0) {
-                                    invia(output, "[SERV] - Errore, utilizzare: showfeed");
+                                    WinsomeUtils.invia(output, "[SERV] - Errore, utilizzare: showfeed");
                                     break;
                                 }
                                 showFeed();
                                 break;
                             case "showpost":
                                 if (arguments.length != 1) {
-                                    invia(output, "[SERV] - Errore, utilizzare: showpost <idPost>");
+                                    WinsomeUtils.invia(output, "[SERV] - Errore, utilizzare: showpost <idPost>");
                                     break;
                                 }
                                 showPost(arguments[0]);
                                 break;
                             case "rewin":
                                 if (arguments.length != 1) {
-                                    invia(output, "[SERV] - Errore, utilizzare: rewinpost <idPost>");
+                                    WinsomeUtils.invia(output, "[SERV] - Errore, utilizzare: rewinpost <idPost>");
                                     break;
                                 }
                                 rewinPost(arguments[0]);
                                 break;
                             case "rate":
                                 if (arguments.length != 2) {
-                                    invia(output, "[SERV] - Errore, utilizzare: rate <idPost> <voto>");
+                                    WinsomeUtils.invia(output, "[SERV] - Errore, utilizzare: rate <idPost> <voto>");
                                     break;
                                 }
                                 ratePost(arguments[0], Integer.parseInt(arguments[1]));
                                 break;
                             case "comment":
                                 if (arguments.length != 2) {
-                                    invia(output, "[SERV] - Errore, utilizzare: comment <idPost> <comment>");
+                                    WinsomeUtils.invia(output, "[SERV] - Errore, utilizzare: comment <idPost> <comment>");
                                     break;
                                 }
                                 addComment(arguments[0], arguments[1]);
                                 break;
                             case "wallet":
                                 if (arguments.length != 0) {
-                                    invia(output, "[SERV] - Errore, utilizzare: wallet");
+                                    WinsomeUtils.invia(output, "[SERV] - Errore, utilizzare: wallet");
                                     break;
                                 }
                                 getWallet();
                                 break;
                             case "walletbtc":
                                 if (arguments.length != 0) {
-                                    invia(output, "[SERV] - Errore, utilizzare: wallet");
+                                    WinsomeUtils.invia(output, "[SERV] - Errore, utilizzare: wallet");
                                     break;
                                 }
                                 getWalletInBitcoin();
                                 break;
                             default:
-                                invia(output, "[SERV] - Errore, comando non riconosciuto.");
+                                WinsomeUtils.invia(output, "[SERV] - Errore, comando non riconosciuto.");
                                 break;
                         }
                     } else {
@@ -197,7 +197,7 @@ public class Handler implements Runnable {
     private void login (String username, String password) {
         // Controllo che non sia già in una sessione aperta
         if (clientLogged()) {
-            invia(output, "[SERV] - Sei attualmente collegato con l'account: " + session.getUsername());
+            WinsomeUtils.invia(output, "[SERV] - Sei attualmente collegato con l'account: " + session.getUsername());
             return;
         }
         System.out.println("[SERV] - User login: " + username + ": START");
@@ -207,26 +207,26 @@ public class Handler implements Runnable {
                         u.getUsername().equals(username) && u.getPassword().equals(password))
                 .findFirst().orElse(null);
         if (user == null) {
-            invia(output, "[SERV] - Errore, utente non trovato. Verificare username & password.");
+            WinsomeUtils.invia(output, "[SERV] - Errore, utente non trovato. Verificare username & password.");
             return;
         }
         // Controllo che l'utente di cui voglio fare l'accesso non sia già loggato
         Session temp = Main.sessions.get(username);
         if (temp != null) {
             if (temp.getClientSocket() != clientSocket) {
-                invia(output, "[SERV] - L'utente è attualmente collegato in un'altra sessione.");
+                WinsomeUtils.invia(output, "[SERV] - L'utente è attualmente collegato in un'altra sessione.");
                 return;
             }
         }
         Main.sessions.put(username, new Session(clientSocket, username));
         session = new Session(clientSocket, username);
         System.out.println("[SERV] - User login: " + username + ": END");
-        invia(output, "login ok");
+        WinsomeUtils.invia(output, "login ok");
     }
 
     private void logout (String username) {
         if(!clientLogged()) {
-            invia(output, "[SERV] - Errore, non sei loggato.");
+            WinsomeUtils.invia(output, "[SERV] - Errore, non sei loggato.");
             return;
         }
         System.out.println("[SERV] - User logout " + username + ": START");
@@ -237,7 +237,7 @@ public class Handler implements Runnable {
                 .findFirst().orElse(null);
         if (user == null) {
             System.err.println("[SERV] - Errore, utente non trovato.");
-            invia(output, "[SERV] - Errore, utente non trovato.");
+            WinsomeUtils.invia(output, "[SERV] - Errore, utente non trovato.");
             return;
         }
         // Mi occupo di rimuovere la connessione dal servizio, controllando che l'utente sia effettivamente loggato
@@ -249,18 +249,18 @@ public class Handler implements Runnable {
                 // Imposto nuovamente la sessione
                 session = null;
                 System.out.println("[SERV] - User logout " + username + ": END");
-                invia(output, "logout ok");
+                WinsomeUtils.invia(output, "logout ok");
             } else {
-                invia(output, "[SERV] - Errore, non hai effettuato la login.");
+                WinsomeUtils.invia(output, "[SERV] - Errore, non hai effettuato la login.");
             }
         } else {
-            invia(output, "[SERV] - Errore, non hai effettuato la login.");
+            WinsomeUtils.invia(output, "[SERV] - Errore, non hai effettuato la login.");
         }
     }
 
     private void listUsers () {
         if(!clientLogged()) {
-            invia(output, "[SERV] - Errore, non sei loggato.");
+            WinsomeUtils.invia(output, "[SERV] - Errore, non sei loggato.");
             return;
         }
         List<Tag> sessionUserTag = null;
@@ -292,7 +292,7 @@ public class Handler implements Runnable {
         usersWithSameTag.remove(clientUser);
         // Finito questo ciclo controllo se ho ho trovato utenti con un tag in comune
         if (usersWithSameTag.size() == 0) {
-            invia(output, "[SERV] - Nessun utente ha almeno un tag in comune con te.");
+            WinsomeUtils.invia(output, "[SERV] - Nessun utente ha almeno un tag in comune con te.");
             return;
         }
         // A questo punto mi occupo di inoltrare la lista di utenti trovata
@@ -302,12 +302,12 @@ public class Handler implements Runnable {
             out.append("|-Utente: ").append(u.getUsername()).append("$");
         }
         // Composto il messaggio, lo inoltro
-        invia(output, out.toString());
+        WinsomeUtils.invia(output, out.toString());
     }
 
     private void listFollowing () {
         if(!clientLogged()) {
-            invia(output, "[SERV] - Errore, non sei loggato.");
+            WinsomeUtils.invia(output, "[SERV] - Errore, non sei loggato.");
             return;
         }
         User clientUser = null;
@@ -318,7 +318,7 @@ public class Handler implements Runnable {
             }
         }
         if (clientUser == null) {
-            invia(output, "[SERV] - Errore, non è stato possibile fornire il servizio.");
+            WinsomeUtils.invia(output, "[SERV] - Errore, non è stato possibile fornire il servizio.");
             return;
         }
         // Invio la risposta
@@ -332,20 +332,20 @@ public class Handler implements Runnable {
             }
         }
         // Composto il messaggio, lo inoltro
-        invia(output, out.toString());
+        WinsomeUtils.invia(output, out.toString());
     }
 
     private void followUser (String username) {
         if(!clientLogged()) {
-            invia(output, "[SERV] - Errore, non sei loggato.");
+            WinsomeUtils.invia(output, "[SERV] - Errore, non sei loggato.");
             return;
         }
         if (username.equals(session.getUsername())) {
-            invia(output, "[SERV] - Errore, non puoi seguire te stesso.");
+            WinsomeUtils.invia(output, "[SERV] - Errore, non puoi seguire te stesso.");
             return;
         }
         if (!existUser(username)) {
-            invia(output, "[SERV] - Errore, l'utente che vuoi seguire non esiste.");
+            WinsomeUtils.invia(output, "[SERV] - Errore, l'utente che vuoi seguire non esiste.");
             return;
         }
         // Cerco l'utente da seguire con username dato in input
@@ -362,11 +362,11 @@ public class Handler implements Runnable {
         boolean result;
         result = clientUser.getInteractions().addFollows(clientUser.getUsername(), username);
         if (!result) {
-            invia(output, "[SERV] - Errore: stai già seguendo l'utente '"+username+"'");
+            WinsomeUtils.invia(output, "[SERV] - Errore: stai già seguendo l'utente '"+username+"'");
             return;
         }
         follow.getInteractions().addFollowers(username, clientUser.getUsername());
-        invia(output, "[SERV] - Hai cominciato a seguire l'utente: "+username);
+        WinsomeUtils.invia(output, "[SERV] - Hai cominciato a seguire l'utente: "+username);
         try {
             // Chi sto seguendo verrrà notificato che ho incominciato a seguirlo
             WinsomeCallbackImpl.addUpdate(username, session.getUsername());
@@ -378,15 +378,15 @@ public class Handler implements Runnable {
 
     private void unfollowUser (String username) {
         if(!clientLogged()) {
-            invia(output, "[SERV] - Errore, non sei loggato.");
+            WinsomeUtils.invia(output, "[SERV] - Errore, non sei loggato.");
             return;
         }
         if (username.equals(session.getUsername())) {
-            invia(output, "[SERV] - Errore, non puoi unfolloware te stesso.");
+            WinsomeUtils.invia(output, "[SERV] - Errore, non puoi unfolloware te stesso.");
             return;
         }
         if (!existUser(username)) {
-            invia(output, "[SERV] - Errore, l'utente che vuoi unfolloware non esiste.");
+            WinsomeUtils.invia(output, "[SERV] - Errore, l'utente che vuoi unfolloware non esiste.");
             return;
         }
         // Cerco l'utente da unfolloware con username dato in input
@@ -403,11 +403,11 @@ public class Handler implements Runnable {
         boolean result;
         result = clientUser.getInteractions().removeFollows(clientUser.getUsername(), username);
         if (!result) {
-            invia(output, "[SERV] - Errore: non segui l'utente '"+username+"'");
+            WinsomeUtils.invia(output, "[SERV] - Errore: non segui l'utente '"+username+"'");
             return;
         }
         follow.getInteractions().removeFollowers(username, clientUser.getUsername());
-        invia(output, "[SERV] - Hai smesso di seguire l'utente: "+username);
+        WinsomeUtils.invia(output, "[SERV] - Hai smesso di seguire l'utente: "+username);
         try {
             // Chi sto smettendo di seguire verrrà notificato che ho smesso di seguirlo
             WinsomeCallbackImpl.removeUpdate(username, session.getUsername());
@@ -419,7 +419,7 @@ public class Handler implements Runnable {
 
     private void viewBlog () {
         if(!clientLogged()) {
-            invia(output, "[SERV] - Errore, non sei loggato.");
+            WinsomeUtils.invia(output, "[SERV] - Errore, non sei loggato.");
             return;
         }
         User clientUser = null;
@@ -430,12 +430,12 @@ public class Handler implements Runnable {
             }
         }
         if (clientUser == null) {
-            invia(output, "[SERV] - Errore, non è stato possibile fornire il servizio.");
+            WinsomeUtils.invia(output, "[SERV] - Errore, non è stato possibile fornire il servizio.");
             return;
         }
         ConcurrentLinkedDeque<Post> sessionUserBlog = clientUser.getBlog().getPosts();
         if (sessionUserBlog.size() == 0) {
-            invia(output, "[SERV] - Il blog è vuoto.");
+            WinsomeUtils.invia(output, "[SERV] - Il blog è vuoto.");
             return;
         }
         StringBuilder out = new StringBuilder();
@@ -447,12 +447,12 @@ public class Handler implements Runnable {
             out.append("|-Data di pubblicazione: "+p.getTimestamp()+"$");
         }
         // Composto il messaggio, lo inoltro
-        invia(output, out.toString());
+        WinsomeUtils.invia(output, out.toString());
     }
 
     private void createPost (String title, String text) {
         if(!clientLogged()) {
-            invia(output, "[SERV] - Errore, non sei loggato.");
+            WinsomeUtils.invia(output, "[SERV] - Errore, non sei loggato.");
             return;
         }
         User clientUser = null;
@@ -463,21 +463,21 @@ public class Handler implements Runnable {
             }
         }
         if (clientUser == null) {
-            invia(output, "[SERV] - Errore, non è stato possibile fornire il servizio.");
+            WinsomeUtils.invia(output, "[SERV] - Errore, non è stato possibile fornire il servizio.");
             return;
         }
         if (title.length() > Post.MAX_TITLE_LENGHT || text.length() > Post.MAX_TEXT_LENGHT) {
-            invia(output, "[SERV] - Errore, il titolo o il contenuto contengono troppi caratteri.");
+            WinsomeUtils.invia(output, "[SERV] - Errore, il titolo o il contenuto contengono troppi caratteri.");
             return;
         }
         Post newPost = new Post(session.getUsername(), title, text);
         clientUser.getBlog().getPosts().add(newPost);
-        invia(output, "[SERV] - Il post con idPost '"+newPost.getIdPost()+"' è stato creato correttamente.");
+        WinsomeUtils.invia(output, "[SERV] - Il post con idPost '"+newPost.getIdPost()+"' è stato creato correttamente.");
     }
 
     public void deletePost(String idPost) {
         if(!clientLogged()) {
-            invia(output, "[SERV] - Errore, non sei loggato.");
+            WinsomeUtils.invia(output, "[SERV] - Errore, non sei loggato.");
             return;
         }
         User clientUser = null;
@@ -488,7 +488,7 @@ public class Handler implements Runnable {
             }
         }
         if (clientUser == null) {
-            invia(output, "[SERV] - Errore, non è stato possibile fornire il servizio.");
+            WinsomeUtils.invia(output, "[SERV] - Errore, non è stato possibile fornire il servizio.");
             return;
         }
 
@@ -497,13 +497,13 @@ public class Handler implements Runnable {
                 .filter(p -> p.getIdPost().equals(idPost))
                 .findFirst().orElse(null);
         if (post == null) {
-            invia(output, "[SERV] - Errore, post non trovato.");
+            WinsomeUtils.invia(output, "[SERV] - Errore, post non trovato.");
             return;
         }
         for (User creator: winsomeData.getUsers()) {
             if(creator.getBlog().getPosts().contains(post)) {
                 creator.getBlog().getPosts().remove(post);
-                invia(output, "[SERV] - Post: "+idPost+" eliminato correttamente.");
+                WinsomeUtils.invia(output, "[SERV] - Post: "+idPost+" eliminato correttamente.");
                 break;
             }
         }
@@ -511,7 +511,7 @@ public class Handler implements Runnable {
 
     private void showFeed() {
         if(!clientLogged()) {
-            invia(output, "[SERV] - Errore, non sei loggato.");
+            WinsomeUtils.invia(output, "[SERV] - Errore, non sei loggato.");
             return;
         }
         User clientUser = null;
@@ -522,7 +522,7 @@ public class Handler implements Runnable {
             }
         }
         if (clientUser == null) {
-            invia(output, "[SERV] - Errore, non è stato possibile fornire il servizio.");
+            WinsomeUtils.invia(output, "[SERV] - Errore, non è stato possibile fornire il servizio.");
             return;
         }
         List<Post> sessionUserFeed = new ArrayList<>();
@@ -542,7 +542,7 @@ public class Handler implements Runnable {
         // clientUser.getInteractions().getFollows().keySet().stream().forEach(user -> sessionUserFeed.addAll(user.getBlog().getPosts()));
         // Controllo che il feed non sia vuoto
         if (sessionUserFeed.size() == 0) {
-            invia(output, "[SERV] - Il feed è vuoto.");
+            WinsomeUtils.invia(output, "[SERV] - Il feed è vuoto.");
             return;
         }
         // Ordino la lista feed
@@ -561,12 +561,12 @@ public class Handler implements Runnable {
 
         }
         // Composto il messaggio, lo inoltro
-        invia(output, out.toString());
+        WinsomeUtils.invia(output, out.toString());
     }
 
     private void showPost(String idPost) {
         if (!clientLogged()) {
-            invia(output, "[SERV] - Errore, non sei loggato.");
+            WinsomeUtils.invia(output, "[SERV] - Errore, non sei loggato.");
             return;
         }
         Post post = null;
@@ -578,7 +578,7 @@ public class Handler implements Runnable {
             }
         }
         if(post == null) {
-            invia(output, "[SERV] - Errore, post non trovato.");
+            WinsomeUtils.invia(output, "[SERV] - Errore, post non trovato.");
         } else {
             StringBuilder out = new StringBuilder();
             out.append("[SERV] - Informazioni sul post ricercato:$");
@@ -595,13 +595,13 @@ public class Handler implements Runnable {
                 out.append(" |-Msg: "+c.getValue()+"$");
                 out.append(" |-Data di pubblicazione: "+c.getCommentTime()+"$");
             }
-            invia(output, out.toString());
+            WinsomeUtils.invia(output, out.toString());
         }
     }
 
     private void rewinPost(String idPost) {
         if (!clientLogged()) {
-            invia(output, "[SERV] - Errore, non sei loggato.");
+            WinsomeUtils.invia(output, "[SERV] - Errore, non sei loggato.");
             return;
         }
         User clientUser = null;
@@ -612,7 +612,7 @@ public class Handler implements Runnable {
             }
         }
         if (clientUser == null) {
-            invia(output, "[SERV] - Errore, non è stato possibile fornire il servizio.");
+            WinsomeUtils.invia(output, "[SERV] - Errore, non è stato possibile fornire il servizio.");
             return;
         }
         List<Post> sessionUserFeed = new ArrayList<>();
@@ -632,7 +632,7 @@ public class Handler implements Runnable {
         // clientUser.getInteractions().getFollows().keySet().stream().forEach(user -> sessionUserFeed.addAll(user.getBlog().getPosts()));
         // Controllo che il feed non sia vuoto
         if (sessionUserFeed.size() == 0) {
-            invia(output, "[SERV] - Errore, il feed è vuoto.");
+            WinsomeUtils.invia(output, "[SERV] - Errore, il feed è vuoto.");
             return;
         }
         // Recupero il post
@@ -641,16 +641,16 @@ public class Handler implements Runnable {
                 .findFirst().orElse(null);
         Post p = new Post(clientUser.getUsername(),rPost.getTitle()+" (Rewin)",rPost.getText());
         clientUser.getBlog().getPosts().add(p);
-        invia(output, "[SERV] - Rewin del post "+p.getIdPost()+" effettuato correttamente.");
+        WinsomeUtils.invia(output, "[SERV] - Rewin del post "+p.getIdPost()+" effettuato correttamente.");
     }
 
     private void ratePost(String idPost, int vote) {
         if (!clientLogged()) {
-            invia(output, "[SERV] - Errore, non sei loggato.");
+            WinsomeUtils.invia(output, "[SERV] - Errore, non sei loggato.");
             return;
         }
         if (vote != 1 && vote != -1) {
-            invia(output, "[SERV] - Errore, voto non valido.");
+            WinsomeUtils.invia(output, "[SERV] - Errore, voto non valido.");
             return;
         }
         // Ricerco il creatore del post da votare
@@ -660,7 +660,7 @@ public class Handler implements Runnable {
                         .findFirst().orElse(null) != null)
                 .findFirst().orElse(null);
         if (creatore == null) {
-            invia(output, "[SERV] - Errore, utente non trovato.");
+            WinsomeUtils.invia(output, "[SERV] - Errore, utente non trovato.");
             return;
         }
         // Ricerco il post da votare
@@ -668,11 +668,11 @@ public class Handler implements Runnable {
                 .filter(p -> p.getIdPost().equals(idPost))
                 .findFirst().orElse(null);
         if (post == null) {
-            invia(output, "[SERV] - Errore, post non trovato.");
+            WinsomeUtils.invia(output, "[SERV] - Errore, post non trovato.");
             return;
         }
         if (session.getUsername().equals(creatore.getUsername())) {
-            invia(output, "[SERV] - Errore, non puoi votare il tuo post.");
+            WinsomeUtils.invia(output, "[SERV] - Errore, non puoi votare il tuo post.");
             return;
         }
         // Recupero il feed
@@ -683,7 +683,7 @@ public class Handler implements Runnable {
             }
         }
         if (clientUser == null) {
-            invia(output, "[SERV] - Errore, non è stato possibile fornire il servizio.");
+            WinsomeUtils.invia(output, "[SERV] - Errore, non è stato possibile fornire il servizio.");
             return;
         }
         List<Post> sessionUserFeed = new ArrayList<>();
@@ -703,12 +703,12 @@ public class Handler implements Runnable {
         // clientUser.getInteractions().getFollows().keySet().stream().forEach(user -> sessionUserFeed.addAll(user.getBlog().getPosts()));
         // Controllo che il feed non sia vuoto
         if (sessionUserFeed.size() == 0) {
-            invia(output, "[SERV] - Errore, il feed è vuoto.");
+            WinsomeUtils.invia(output, "[SERV] - Errore, il feed è vuoto.");
             return;
         }
         // Controllo che il post faccia parte del feed
         if (!sessionUserFeed.contains(post)) {
-            invia(output, "[SERV] - Errore, il post non fa parte del tuo feed.");
+            WinsomeUtils.invia(output, "[SERV] - Errore, il post non fa parte del tuo feed.");
             return;
         }
         boolean result;
@@ -718,15 +718,15 @@ public class Handler implements Runnable {
             result = post.addVote(session.getUsername(), new Vote(-1));
         }
         if (result) {
-            invia(output, "[SERV] - Voto inserito correttamente.");
+            WinsomeUtils.invia(output, "[SERV] - Voto inserito correttamente.");
         } else {
-            invia(output, "[SERV] - Errore, hai già votato questo post.");
+            WinsomeUtils.invia(output, "[SERV] - Errore, hai già votato questo post.");
         }
     }
 
     private void addComment(String idPost, String comment) {
         if (!clientLogged()) {
-            invia(output, "[SERV] - Errore, non sei loggato.");
+            WinsomeUtils.invia(output, "[SERV] - Errore, non sei loggato.");
             return;
         }
         // Ricerco il creatore del post da commentare
@@ -736,7 +736,7 @@ public class Handler implements Runnable {
                         .findFirst().orElse(null) != null)
                 .findFirst().orElse(null);
         if (creatore == null) {
-            invia(output, "[SERV] - Errore, utente non trovato.");
+            WinsomeUtils.invia(output, "[SERV] - Errore, utente non trovato.");
             return;
         }
         // Ricerco il post da commentare
@@ -744,12 +744,12 @@ public class Handler implements Runnable {
                 .filter(p -> p.getIdPost().equals(idPost))
                 .findFirst().orElse(null);
         if (post == null) {
-            invia(output, "[SERV] - Errore, post non trovato.");
+            WinsomeUtils.invia(output, "[SERV] - Errore, post non trovato.");
             return;
         }
         // Controllo che il commento non sia rivolto ad un post creato dall'utente
         if (session.getUsername().equals(creatore.getUsername())) {
-            invia(output, "[SERV] - Errore, non puoi commentare il tuo post.");
+            WinsomeUtils.invia(output, "[SERV] - Errore, non puoi commentare il tuo post.");
             return;
         }
         // Recupero il feed
@@ -760,7 +760,7 @@ public class Handler implements Runnable {
             }
         }
         if (clientUser == null) {
-            invia(output, "[SERV] - Errore, non è stato possibile fornire il servizio.");
+            WinsomeUtils.invia(output, "[SERV] - Errore, non è stato possibile fornire il servizio.");
             return;
         }
         List<Post> sessionUserFeed = new ArrayList<>();
@@ -780,29 +780,29 @@ public class Handler implements Runnable {
         // clientUser.getInteractions().getFollows().keySet().stream().forEach(user -> sessionUserFeed.addAll(user.getBlog().getPosts()));
         // Controllo che il feed non sia vuoto
         if (sessionUserFeed.size() == 0) {
-            invia(output, "[SERV] - Errore, il feed è vuoto.");
+            WinsomeUtils.invia(output, "[SERV] - Errore, il feed è vuoto.");
             return;
         }
         // Controllo che il post faccia parte del feed
         if (!sessionUserFeed.contains(post)) {
-            invia(output, "[SERV] - Errore, il post non fa parte del tuo feed.");
+            WinsomeUtils.invia(output, "[SERV] - Errore, il post non fa parte del tuo feed.");
             return;
         }
         // Controllo che l'utente non abbia già commentato il post
         for(Comment c: post.getComments()) {
             if (c.getCreator().equals(session.getUsername())) {
-                invia(output,"[SERV] - Errore, hai già commentato questo post.");
+                WinsomeUtils.invia(output,"[SERV] - Errore, hai già commentato questo post.");
                 return;
             }
         }
         Comment userComment = new Comment(session.getUsername(), comment);
         post.addComment(userComment);
-        invia(output, "[SERV] - Commento inserito correttamente.");
+        WinsomeUtils.invia(output, "[SERV] - Commento inserito correttamente.");
     }
 
     private void getWallet() {
         if (!clientLogged()) {
-            invia(output, "[SERV] - Errore, non sei loggato.");
+            WinsomeUtils.invia(output, "[SERV] - Errore, non sei loggato.");
             return;
         }
         User clientUser = null;
@@ -812,7 +812,7 @@ public class Handler implements Runnable {
             }
         }
         if (clientUser == null) {
-            invia(output, "[SERV] - Errore, non è stato possibile fornire il servizio.");
+            WinsomeUtils.invia(output, "[SERV] - Errore, non è stato possibile fornire il servizio.");
             return;
         }
         Wallet clientWallet = clientUser.getWallet();
@@ -830,12 +830,12 @@ public class Handler implements Runnable {
         } else {
             out.append(" |-Non sono presenti transazioni.$");
         }
-        invia(output, out.toString());
+        WinsomeUtils.invia(output, out.toString());
     }
 
     private void getWalletInBitcoin() {
         if (!clientLogged()) {
-            invia(output, "[SERV] - Errore, non sei loggato.");
+            WinsomeUtils.invia(output, "[SERV] - Errore, non sei loggato.");
             return;
         }
         User clientUser = null;
@@ -845,7 +845,7 @@ public class Handler implements Runnable {
             }
         }
         if (clientUser == null) {
-            invia(output, "[SERV] - Errore, non è stato possibile fornire il servizio.");
+            WinsomeUtils.invia(output, "[SERV] - Errore, non è stato possibile fornire il servizio.");
             return;
         }
         Wallet clientWallet = clientUser.getWallet();
@@ -857,7 +857,7 @@ public class Handler implements Runnable {
         out.append("|-Tasso di conversione: "+tasso+"$");
         out.append("|-Bilancio in Bitcoin: "+bitcoinBalance+"$");
 
-        invia(output, out.toString());
+        WinsomeUtils.invia(output, out.toString());
     }
 
     private boolean existUser(String user) {
@@ -882,15 +882,4 @@ public class Handler implements Runnable {
         }
     }
 
-    private static void invia (PrintWriter output, String send) {
-        output.println(send);
-        output.flush();
-    }
-
-    private static String ricevi (BufferedReader input) throws IOException {
-        String text = input.readLine();
-        if (text == null) throw new IOException();
-        text = text.replace('$', '\n');
-        return text;
-    }
 }
