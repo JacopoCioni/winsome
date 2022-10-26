@@ -1,0 +1,1 @@
+Class-Path: winsome/libs/gson-2.8.5.jar
