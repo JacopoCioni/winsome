@@ -22,7 +22,6 @@ import static it.unipi.jcioni.winsome.core.service.WinsomeService.*;
 
 public class Main {
 
-    // Key: Utente che mi segue <String>, Value: utente seguito <String>
     public static HashMap<String, List<String>> followers = new HashMap<>();
     public static WinsomeConfig winsomeConfig;
     private static int serverPort;
